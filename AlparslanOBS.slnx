@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AlparslanOBS/AlparslanOBS.csproj" />
+  <Project Path="BenchmarkSuite1/BenchmarkSuite1.csproj" />
+</Solution>

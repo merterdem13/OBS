@@ -1,0 +1,14 @@
+using System.Windows;
+using AlparslanOBS.ViewModels;
+
+namespace AlparslanOBS.Views
+{
+    public partial class LoginWindow
+    {
+        public LoginWindow()
+        {
+            InitializeComponent();
+            DataContext = new LoginViewModel();
+        }
+    }
+}
