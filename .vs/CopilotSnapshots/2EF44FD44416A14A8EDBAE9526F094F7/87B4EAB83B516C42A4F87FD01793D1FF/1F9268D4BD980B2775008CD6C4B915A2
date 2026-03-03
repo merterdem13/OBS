@@ -1,0 +1,143 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Data.Sqlite;
+using AlparslanOBS.Models;
+
+namespace AlparslanOBS.DataAccess
+{
+    /// <summary>
+    /// Repository for Students table. Repository methods are intentionally minimal stubs
+    /// and must be implemented with parameterized queries and transaction handling per spec.
+    /// </summary>
+    public class StudentRepository
+    {
+        public StudentRepository()
+        {
+            DatabaseConnection.EnsureDatabase();
+            // TODO: initialize tables if missing (handled in DatabaseConnection)
+        }
+
+        /// <summary>
+        /// Gets all students. Implement pagination/filters as needed for large datasets.
+        /// </summary>
+        public IEnumerable<Student> GetAll()
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, GuardianId FROM Students;";
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                yield return Map(reader);
+            }
+        }
+
+        private Student Map(SqliteDataReader r)
+        {
+            static string getString(SqliteDataReader rd, string name)
+            {
+                var idx = rd.GetOrdinal(name);
+                return rd.IsDBNull(idx) ? string.Empty : rd.GetString(idx);
+            }
+
+            static int getInt(SqliteDataReader rd, string name)
+            {
+                var idx = rd.GetOrdinal(name);
+                return rd.IsDBNull(idx) ? 0 : rd.GetInt32(idx);
+            }
+
+            static DateTime? getDate(SqliteDataReader rd, string name)
+            {
+                var idx = rd.GetOrdinal(name);
+                if (rd.IsDBNull(idx)) return null;
+                // Microsoft.Data.Sqlite returns string for some date formats; try safe conversion
+                try
+                {
+                    return rd.GetDateTime(idx);
+                }
+                catch
+                {
+                    var s = rd.GetString(idx);
+                    if (DateTime.TryParse(s, out var dt)) return dt;
+                    return null;
+                }
+            }
+
+            return new Student
+            {
+                StudentNumber = getString(r, "StudentNumber"),
+                FirstName = getString(r, "FirstName"),
+                LastName = getString(r, "LastName"),
+                Class = getString(r, "Class"),
+                ClassNo = getInt(r, "ClassNo"),
+                TcNo = getString(r, "TcNo"),
+                BirthDate = getDate(r, "BirthDate"),
+                PhotoPath = getString(r, "PhotoPath"),
+                GuardianId = r.IsDBNull(r.GetOrdinal("GuardianId")) ? (int?)null : r.GetInt32(r.GetOrdinal("GuardianId"))
+            };
+        }
+
+        /// <summary>
+        /// Insert or update a student using ON CONFLICT(StudentNumber) DO UPDATE.
+        /// Caller may pass an open connection and an active transaction to participate in a larger transaction.
+        /// </summary>
+        public void Upsert(Student s, SqliteConnection? connection = null, SqliteTransaction? transaction = null)
+        {
+            var externalConn = connection != null;
+            using var conn = externalConn ? null : DatabaseConnection.GetConnection();
+            if (!externalConn)
+            {
+                conn!.Open();
+            }
+
+            var cmd = (connection ?? conn)!.CreateCommand();
+            if (transaction != null)
+                cmd.Transaction = transaction;
+
+            cmd.CommandText = @"
+                INSERT INTO Students (StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, GuardianId)
+                VALUES (@StudentNumber, @FirstName, @LastName, @Class, @ClassNo, @TcNo, @BirthDate, @PhotoPath, @GuardianId)
+                ON CONFLICT(StudentNumber) DO UPDATE SET
+                    FirstName = excluded.FirstName,
+                    LastName = excluded.LastName,
+                    Class = excluded.Class,
+                    ClassNo = excluded.ClassNo,
+                    TcNo = excluded.TcNo,
+                    BirthDate = excluded.BirthDate,
+                    PhotoPath = excluded.PhotoPath,
+                    GuardianId = excluded.GuardianId;
+            ";
+
+            cmd.Parameters.AddWithValue("@StudentNumber", s.StudentNumber ?? string.Empty);
+            cmd.Parameters.AddWithValue("@FirstName", s.FirstName ?? string.Empty);
+            cmd.Parameters.AddWithValue("@LastName", s.LastName ?? string.Empty);
+            cmd.Parameters.AddWithValue("@Class", s.Class ?? string.Empty);
+            cmd.Parameters.AddWithValue("@ClassNo", s.ClassNo);
+            cmd.Parameters.AddWithValue("@TcNo", s.TcNo ?? string.Empty);
+            cmd.Parameters.AddWithValue("@BirthDate", s.BirthDate.HasValue ? s.BirthDate.Value.ToString("o") : (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@PhotoPath", s.PhotoPath ?? string.Empty);
+            cmd.Parameters.AddWithValue("@GuardianId", s.GuardianId.HasValue ? (object)s.GuardianId.Value : DBNull.Value);
+
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Finds the internal integer Id of a student by StudentNumber. Returns null if not found.
+        /// </summary>
+        public int? FindStudentIdByStudentNumber(string studentNumber)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT Id FROM Students WHERE StudentNumber = @sn LIMIT 1;";
+            cmd.Parameters.AddWithValue("@sn", studentNumber ?? string.Empty);
+            var r = cmd.ExecuteScalar();
+            if (r == null || r is DBNull) return null;
+            return Convert.ToInt32(r);
+        }
+
+        // TODO: Delete method for manual deletes only, and other repository helpers
+    }
+}

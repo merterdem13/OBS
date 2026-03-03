@@ -1,0 +1,148 @@
+﻿using System;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Windows;
+using System.Windows.Input;
+using AlparslanOBS.DataAccess;
+
+namespace AlparslanOBS.Views
+{
+    public class LoginViewModel : INotifyPropertyChanged
+    {
+        private string _pinInput = string.Empty;
+        private string _titleMessage = string.Empty;
+        private string _errorMessage = string.Empty;
+
+        private readonly SettingsRepository _settingsRepo;
+        private readonly string _storedPinHash;
+        private readonly bool _isFirstRun;
+        private readonly bool _isAdminResetMode;
+        private readonly string _resetFilePath;
+
+        public Action? OnLoginSuccess { get; set; } // Başarılı girişte pencereyi kapatmak için
+
+        public string PinInput
+        {
+            get => _pinInput;
+            set { _pinInput = value; OnPropertyChanged(); }
+        }
+
+        public string TitleMessage
+        {
+            get => _titleMessage;
+            set { _titleMessage = value; OnPropertyChanged(); }
+        }
+
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set { _errorMessage = value; OnPropertyChanged(); }
+        }
+
+        public ICommand NumpadCommand { get; }
+        public ICommand DeleteCommand { get; }
+
+        public LoginViewModel()
+        {
+            _settingsRepo = new SettingsRepository();
+            NumpadCommand = new RelayCommand(param => AddNumber(param?.ToString()));
+            DeleteCommand = new RelayCommand(_ => DeleteNumber());
+
+            // AppData/Local/OBS_System klasöründeki admin.reset dosyasını kontrol et (Anayasa Madde 4)
+            string appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OBS_System");
+            _resetFilePath = Path.Combine(appFolder, "admin.reset");
+
+            _isAdminResetMode = File.Exists(_resetFilePath);
+            _storedPinHash = _settingsRepo.GetSetting("AppPIN") ?? string.Empty;
+            _isFirstRun = string.IsNullOrEmpty(_storedPinHash);
+
+            if (_isAdminResetMode)
+            {
+                TitleMessage = "GÜVENLİK SIFIRLANDI\nYeni 4 Haneli PIN Belirleyin";
+            }
+            else if (_isFirstRun)
+            {
+                TitleMessage = "HOŞ GELDİNİZ\nYeni 4 Haneli PIN Belirleyin";
+            }
+            else
+            {
+                TitleMessage = "SİSTEME GİRİŞ\nLütfen PIN Giriniz";
+            }
+        }
+
+        private void AddNumber(string? number)
+        {
+            if (string.IsNullOrEmpty(number) || PinInput.Length >= 4) return;
+
+            PinInput += number;
+            ErrorMessage = string.Empty; // Hata mesajını temizle
+
+            if (PinInput.Length == 4)
+            {
+                ValidatePin();
+            }
+        }
+
+        private void DeleteNumber()
+        {
+            if (PinInput.Length > 0)
+            {
+                PinInput = PinInput.Substring(0, PinInput.Length - 1);
+                ErrorMessage = string.Empty;
+            }
+        }
+
+        private void ValidatePin()
+        {
+            string currentHash = ComputeSha256Hash(PinInput);
+
+            if (_isFirstRun || _isAdminResetMode)
+            {
+                // Yeni şifreyi Hashleyip veritabanına kaydet
+                _settingsRepo.SetSetting("AppPIN", currentHash);
+
+                // Admin reset dosyası ile girildiyse, dosyayı yok et (Bypass izini temizle)
+                if (_isAdminResetMode && File.Exists(_resetFilePath))
+                {
+                    try { File.Delete(_resetFilePath); } catch { }
+                }
+
+                // Sisteme giriş yap
+                OnLoginSuccess?.Invoke();
+            }
+            else
+            {
+                // Normal Giriş: Hash kontrolü yap
+                if (currentHash == _storedPinHash)
+                {
+                    OnLoginSuccess?.Invoke();
+                }
+                else
+                {
+                    ErrorMessage = "Hatalı PIN! Lütfen tekrar deneyin.";
+                    PinInput = string.Empty; // Alanı temizle
+                }
+            }
+        }
+
+        private string ComputeSha256Hash(string rawData)
+        {
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+}

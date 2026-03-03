@@ -1,0 +1,357 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows;
+using AlparslanOBS.DataAccess;
+using AlparslanOBS.Models;
+using AlparslanOBS.Services;
+using AlparslanOBS.ViewModels;
+
+namespace AlparslanOBS.Views
+{
+    /// <summary>
+    /// Takım Oluşturma Penceresi.
+    /// İSTEM METNİ GEREĞİ:
+    /// - Takım adı + Kategori seçimi
+    /// - Öğrenci seçme (Multi-select)
+    /// - Constraint: Aynı kategoride olmayan öğrenciler
+    /// </summary>
+    public partial class CreateTeamWindow : Window
+    {
+        private readonly StudentRepository _studentRepo;
+        private readonly TeamRepository _teamRepo;
+        private readonly ObservableCollection<StudentViewModel> _selectedStudents;
+        private string _selectedCategory = string.Empty;
+
+        public CreateTeamWindow()
+        {
+            InitializeComponent();
+
+            _studentRepo = new StudentRepository();
+            _teamRepo = new TeamRepository();
+            _selectedStudents = new ObservableCollection<StudentViewModel>();
+
+            SelectedStudentsItemsControl.ItemsSource = _selectedStudents;
+        }
+
+        #region Event Handlers
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void CategoryComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (CategoryComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item)
+            {
+                _selectedCategory = item.Content.ToString() ?? string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Öğrenci ekle butonu.
+        /// İSTEM METNİ GEREĞİ: Öğrenci seçme dialogu açılır.
+        /// </summary>
+        private void AddStudentButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(_selectedCategory))
+            {
+                MessageBox.Show("Önce kategori seçiniz!", "Uyarı", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Tüm öğrencileri al
+            var allStudents = _studentRepo.GetAll().ToList();
+
+            // Zaten seçili olanları filtrele
+            var selectedNumbers = _selectedStudents.Select(s => s.StudentNumber).ToHashSet();
+            var availableStudents = allStudents
+                .Where(s => !selectedNumbers.Contains(s.StudentNumber))
+                .ToList();
+
+            // Constraint kontrolü: Bu kategoride takımı olanları filtrele
+            var eligibleStudents = availableStudents
+                .Where(s => !_teamRepo.IsStudentInCategory(s.StudentNumber, _selectedCategory))
+                .Select(s => new StudentViewModel(s, false))
+                .ToList();
+
+            if (!eligibleStudents.Any())
+            {
+                MessageBox.Show(
+                    "Bu kategoride eklenebilecek öğrenci kalmadı!\n\n" +
+                    "Not: Bir öğrenci aynı kategoride birden fazla takımda olamaz.",
+                    "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Öğrenci seçme dialogu aç
+            var selectDialog = new StudentSelectionDialog(eligibleStudents);
+            selectDialog.Owner = this;
+
+            if (selectDialog.ShowDialog() == true)
+            {
+                var selected = selectDialog.SelectedStudents;
+                foreach (var student in selected)
+                {
+                    if (!_selectedStudents.Any(s => s.StudentNumber == student.StudentNumber))
+                    {
+                        _selectedStudents.Add(student);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Öğrenci çıkar butonu.
+        /// </summary>
+        private void RemoveStudent_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && 
+                button.Tag is StudentViewModel student)
+            {
+                _selectedStudents.Remove(student);
+            }
+        }
+
+        /// <summary>
+        /// Takım oluştur butonu.
+        /// İSTEM METNİ GEREĞİ: Validation + DB'ye kaydet.
+        /// </summary>
+        private void CreateButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Validasyon
+            var teamName = TeamNameTextBox.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(teamName))
+            {
+                MessageBox.Show("Takım adı boş olamaz!", "Uyarı", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_selectedCategory))
+            {
+                MessageBox.Show("Kategori seçiniz!", "Uyarı", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_selectedStudents.Count == 0)
+            {
+                MessageBox.Show("En az 1 öğrenci ekleyiniz!", "Uyarı", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // Takım oluştur
+                var team = new Team
+                {
+                    Name = teamName,
+                    Category = _selectedCategory,
+                    CreatedAt = DateTime.Now
+                };
+
+                var teamId = _teamRepo.CreateTeam(team);
+
+                // Üyeleri ekle
+                foreach (var student in _selectedStudents)
+                {
+                    try
+                    {
+                        _teamRepo.AddTeamMember(teamId, student.StudentNumber);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Üye ekleme hatası ({student.FullName}): {ex.Message}", 
+                            "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+
+                ToastService.ShowSuccess($"'{teamName}' takımı oluşturuldu! ({_selectedStudents.Count} üye)");
+                
+                this.DialogResult = true;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Takım oluşturma hatası:\n\n{ex.Message}", 
+                    "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Öğrenci seçme dialogu (Multi-select).
+    /// İSTEM METNİ GEREĞİ: CheckBox ile çoklu seçim.
+    /// </summary>
+    public class StudentSelectionDialog : Window
+    {
+        private readonly ObservableCollection<StudentSelectionItem> _students;
+        public System.Collections.Generic.List<StudentViewModel> SelectedStudents { get; private set; }
+
+        public StudentSelectionDialog(System.Collections.Generic.List<StudentViewModel> availableStudents)
+        {
+            Title = "Öğrenci Seçin";
+            Width = 450;
+            Height = 500;
+            WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            WindowStyle = WindowStyle.None;
+            ResizeMode = ResizeMode.NoResize;
+            Background = System.Windows.Media.Brushes.White;
+
+            _students = new ObservableCollection<StudentSelectionItem>(
+                availableStudents.Select(s => new StudentSelectionItem(s))
+            );
+
+            SelectedStudents = new System.Collections.Generic.List<StudentViewModel>();
+
+            BuildUI();
+        }
+
+        private void BuildUI()
+        {
+            var mainGrid = new System.Windows.Controls.Grid();
+            mainGrid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            mainGrid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            mainGrid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            mainGrid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+            var border = new System.Windows.Controls.Border
+            {
+                BorderBrush = System.Windows.Media.Brushes.LightGray,
+                BorderThickness = new Thickness(1),
+                CornerRadius = new System.Windows.CornerRadius(8)
+            };
+
+            var innerGrid = new System.Windows.Controls.Grid { Margin = new Thickness(20) };
+            innerGrid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            innerGrid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            innerGrid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            innerGrid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+            // Başlık
+            var title = new System.Windows.Controls.TextBlock
+            {
+                Text = "Öğrenci Seçin",
+                FontSize = 16,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            System.Windows.Controls.Grid.SetRow(title, 0);
+            innerGrid.Children.Add(title);
+
+            // Arama
+            var searchBox = new System.Windows.Controls.TextBox
+            {
+                Height = 35,
+                Padding = new Thickness(10),
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            searchBox.TextChanged += (s, e) => FilterStudents(searchBox.Text);
+            System.Windows.Controls.Grid.SetRow(searchBox, 1);
+            innerGrid.Children.Add(searchBox);
+
+            // Liste
+            var listBox = new System.Windows.Controls.ListBox
+            {
+                ItemsSource = _students,
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+
+            var itemTemplate = new System.Windows.DataTemplate();
+            var checkBoxFactory = new System.Windows.FrameworkElementFactory(typeof(System.Windows.Controls.CheckBox));
+            checkBoxFactory.SetBinding(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty, 
+                new System.Windows.Data.Binding("IsSelected"));
+            checkBoxFactory.SetBinding(System.Windows.Controls.ContentControl.ContentProperty, 
+                new System.Windows.Data.Binding("DisplayText"));
+            itemTemplate.VisualTree = checkBoxFactory;
+            listBox.ItemTemplate = itemTemplate;
+
+            System.Windows.Controls.Grid.SetRow(listBox, 2);
+            innerGrid.Children.Add(listBox);
+
+            // Butonlar
+            var buttonPanel = new System.Windows.Controls.StackPanel
+            {
+                Orientation = System.Windows.Controls.Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+
+            var cancelBtn = new System.Windows.Controls.Button
+            {
+                Content = "İptal",
+                Width = 100,
+                Height = 35,
+                Margin = new Thickness(0, 0, 10, 0)
+            };
+            cancelBtn.Click += (s, e) => { DialogResult = false; Close(); };
+
+            var okBtn = new System.Windows.Controls.Button
+            {
+                Content = "Tamam",
+                Width = 100,
+                Height = 35
+            };
+            okBtn.Click += (s, e) =>
+            {
+                SelectedStudents = _students.Where(s => s.IsSelected).Select(s => s.Student).ToList();
+                DialogResult = true;
+                Close();
+            };
+
+            buttonPanel.Children.Add(cancelBtn);
+            buttonPanel.Children.Add(okBtn);
+
+            System.Windows.Controls.Grid.SetRow(buttonPanel, 3);
+            innerGrid.Children.Add(buttonPanel);
+
+            border.Child = innerGrid;
+            Content = border;
+        }
+
+        private void FilterStudents(string query)
+        {
+            // TODO: Filtreleme implementasyonu
+        }
+    }
+
+    public class StudentSelectionItem : System.ComponentModel.INotifyPropertyChanged
+    {
+        private bool _isSelected;
+
+        public StudentViewModel Student { get; }
+        public string DisplayText => $"{Student.FullName} ({Student.Class} - {Student.StudentNumber})";
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
+            }
+        }
+
+        public StudentSelectionItem(StudentViewModel student)
+        {
+            Student = student;
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+        }
+    }
+}

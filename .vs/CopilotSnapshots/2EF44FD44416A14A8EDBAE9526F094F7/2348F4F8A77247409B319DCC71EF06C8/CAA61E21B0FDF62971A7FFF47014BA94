@@ -1,0 +1,56 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SQLite;
+using AlparslanOBS.Models;
+
+namespace AlparslanOBS.DataAccess
+{
+    /// <summary>
+    /// Repository for Students table. Repository methods are intentionally minimal stubs
+    /// and must be implemented with parameterized queries and transaction handling per spec.
+    /// </summary>
+    public class StudentRepository
+    {
+        public StudentRepository()
+        {
+            DatabaseConnection.EnsureDatabase();
+            // TODO: initialize tables if missing
+        }
+
+        /// <summary>
+        /// Gets all students. Implement pagination/filters as needed for large datasets.
+        /// </summary>
+        public IEnumerable<Student> GetAll()
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, GuardianId FROM Students;";
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                yield return Map(reader);
+            }
+        }
+
+        private Student Map(IDataRecord r)
+        {
+            return new Student
+            {
+                StudentNumber = r["StudentNumber"].ToString() ?? string.Empty,
+                FirstName = r["FirstName"].ToString() ?? string.Empty,
+                LastName = r["LastName"].ToString() ?? string.Empty,
+                Class = r["Class"].ToString() ?? string.Empty,
+                ClassNo = Convert.ToInt32(r["ClassNo"] is DBNull ? 0 : r["ClassNo"]),
+                TcNo = r["TcNo"].ToString() ?? string.Empty,
+                BirthDate = r["BirthDate"] is DBNull ? (DateTime?)null : Convert.ToDateTime(r["BirthDate"]),
+                PhotoPath = r["PhotoPath"].ToString() ?? string.Empty,
+                GuardianId = r["GuardianId"] is DBNull ? (int?)null : Convert.ToInt32(r["GuardianId"]) 
+            };
+        }
+
+        // TODO: Add methods for Insert/Update (UPSERT), FindByStudentNumber, Delete (manual only), transactional merge
+    }
+}

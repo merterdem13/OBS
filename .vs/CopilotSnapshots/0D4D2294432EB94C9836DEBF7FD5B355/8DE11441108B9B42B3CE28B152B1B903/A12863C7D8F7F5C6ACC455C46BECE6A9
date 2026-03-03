@@ -1,0 +1,173 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Windows.Data;
+using System.Windows.Input;
+using Microsoft.Win32;
+using AlparslanOBS.Models;
+using AlparslanOBS.DataAccess;
+using AlparslanOBS.Services;
+
+namespace AlparslanOBS.ViewModels
+{
+    public class MainViewModel : INotifyPropertyChanged
+    {
+        private string _searchText = string.Empty;
+        private bool _isTeamPanelOpen;
+
+        private readonly StudentRepository _repo;
+        private readonly IPdfExtractionService _pdfService;
+        private readonly IMergeService _mergeService;
+
+        // Kesin çözüm: Derleyiciye bu değerin null kalmayacağı garantisi verildi (= null!)
+        private ICollectionView _studentsView = null!;
+
+        private string _toastMessage = string.Empty;
+        private bool _isToastVisible;
+        private bool _isToastError;
+
+        public ObservableCollection<Student> Students { get; } = new ObservableCollection<Student>();
+
+        public bool IsTeamPanelOpen
+        {
+            get => _isTeamPanelOpen;
+            set { if (_isTeamPanelOpen != value) { _isTeamPanelOpen = value; OnPropertyChanged(); } }
+        }
+
+        public string SearchText
+        {
+            get => _searchText;
+            set { if (_searchText != value) { _searchText = value; OnPropertyChanged(); _studentsView.Refresh(); } }
+        }
+
+        public string ToastMessage
+        {
+            get => _toastMessage;
+            set { if (_toastMessage != value) { _toastMessage = value; OnPropertyChanged(); } }
+        }
+
+        public bool IsToastVisible
+        {
+            get => _isToastVisible;
+            set { if (_isToastVisible != value) { _isToastVisible = value; OnPropertyChanged(); } }
+        }
+
+        public bool IsToastError
+        {
+            get => _isToastError;
+            set { if (_isToastError != value) { _isToastError = value; OnPropertyChanged(); } }
+        }
+
+        public ICommand ToggleTeamPanelCommand { get; }
+        public ICommand ImportKunyeCommand { get; }
+
+        public MainViewModel()
+        {
+            _repo = new StudentRepository();
+            _pdfService = new PdfExtractionService();
+            _mergeService = new MergeService();
+
+            ToggleTeamPanelCommand = new RelayCommand(_ => IsTeamPanelOpen = !IsTeamPanelOpen);
+            ImportKunyeCommand = new RelayCommand(async _ => await ImportKunyePdfAsync());
+
+            _studentsView = CollectionViewSource.GetDefaultView(Students);
+            _studentsView.Filter = FilterStudents;
+
+            RefreshStudents();
+        }
+
+        // Predicate temsilcisine uyması için object obj parametresi kullanıldı
+        private bool FilterStudents(object obj)
+        {
+            if (string.IsNullOrWhiteSpace(SearchText)) return true;
+            if (obj is Student student)
+            {
+                var search = SearchText.ToLowerInvariant();
+                return (student.FirstName?.ToLowerInvariant().Contains(search) == true) ||
+                       (student.LastName?.ToLowerInvariant().Contains(search) == true) ||
+                       (student.StudentNumber?.ToLowerInvariant().Contains(search) == true);
+            }
+            return false;
+        }
+
+        public void RefreshStudents()
+        {
+            Students.Clear();
+            foreach (var s in _repo.GetAll())
+            {
+                Students.Add(s);
+            }
+        }
+
+        private async Task ImportKunyePdfAsync()
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "PDF Dosyaları (*.pdf)|*.pdf",
+                Title = "Künye PDF Dosyasını Seçin"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var extractedStudents = await Task.Run(() => _pdfService.ExtractStudentsFromKunyePdf(openFileDialog.FileName));
+
+                    if (extractedStudents == null || !extractedStudents.Any())
+                    {
+                        ShowToast("PDF dosyasından hiçbir öğrenci verisi okunamadı.", isError: true);
+                        return;
+                    }
+
+                    await Task.Run(() => _mergeService.MergeStudents(extractedStudents));
+                    RefreshStudents();
+                    ShowToast($"{extractedStudents.Count()} öğrencinin künye bilgisi başarıyla işlendi.", isError: false);
+                }
+                catch (Exception ex)
+                {
+                    ShowToast($"Aktarım sırasında hata oluştu: {ex.Message}", isError: true);
+                }
+                finally
+                {
+                    _pdfService.CleanupTempFiles();
+                }
+            }
+        }
+
+        private async void ShowToast(string message, bool isError)
+        {
+            ToastMessage = message;
+            IsToastError = isError;
+            IsToastVisible = true;
+            await Task.Delay(3000);
+            IsToastVisible = false;
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+
+    public class RelayCommand : ICommand
+    {
+        private readonly Action<object?> _execute;
+        private readonly Func<object?, bool>? _canExecute;
+
+        public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
+        {
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
+        }
+
+        public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
+        public void Execute(object? parameter) => _execute(parameter);
+
+        public event EventHandler? CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+    }
+}

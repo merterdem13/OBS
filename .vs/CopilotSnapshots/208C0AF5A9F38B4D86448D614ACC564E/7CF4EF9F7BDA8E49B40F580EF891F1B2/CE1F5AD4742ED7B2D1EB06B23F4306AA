@@ -1,0 +1,28 @@
+﻿using System.Windows;
+using AlparslanOBS.DataAccess;
+
+namespace AlparslanOBS
+{
+    /// <summary>
+    /// Uygulama başlangıç sınıfı.
+    /// İSTEM METNİ GEREĞİ: 
+    /// - Veritabanı başlatma ve foreign key aktifleştirme
+    /// - PIN sistemi ile giriş (LoginWindow)
+    /// </summary>
+    public partial class App : Application
+    {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            // Veritabanını başlat
+            // İSTEM METNİ GEREĞİ: PRAGMA foreign_keys = ON aktifleştirilecek
+            DatabaseConnection.EnsureDatabase();
+
+            // Login penceresi ile başla
+            // İSTEM METNİ GEREĞİ: 4 haneli PIN ekranı ile giriş
+            var loginWindow = new Views.LoginWindow();
+            loginWindow.Show();
+        }
+    }
+}

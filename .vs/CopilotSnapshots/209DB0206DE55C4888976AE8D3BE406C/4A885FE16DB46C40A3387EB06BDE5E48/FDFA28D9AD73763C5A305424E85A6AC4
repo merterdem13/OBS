@@ -1,0 +1,191 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using AlparslanOBS.DataAccess;
+using AlparslanOBS.Models;
+using AlparslanOBS.Services;
+
+namespace AlparslanOBS.Views
+{
+    public partial class EditTeamWindow
+    {
+        private readonly TeamRepository _teamRepo;
+        private readonly StudentRepository _studentRepo;
+        private readonly int _teamId;
+        private readonly string _originalName;
+        private readonly string _category;
+        private readonly string? _requiredGender;
+        private CancellationTokenSource? _searchCts;
+        private HashSet<string> _currentMemberNumbers = new();
+
+        public bool HasChanges { get; private set; }
+
+        public EditTeamWindow(int teamId, string teamName, string category)
+        {
+            InitializeComponent();
+
+            _teamRepo = new TeamRepository();
+            _studentRepo = new StudentRepository();
+            _teamId = teamId;
+            _originalName = teamName;
+            _category = category;
+            _requiredGender = ResolveRequiredGender(category);
+
+            TeamNameBox.Text = teamName;
+
+            RefreshMembers();
+        }
+
+        /// <summary>
+        /// Kategori string'inden cinsiyet filtresini çıkarır.
+        /// "(Kadınlar)" → "Kız", "(Karma)" → null (herkes), suffix yok → "Erkek"
+        /// </summary>
+        private static string? ResolveRequiredGender(string category)
+        {
+            if (category.Contains("(Kadınlar)", StringComparison.OrdinalIgnoreCase))
+                return "Kız";
+            if (category.Contains("(Karma)", StringComparison.OrdinalIgnoreCase))
+                return null; // Karma: cinsiyet kısıtlaması yok
+            return "Erkek"; // Varsayılan: erkek takımı
+        }
+
+        private void OnSaveNameClick(object sender, RoutedEventArgs e)
+        {
+            var newName = TeamNameBox.Text?.Trim();
+
+            if (string.IsNullOrWhiteSpace(newName))
+            {
+                ToastService.ShowError("Takım adı boş bırakılamaz.");
+                return;
+            }
+
+            if (newName != _originalName && _teamRepo.Exists(newName))
+            {
+                ToastService.ShowError("Bu isimde bir takım zaten mevcut.");
+                return;
+            }
+
+            _teamRepo.UpdateName(_teamId, newName);
+            HasChanges = true;
+            ToastService.ShowSuccess("Takım adı güncellendi.");
+        }
+
+        private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+        {
+            _searchCts?.Cancel();
+            _searchCts = new CancellationTokenSource();
+            var token = _searchCts.Token;
+
+            var keyword = SearchBox.Text?.Trim();
+
+            if (string.IsNullOrWhiteSpace(keyword) || keyword.Length < 2)
+            {
+                SearchResultsBorder.Visibility = Visibility.Collapsed;
+                SearchResultsList.ItemsSource = null;
+                return;
+            }
+
+            try
+            {
+                await Task.Delay(300, token);
+
+                var results = _studentRepo.Search(keyword)
+                    .Where(s => !_currentMemberNumbers.Contains(s.StudentNumber))
+                    .Take(10)
+                    .ToList();
+
+                if (token.IsCancellationRequested) return;
+
+                SearchResultsList.ItemsSource = results;
+                SearchResultsBorder.Visibility = results.Count > 0
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        private void OnSearchResultDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (SearchResultsList.SelectedItem is Student student)
+            {
+                AddStudentToTeam(student.StudentNumber);
+            }
+        }
+
+        private void OnAddStudentClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is string studentNumber)
+            {
+                AddStudentToTeam(studentNumber);
+            }
+        }
+
+        private void OnRemoveMemberClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is string studentNumber)
+            {
+                _teamRepo.RemoveMember(_teamId, studentNumber);
+                HasChanges = true;
+                RefreshMembers();
+                RefreshSearchResults();
+                ToastService.ShowSuccess("Öğrenci takımdan çıkarıldı.");
+            }
+        }
+
+        private void AddStudentToTeam(string studentNumber)
+        {
+            try
+            {
+                _teamRepo.AddMember(_teamId, studentNumber);
+                HasChanges = true;
+                RefreshMembers();
+                RefreshSearchResults();
+                ToastService.ShowSuccess("Öğrenci takıma eklendi.");
+            }
+            catch (Exception ex)
+            {
+                ToastService.ShowError($"Ekleme hatası: {ex.Message}");
+            }
+        }
+
+        private void RefreshMembers()
+        {
+            var members = _teamRepo.GetMembers(_teamId);
+            _currentMemberNumbers = new HashSet<string>(members.Select(m => m.StudentNumber));
+            MembersList.ItemsSource = members;
+            MembersHeader.Text = $"Mevcut Üyeler ({members.Count})";
+        }
+
+        private void RefreshSearchResults()
+        {
+            var keyword = SearchBox.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(keyword) || keyword.Length < 2)
+            {
+                SearchResultsBorder.Visibility = Visibility.Collapsed;
+                SearchResultsList.ItemsSource = null;
+                return;
+            }
+
+            var results = _studentRepo.Search(keyword)
+                .Where(s => !_currentMemberNumbers.Contains(s.StudentNumber))
+                .Take(10)
+                .ToList();
+
+            SearchResultsList.ItemsSource = results;
+            SearchResultsBorder.Visibility = results.Count > 0
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private void OnCloseClick(object sender, RoutedEventArgs e)
+        {
+            DialogResult = HasChanges;
+            Close();
+        }
+    }
+}

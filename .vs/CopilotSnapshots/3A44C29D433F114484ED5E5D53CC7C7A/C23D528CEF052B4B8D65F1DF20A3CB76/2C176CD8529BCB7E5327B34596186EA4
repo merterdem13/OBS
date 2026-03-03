@@ -1,0 +1,61 @@
+﻿<Window x:Class="AlparslanOBS.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Giriş" Height="500" Width="350"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" ResizeMode="NoResize"
+        AllowsTransparency="True" Background="Transparent">
+
+	<Border Background="White" CornerRadius="10" Margin="10">
+		<Border.Effect>
+			<DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.2"/>
+		</Border.Effect>
+
+		<Grid Margin="20">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+
+			<TextBlock Grid.Row="0" Text="{Binding TitleMessage}" TextAlignment="Center"
+                       FontWeight="Bold" FontSize="16" Foreground="#333" Margin="0,10,0,20"/>
+
+			<TextBlock Grid.Row="1" Text="{Binding PinInput}" TextAlignment="Center"
+                       FontSize="36" FontWeight="Bold"
+                       Foreground="#2196F3" Margin="0,0,0,10" Height="50"/>
+
+			<TextBlock Grid.Row="1" Text="{Binding ErrorMessage}" Foreground="Red"
+                       HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,-15"/>
+
+			<UniformGrid Grid.Row="2" Columns="3" Rows="4" Margin="20,20,20,0">
+				<UniformGrid.Resources>
+					<Style TargetType="Button">
+						<Setter Property="Background" Value="#F5F5F5"/>
+						<Setter Property="Foreground" Value="#333"/>
+						<Setter Property="FontSize" Value="24"/>
+						<Setter Property="FontWeight" Value="Bold"/>
+						<Setter Property="Margin" Value="5"/>
+						<Setter Property="BorderThickness" Value="0"/>
+						<Setter Property="Cursor" Value="Hand"/>
+					</Style>
+				</UniformGrid.Resources>
+
+				<Button Content="1" Command="{Binding NumpadCommand}" CommandParameter="1"/>
+				<Button Content="2" Command="{Binding NumpadCommand}" CommandParameter="2"/>
+				<Button Content="3" Command="{Binding NumpadCommand}" CommandParameter="3"/>
+				<Button Content="4" Command="{Binding NumpadCommand}" CommandParameter="4"/>
+				<Button Content="5" Command="{Binding NumpadCommand}" CommandParameter="5"/>
+				<Button Content="6" Command="{Binding NumpadCommand}" CommandParameter="6"/>
+				<Button Content="7" Command="{Binding NumpadCommand}" CommandParameter="7"/>
+				<Button Content="8" Command="{Binding NumpadCommand}" CommandParameter="8"/>
+				<Button Content="9" Command="{Binding NumpadCommand}" CommandParameter="9"/>
+
+				<Label/>
+				<Button Content="0" Command="{Binding NumpadCommand}" CommandParameter="0"/>
+
+				<Button Content="⌫" Command="{Binding DeleteCommand}" Foreground="#F44336"/>
+			</UniformGrid>
+		</Grid>
+	</Border>
+</Window>

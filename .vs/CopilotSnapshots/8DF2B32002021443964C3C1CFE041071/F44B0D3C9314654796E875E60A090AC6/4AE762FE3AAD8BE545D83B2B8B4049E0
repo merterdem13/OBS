@@ -1,0 +1,314 @@
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+using Microsoft.Win32;
+using AlparslanOBS.Services;
+
+namespace AlparslanOBS.Views.Components
+{
+    public partial class ManagementButtonComponent : UserControl
+    {
+        private bool _isMenuOpen = false;
+        private readonly IPdfExtractionService _pdfService;
+        private readonly IMergeService _mergeService;
+        private readonly ResetSystemService _resetService;
+
+        public bool IsMenuOpen => _isMenuOpen;
+
+        public void CloseMenu()
+        {
+            if (!_isMenuOpen)
+                return;
+
+            ToggleMenu();
+        }
+
+        public ManagementButtonComponent()
+        {
+            InitializeComponent();
+
+            _pdfService = new PdfExtractionService();
+            _mergeService = new MergeService();
+            _resetService = new ResetSystemService();
+        }
+
+        #region Button Events
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMenu();
+        }
+
+        private void SettingsButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            SettingsButton.Effect = null;
+            var storyboard = (Storyboard)Resources["BumpInStoryboard"];
+            storyboard.Begin();
+        }
+
+        private void SettingsButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (!_isMenuOpen)
+            {
+                SettingsButton.Effect = (BlurEffect)Resources["BlurEffect"];
+            }
+
+            var storyboard = (Storyboard)Resources["BumpOutStoryboard"];
+            storyboard.Begin();
+        }
+
+        #endregion
+
+        #region Menu Management
+
+        private void ToggleMenu()
+        {
+            _isMenuOpen = !_isMenuOpen;
+
+            if (_isMenuOpen)
+            {
+                MenuPopup.Visibility = Visibility.Visible;
+                SettingsButton.Effect = null;
+
+                var fadeIn = new DoubleAnimation
+                {
+                    From = 0,
+                    To = 1,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(200))
+                };
+                MenuPopup.BeginAnimation(OpacityProperty, fadeIn);
+            }
+            else
+            {
+                var fadeOut = new DoubleAnimation
+                {
+                    From = 1,
+                    To = 0,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(200))
+                };
+
+                fadeOut.Completed += (s, e) =>
+                {
+                    MenuPopup.Visibility = Visibility.Collapsed;
+                    SettingsButton.Effect = (BlurEffect)Resources["BlurEffect"];
+                };
+
+                MenuPopup.BeginAnimation(OpacityProperty, fadeOut);
+            }
+        }
+
+        #endregion
+
+        #region PDF Import
+
+        /// <summary>
+        /// Akıllı PDF Yükleme: PDF türünü otomatik algılar ve uygun işlemi yapar.
+        /// - Künye Defteri: Öğrenci verilerini çıkart ve kaydedilir
+        /// - Sınıf Listesi: Sınıf ve cinsiyet bilgisini çıkart ve mevcutöğrencileri güncelle
+        /// - Resim Listesi: Sadece kaydet
+        /// </summary>
+        private async void LoadPdf_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMenu();
+
+            var dialog = new OpenFileDialog
+            {
+                Filter = "PDF Dosyaları|*.pdf",
+                Title = "PDF Seçin (Künye/Sınıf/Resim Listesi)",
+                Multiselect = true
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    foreach (var filePath in dialog.FileNames)
+                    {
+                        var pdfType = _pdfService.GetPdfDocumentType(filePath);
+
+                        switch (pdfType)
+                        {
+                            case PdfDocumentType.KunyeDefteri:
+                                ProcessKunyePdf(filePath);
+                                break;
+
+                            case PdfDocumentType.SinifListesi:
+                                ProcessClassListPdf(filePath);
+                                break;
+
+                            case PdfDocumentType.ResimListesi:
+                                ProcessPhotoListPdf(filePath);
+                                break;
+
+                            default:
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    ToastService.ShowError($"PDF türü tanınmadı: {System.IO.Path.GetFileName(filePath)}");
+                                });
+                                break;
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                ToastService.ShowError($"PDF yükleme hatası: {ex.Message}");
+            }
+        }
+
+        private void ProcessKunyePdf(string filePath)
+        {
+            var students = _pdfService.ExtractStudentsFromKunyePdf(filePath).ToList();
+
+            if (!students.Any())
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ToastService.ShowError("PDF'den öğrenci verisi çıkarılamadı!");
+                });
+                return;
+            }
+
+            _mergeService.MergeStudents(students);
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ToastService.ShowSuccess($"{students.Count} öğrenci başarıyla yüklendi!");
+                RefreshMainViewModel();
+            });
+        }
+
+        private void ProcessClassListPdf(string filePath)
+        {
+            var classList = _pdfService.ExtractClassList(filePath).ToList();
+
+            if (!classList.Any())
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ToastService.ShowError("PDF'den sınıf verisi çıkarılamadı!");
+                });
+                return;
+            }
+
+            _mergeService.MergeClassList(classList);
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ToastService.ShowSuccess($"{classList.Count} öğrencinin sınıf ve cinsiyet bilgisi güncellendi!");
+                RefreshMainViewModel();
+            });
+        }
+
+        private void ProcessPhotoListPdf(string filePath)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ToastService.ShowSuccess("Resim Listesi başarıyla kaydedildi!");
+                RefreshMainViewModel();
+            });
+        }
+
+        #endregion
+
+        #region System Reset
+
+        private async void ResetSystem_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMenu();
+
+            var dialog = GetConfirmDialog();
+            if (dialog == null)
+                return;
+
+            var firstConfirm = await dialog.ShowAsync(
+                "Sistemi Sıfırla",
+                "Sistemi sıfırlamak istediğinizden emin misiniz?\n\n" +
+                "• Tüm öğrenci verileri\n" +
+                "• Tüm takımlar\n" +
+                "• Tüm favoriler\n" +
+                "• Tüm fotoğraflar\n\n" +
+                "kalıcı olarak silinecektir.\n(PIN ayarı korunacaktır)",
+                confirmText: "Devam Et",
+                cancelText: "Vazgeç");
+
+            if (!firstConfirm)
+                return;
+
+            var secondConfirm = await dialog.ShowAsync(
+                "Son Uyarı",
+                "Bu işlem GERİ ALINAMAZ!\n\nDevam etmek istediğinizden emin misiniz?",
+                confirmText: "Evet, Sıfırla",
+                cancelText: "İptal",
+                icon: Wpf.Ui.Controls.SymbolRegular.ErrorCircle24,
+                iconColor: "#ef4444");
+
+            if (!secondConfirm)
+                return;
+
+            try
+            {
+                var window = Window.GetWindow(this);
+                if (window is Views.MainWindow mainWindow)
+                {
+                    if (mainWindow.DataContext is ViewModels.MainViewModel vm)
+                    {
+                        vm.ClearAllStudents();
+                    }
+                }
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
+                _resetService.ResetSystem();
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ToastService.ShowSuccess("Sistem başarıyla sıfırlandı!");
+                    RefreshMainViewModel();
+                });
+            }
+            catch (Exception ex)
+            {
+                ToastService.ShowError($"Sistem sıfırlama hatası: {ex.Message}");
+            }
+        }
+
+        private ConfirmDialogOverlay? GetConfirmDialog()
+        {
+            var window = Window.GetWindow(this);
+            if (window is Views.MainWindow mainWindow)
+            {
+                return mainWindow.ConfirmDialog;
+            }
+            return null;
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private void RefreshMainViewModel()
+        {
+            var window = Window.GetWindow(this);
+            if (window is Views.MainWindow mainWindow)
+            {
+                if (mainWindow.DataContext is ViewModels.MainViewModel vm)
+                {
+                    vm.RefreshStudents();
+                }
+            }
+        }
+
+        #endregion
+    }
+}
+

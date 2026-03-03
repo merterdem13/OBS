@@ -1,0 +1,442 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using AlparslanOBS.Models;
+using AlparslanOBS.DataAccess;
+
+namespace AlparslanOBS.Services
+{
+    /// <summary>
+    /// PDF extraction service that uses reflection to call UglyToad.PdfPig if it is available at runtime.
+    /// Optimized for Turkish student record PDFs (Künye Defteri) and class list PDFs.
+    /// 
+    /// Note on class information:
+    /// - Künye PDFs contain personal student data only (name, TC No, birth date, photo).
+    /// - Class information is NOT extracted from Künye PDFs.
+    /// - Class data is populated separately via ExtractClassList() from dedicated class list PDFs
+    ///   and merged into Student objects via MergeService.
+    /// 
+    /// This avoids a compile-time dependency on the NuGet package while still allowing real extraction
+    /// when the package is present on the machine (via dotnet restore).
+    /// If PdfPig is not available, extraction yields no results.
+    /// </summary>
+    public class PdfExtractionService
+    {
+        private readonly string _photosFolder;
+
+        public PdfExtractionService()
+        {
+            _photosFolder = DatabaseConnection.GetPhotosFolder();
+            Directory.CreateDirectory(_photosFolder);
+        }
+
+        /// <summary>
+        /// Extracts personal student information from Künye (student record) PDF.
+        /// Returns Student objects with: StudentNumber, FirstName, LastName, TcNo, BirthDate, PhotoPath.
+        /// Class and ClassNo are NOT populated here; they come from ExtractClassList().
+        /// </summary>
+        public IEnumerable<Student> ExtractStudentsFromKunyePdf(string pdfPath)
+        {
+            var results = new List<Student>();
+
+            if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
+                return results;
+
+            // Try to locate UglyToad.PdfPig assembly
+            var asm = TryLoadPdfPigAssembly();
+            if (asm == null)
+            {
+                // No PDF library available; cannot extract
+                return results;
+            }
+
+            // Obtain PdfDocument type and open method
+            var pdfDocType = asm.GetType("UglyToad.PdfPig.PdfDocument");
+            if (pdfDocType == null)
+                return results;
+
+            // static Open(string path) method
+            var openMethod = pdfDocType.GetMethod("Open", new[] { typeof(string) });
+            if (openMethod == null)
+                return results;
+
+            // Call PdfDocument.Open(pdfPath)
+            var docInstance = openMethod.Invoke(null, new object[] { pdfPath });
+            if (docInstance == null)
+                return results;
+
+            try
+            {
+                // Prefer method GetPages()
+                var getPagesMethod = pdfDocType.GetMethod("GetPages", Type.EmptyTypes);
+                IEnumerable<object>? pagesEnumerable = null;
+                if (getPagesMethod != null)
+                {
+                    var pagesObj = getPagesMethod.Invoke(docInstance, null);
+                    pagesEnumerable = (pagesObj as System.Collections.IEnumerable)?.Cast<object>();
+                }
+                else
+                {
+                    // Fallback: look for Pages property
+                    var pagesProp = pdfDocType.GetProperty("Pages");
+                    if (pagesProp != null)
+                    {
+                        var pagesObj = pagesProp.GetValue(docInstance);
+                        pagesEnumerable = (pagesObj as System.Collections.IEnumerable)?.Cast<object>();
+                    }
+                }
+
+                if (pagesEnumerable == null)
+                    return results;
+
+                foreach (var page in pagesEnumerable)
+                {
+                    try
+                    {
+                        var pageType = page.GetType();
+                        // Text property
+                        var textProp = pageType.GetProperty("Text");
+                        var text = textProp?.GetValue(page)?.ToString() ?? string.Empty;
+
+                        var student = new Student();
+                        student.StudentNumber = FindStudentNumber(text) ?? string.Empty;
+
+                        var name = FindName(text);
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            student.FirstName = parts.Length > 0 ? parts[0] : string.Empty;
+                            student.LastName = parts.Length > 1 ? string.Join(' ', parts.Skip(1)) : string.Empty;
+                        }
+
+                        student.TcNo = FindTcNo(text) ?? string.Empty;
+                        student.BirthDate = FindBirthDate(text);
+                        
+                        // Note: Class and ClassNo are NOT extracted from Künye PDF.
+                        // They are populated separately via ExtractClassList() from dedicated class list PDFs
+                        // and merged via MergeService.
+
+                        // Try to get images: method GetImages()
+                        var getImagesMethod = pageType.GetMethod("GetImages", Type.EmptyTypes);
+                        if (getImagesMethod != null)
+                        {
+                            var imagesObj = getImagesMethod.Invoke(page, null) as System.Collections.IEnumerable;
+                            if (imagesObj != null)
+                            {
+                                // Get largest image by byte count
+                                object? largest = null;
+                                int largestSize = 0;
+                                foreach (var img in imagesObj.Cast<object>())
+                                {
+                                    var imgType = img.GetType();
+                                    var rawProp = imgType.GetProperty("RawBytes");
+                                    var raw = rawProp?.GetValue(img) as System.Collections.IList;
+                                    int size = raw?.Count ?? 0;
+                                    if (size > largestSize)
+                                    {
+                                        largestSize = size;
+                                        largest = img;
+                                    }
+                                }
+
+                                if (largest != null)
+                                {
+                                    var rawProp = largest.GetType().GetProperty("RawBytes");
+                                    var raw = rawProp?.GetValue(largest) as System.Collections.IList;
+                                    if (raw != null && raw.Count > 0)
+                                    {
+                                        var bytes = new byte[raw.Count];
+                                        for (int i = 0; i < raw.Count; i++) bytes[i] = Convert.ToByte(raw[i]);
+
+                                        var ext = ".jpg";
+                                        var fileName = Slugify($"{student.FirstName}_{student.LastName}_{student.StudentNumber}") + ext;
+                                        var dest = Path.Combine(_photosFolder, fileName);
+                                        File.WriteAllBytes(dest, bytes);
+                                        student.PhotoPath = dest;
+                                    }
+                                }
+                            }
+                        }
+
+                        results.Add(student);
+                    }
+                    catch
+                    {
+                        // skip problematic page
+                    }
+                }
+            }
+            finally
+            {
+                // Dispose docInstance if IDisposable
+                if (docInstance is IDisposable d)
+                {
+                    d.Dispose();
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Extracts class list (StudentNumber -> Class mapping) from a dedicated class list PDF.
+        /// Expects format: "N. Sınıf / X Şubesi" header and lines with student numbers and names.
+        /// Returns tuples of (StudentNumber, Class) that can be used to populate Student.Class via MergeService.
+        /// Example: ("12", "7F") for student 12 in class 7 section F.
+        /// </summary>
+        public IEnumerable<(string StudentNumber, string Class)> ExtractClassList(string pdfPath)
+        {
+            var results = new List<(string, string)>();
+
+            if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
+                return results;
+
+            var asm = TryLoadPdfPigAssembly();
+            if (asm == null)
+                return results;
+
+            var pdfDocType = asm.GetType("UglyToad.PdfPig.PdfDocument");
+            if (pdfDocType == null)
+                return results;
+
+            var openMethod = pdfDocType.GetMethod("Open", new[] { typeof(string) });
+            if (openMethod == null)
+                return results;
+
+            var docInstance = openMethod.Invoke(null, new object[] { pdfPath });
+            if (docInstance == null)
+                return results;
+
+            try
+            {
+                var getPagesMethod = pdfDocType.GetMethod("GetPages", Type.EmptyTypes);
+                IEnumerable<object>? pagesEnumerable = null;
+                if (getPagesMethod != null)
+                {
+                    var pagesObj = getPagesMethod.Invoke(docInstance, null);
+                    pagesEnumerable = (pagesObj as System.Collections.IEnumerable)?.Cast<object>();
+                }
+                else
+                {
+                    var pagesProp = pdfDocType.GetProperty("Pages");
+                    if (pagesProp != null)
+                    {
+                        var pagesObj = pagesProp.GetValue(docInstance);
+                        pagesEnumerable = (pagesObj as System.Collections.IEnumerable)?.Cast<object>();
+                    }
+                }
+
+                if (pagesEnumerable != null)
+                {
+                    foreach (var page in pagesEnumerable)
+                    {
+                        try
+                        {
+                            var pageType = page.GetType();
+                            var textProp = pageType.GetProperty("Text");
+                            var text = textProp?.GetValue(page)?.ToString() ?? string.Empty;
+
+                            // Extract class from header: "7. Sınıf / F Şubesi" -> "7F"
+                            var classInfo = ExtractClassFromHeader(text);
+                            if (string.IsNullOrEmpty(classInfo))
+                                continue;
+
+                            // Parse lines to extract student numbers
+                            var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var line in lines)
+                            {
+                                var sn = FindStudentNumberFromClassListLine(line);
+                                if (!string.IsNullOrEmpty(sn))
+                                {
+                                    results.Add((sn, classInfo));
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // skip problematic page
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (docInstance is IDisposable d)
+                {
+                    d.Dispose();
+                }
+            }
+
+            return results;
+        }
+
+        private static Assembly? TryLoadPdfPigAssembly()
+        {
+            try
+            {
+                // Try to load by simple name
+                var asm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "UglyToad.PdfPig");
+                if (asm != null) return asm;
+
+                // Try to load from default probing
+                try
+                {
+                    return Assembly.Load("UglyToad.PdfPig");
+                }
+                catch { }
+
+                // Not available
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #region Heuristics
+        private static string? FindStudentNumber(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+
+            // Look for "Okul No:" label
+            var m = Regex.Match(text, "Okul\\s*No\\s*:\\s*(\\d+)", RegexOptions.IgnoreCase);
+            if (m.Success) return m.Groups[1].Value.Trim();
+
+            // Fallback: first long digit sequence
+            m = Regex.Match(text, "\\b\\d{3,}\\b");
+            if (m.Success) return m.Value;
+            return null;
+        }
+
+        private static string? FindName(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+
+            // Look for labeled fields: "Adı:" and "Soyadı:"
+            var adıMatch = Regex.Match(text, "Adı\\s*:\\s*([A-Za-zİıŞşÇçĞğÜüÖö]+)", RegexOptions.IgnoreCase);
+            var soyadıMatch = Regex.Match(text, "Soyadı\\s*:\\s*([A-Za-zİıŞşÇçĞğÜüÖö]+)", RegexOptions.IgnoreCase);
+
+            if (adıMatch.Success && soyadıMatch.Success)
+            {
+                return $"{adıMatch.Groups[1].Value.Trim()} {soyadıMatch.Groups[1].Value.Trim()}";
+            }
+
+            if (adıMatch.Success)
+            {
+                return adıMatch.Groups[1].Value.Trim();
+            }
+
+            // Fallback: look for lines with Turkish letters and spaces (exclude form labels)
+            var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                var clean = line.Trim();
+                if (clean.Length < 3) continue;
+                if (Regex.IsMatch(clean, "[A-Za-zİıŞşÇçĞğÜüÖö]+") && clean.Contains(' ') && !Regex.IsMatch(clean, "TC|No|Numara|Öğrenci|Okul|Tarih|Adı|Soyadı|Sınıf", RegexOptions.IgnoreCase))
+                {
+                    return clean;
+                }
+            }
+            return null;
+        }
+
+        private static string? FindTcNo(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+
+            // Look for "T.C. Kimlik No:" or "TC Kimlik No:" label
+            var m = Regex.Match(text, "T\\.?C\\.?\\s*Kimlik\\s*No\\s*:\\s*(\\d{11})", RegexOptions.IgnoreCase);
+            if (m.Success) return m.Groups[1].Value.Trim();
+
+            // Fallback: 11-digit number anywhere
+            m = Regex.Match(text, "\\b\\d{11}\\b");
+            if (m.Success) return m.Value;
+            return null;
+        }
+
+        private static DateTime? FindBirthDate(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+
+            // Look for "Doğum Yeri , Tarihi:" or "Doğum Tarihi:" label
+            var m = Regex.Match(text, "Doğum\\s+(?:Yeri\\s*,)?\\s*Tarihi?\\s*:\\s*(?:[A-Za-zİıŞşÇçĞğÜüÖö]+\\s+)?(\\d{1,2}[./-]\\d{1,2}[./-]\\d{2,4})", RegexOptions.IgnoreCase);
+            if (m.Success && DateTime.TryParse(m.Groups[1].Value, out var dt)) return dt;
+
+            // Fallback: look for date pattern dd.mm.yyyy or yyyy-mm-dd
+            m = Regex.Match(text, "(\\d{1,2}[./-]\\d{1,2}[./-]\\d{2,4})");
+            if (m.Success && DateTime.TryParse(m.Value, out dt)) return dt;
+
+            m = Regex.Match(text, "(\\d{4}-\\d{2}-\\d{2})");
+            if (m.Success && DateTime.TryParse(m.Value, out dt)) return dt;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Extracts class info from class list PDF header.
+        /// Expected format: "N. Sınıf / X Şubesi" where N is class number and X is section letter.
+        /// Returns "NX" format (e.g., "7F" for class 7 section F).
+        /// </summary>
+        private static string? ExtractClassFromHeader(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+
+            // Look for pattern: "N. Sınıf / X Şubesi"
+            var m = Regex.Match(text, "(\\d+)\\.\\s*Sınıf\\s*(?:/\\s*)?([A-Z])?\\s*Şubesi", RegexOptions.IgnoreCase);
+            if (m.Success)
+            {
+                var classNum = m.Groups[1].Value.Trim();
+                var section = m.Groups[2].Value.Trim();
+                return section.Length > 0 ? $"{classNum}{section}" : classNum;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Extracts student number from a class list line.
+        /// Expected format: " 12 ADA Kız GÜVEN 1" -> returns "12"
+        /// Also accepts simple format: just 3-digit numbers.
+        /// </summary>
+        private static string? FindStudentNumberFromClassListLine(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line)) return null;
+
+            // Try to match class list line format: leading spaces, then student number
+            // Pattern: ^\\s*(\\d+)\\s+ (student number at start followed by whitespace)
+            var m = Regex.Match(line, "^\\s*(\\d+)\\s+");
+            if (m.Success) return m.Groups[1].Value.Trim();
+
+            // Fallback: any 3+ digit number
+            m = Regex.Match(line, "\\b(\\d{3,})\\b");
+            if (m.Success) return m.Value;
+
+            return null;
+        }
+
+        private static string Slugify(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            var map = new Dictionary<char, char>
+            {
+                ['ç'] = 'c', ['Ç'] = 'C', ['ş'] = 's', ['Ş'] = 'S', ['ğ'] = 'g', ['Ğ'] = 'G',
+                ['ü'] = 'u', ['Ü'] = 'U', ['ö'] = 'o', ['Ö'] = 'O', ['ı'] = 'i', ['İ'] = 'I'
+            };
+            var sb = new System.Text.StringBuilder();
+            foreach (var ch in input)
+            {
+                if (map.TryGetValue(ch, out var r)) sb.Append(r);
+                else sb.Append(ch);
+            }
+            var s = sb.ToString();
+            foreach (var c in Path.GetInvalidFileNameChars()) s = s.Replace(c, '_');
+            s = Regex.Replace(s, "\\s+", "_").ToLowerInvariant();
+            return s;
+        }
+        #endregion
+    }
+}

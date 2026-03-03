@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+using AlparslanOBS.Models;
+
+namespace AlparslanOBS.DataAccess
+{
+    public class TeamRepository
+    {
+        public void Insert(Team team)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                INSERT INTO Teams (TeamName, Category, MatchDate, Description)
+                VALUES (@teamName, @category, @matchDate, @description);
+            ";
+            cmd.Parameters.AddWithValue("@teamName", team.TeamName);
+            cmd.Parameters.AddWithValue("@category", team.Category);
+            cmd.Parameters.AddWithValue("@matchDate", (object?)team.MatchDate ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@description", (object?)team.Description ?? DBNull.Value);
+            cmd.ExecuteNonQuery();
+        }
+
+        public void Delete(int teamId)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DELETE FROM Teams WHERE Id = @id;";
+            cmd.Parameters.AddWithValue("@id", teamId);
+            cmd.ExecuteNonQuery();
+        }
+
+        public List<Team> GetAll()
+        {
+            var results = new List<Team>();
+
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT t.Id, t.TeamName, t.Category, t.MatchDate, t.Description,
+                       (SELECT COUNT(*) FROM TeamMembers tm WHERE tm.TeamId = t.Id) AS MemberCount
+                FROM Teams t
+                ORDER BY t.TeamName;
+            ";
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                results.Add(new Team
+                {
+                    Id = reader.GetInt32(0),
+                    TeamName = reader.GetString(1),
+                    Category = reader.GetString(2),
+                    MatchDate = reader.IsDBNull(3) ? null : reader.GetString(3),
+                    Description = reader.IsDBNull(4) ? null : reader.GetString(4),
+                    MemberCount = reader.GetInt32(5)
+                });
+            }
+
+            return results;
+        }
+
+        public bool Exists(string teamName)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*) FROM Teams WHERE TeamName = @name;";
+            cmd.Parameters.AddWithValue("@name", teamName);
+            var count = Convert.ToInt32(cmd.ExecuteScalar());
+            return count > 0;
+        }
+    }
+}

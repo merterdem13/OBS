@@ -1,0 +1,17 @@
+﻿using System.Windows.Controls;
+
+namespace AlparslanOBS.Views.Components
+{
+    /// <summary>
+    /// Üst bilgi (Header) ve arama çubuğu bileşeninin arka plan kodu.
+    /// Modülerlik kuralımız gereği iş mantığı (Arama algoritması, veritabanı sorgusu vb.)
+    /// BURADA YER ALMAZ. Tüm bu işlemler DataContext üzerinden ViewModel'a aktarılır.
+    /// </summary>
+    public partial class HeaderComponent : UserControl
+    {
+        public HeaderComponent()
+        {
+            InitializeComponent();
+        }
+    }
+}

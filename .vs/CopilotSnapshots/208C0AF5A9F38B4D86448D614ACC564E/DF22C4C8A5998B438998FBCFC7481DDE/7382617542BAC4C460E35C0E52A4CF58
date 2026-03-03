@@ -1,0 +1,305 @@
+﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Input;
+using AlparslanOBS.DataAccess;
+using AlparslanOBS.Helpers;
+
+namespace AlparslanOBS.ViewModels
+{
+    /// <summary>
+    /// Login penceresi için ViewModel.
+    /// İSTEM METNİ GEREĞİ:
+    /// - 4 haneli PIN ekranı
+    /// - Numpad + klavye desteği
+    /// - Enter ile doğrulama
+    /// - İlk açılışta PIN oluşturma
+    /// - admin.reset dosyası ile PIN sıfırlama
+    /// </summary>
+    public class LoginViewModel : INotifyPropertyChanged
+    {
+        private readonly SettingsRepository _settingsRepo;
+        private string _pinInput = string.Empty;
+        private string _titleMessage = string.Empty;
+        private string _errorMessage = string.Empty;
+        private bool _isCreateMode = false;
+        private string _confirmPin = string.Empty;
+
+        public LoginViewModel()
+        {
+            _settingsRepo = new SettingsRepository();
+
+            // Commands
+            NumpadCommand = new RelayCommand(OnNumpadClick);
+            DeleteCommand = new RelayCommand(_ => DeleteLastDigit());
+            ConfirmCommand = new RelayCommand(_ => OnConfirm());
+
+            // Başlangıç durumunu belirle
+            CheckInitialState();
+        }
+
+        #region Properties
+
+        /// <summary>
+        /// Girilen PIN (görsel olarak ●●●● şeklinde gösterilecek).
+        /// </summary>
+        public string PinInput
+        {
+            get => _pinInput;
+            set
+            {
+                if (_pinInput != value)
+                {
+                    _pinInput = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(PinDisplay));
+                }
+            }
+        }
+
+        /// <summary>
+        /// PIN görsel gösterimi (●●●●).
+        /// </summary>
+        public string PinDisplay => new string('●', PinInput.Length);
+
+        /// <summary>
+        /// Başlık mesajı (mod'a göre değişir).
+        /// </summary>
+        public string TitleMessage
+        {
+            get => _titleMessage;
+            set
+            {
+                if (_titleMessage != value)
+                {
+                    _titleMessage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Hata mesajı.
+        /// </summary>
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                if (_errorMessage != value)
+                {
+                    _errorMessage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        #endregion
+
+        #region Commands
+
+        public ICommand NumpadCommand { get; }
+        public ICommand DeleteCommand { get; }
+        public ICommand ConfirmCommand { get; }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Başlangıç durumunu kontrol eder (ilk çalıştırma mı, reset mi, normal giriş mi).
+        /// İSTEM METNİ GEREĞİ:
+        /// - İlk açılışta: Yeni PIN oluşturma
+        /// - admin.reset varsa: PIN sıfırlama
+        /// - Normal: PIN doğrulama
+        /// </summary>
+        private void CheckInitialState()
+        {
+            // admin.reset kontrolü
+            if (PinResetHelper.ResetFileExists())
+            {
+                _isCreateMode = true;
+                TitleMessage = "PIN Sıfırlama - Yeni PIN Oluşturun";
+                PinResetHelper.DeleteResetFile(); // İSTEM METNİ GEREĞİ: Dosya otomatik silinir
+                return;
+            }
+
+            // İlk çalıştırma kontrolü (PIN yok mu?)
+            var storedPin = _settingsRepo.GetSetting("PIN");
+            if (string.IsNullOrWhiteSpace(storedPin))
+            {
+                _isCreateMode = true;
+                TitleMessage = "Hoş Geldiniz - Yeni PIN Oluşturun";
+            }
+            else
+            {
+                _isCreateMode = false;
+                TitleMessage = "PIN Girişi";
+            }
+        }
+
+        /// <summary>
+        /// Numpad tuşu tıklandığında.
+        /// İSTEM METNİ GEREĞİ: Numpad + klavye üst sıra (1-9, 0) desteği.
+        /// </summary>
+        private void OnNumpadClick(object? parameter)
+        {
+            if (parameter == null) return;
+
+            var digit = parameter.ToString();
+            if (PinInput.Length < 4 && int.TryParse(digit, out _))
+            {
+                PinInput += digit;
+                ErrorMessage = string.Empty;
+
+                // 4 hane tamamlandığında otomatik doğrula
+                if (PinInput.Length == 4)
+                {
+                    System.Threading.Tasks.Task.Delay(200).ContinueWith(_ =>
+                    {
+                        Application.Current.Dispatcher.Invoke(() => OnConfirm());
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Son rakamı siler (backspace).
+        /// </summary>
+        private void DeleteLastDigit()
+        {
+            if (PinInput.Length > 0)
+            {
+                PinInput = PinInput.Substring(0, PinInput.Length - 1);
+                ErrorMessage = string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Onaylama işlemi (Enter tuşu veya 4 hane tamamlandığında).
+        /// İSTEM METNİ GEREĞİ: Enter ile doğrulama.
+        /// </summary>
+        private void OnConfirm()
+        {
+            if (!PinHashHelper.IsValidPinFormat(PinInput))
+            {
+                ErrorMessage = "PIN 4 haneli olmalıdır!";
+                PinInput = string.Empty;
+                return;
+            }
+
+            if (_isCreateMode)
+            {
+                // Yeni PIN oluşturma modu
+                if (string.IsNullOrEmpty(_confirmPin))
+                {
+                    // İlk girilen PIN, tekrar girmesini iste
+                    _confirmPin = PinInput;
+                    PinInput = string.Empty;
+                    TitleMessage = "PIN'i Tekrar Girin";
+                    ErrorMessage = string.Empty;
+                }
+                else
+                {
+                    // İkinci giriş, eşleşme kontrolü
+                    if (_confirmPin == PinInput)
+                    {
+                        // PIN'i hash'le ve kaydet
+                        var hashedPin = PinHashHelper.HashPin(PinInput);
+                        _settingsRepo.SetSetting("PIN", hashedPin);
+
+                        MessageBox.Show("PIN başarıyla oluşturuldu!", "Başarılı",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // Ana pencereyi aç
+                        OpenMainWindow();
+                    }
+                    else
+                    {
+                        ErrorMessage = "PIN'ler eşleşmiyor!";
+                        PinInput = string.Empty;
+                        _confirmPin = string.Empty;
+                        TitleMessage = "Yeni PIN Oluşturun";
+                    }
+                }
+            }
+            else
+            {
+                // Normal giriş modu
+                var storedHash = _settingsRepo.GetSetting("PIN");
+                if (PinHashHelper.VerifyPin(PinInput, storedHash ?? ""))
+                {
+                    // Giriş başarılı
+                    OpenMainWindow();
+                }
+                else
+                {
+                    ErrorMessage = "Hatalı PIN!";
+                    PinInput = string.Empty;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ana pencereyi açar ve login penceresini kapatır.
+        /// </summary>
+        private void OpenMainWindow()
+        {
+            var mainWindow = new Views.MainWindow();
+            mainWindow.Show();
+
+            // Login penceresini kapat
+            Application.Current.MainWindow?.Close();
+        }
+
+        /// <summary>
+        /// Klavye girişini handle eder.
+        /// İSTEM METNİ GEREĞİ: Klavyenin üst sırasındaki sayı tuşları (1-9, 0).
+        /// </summary>
+        public void HandleKeyPress(Key key)
+        {
+            // Numpad tuşları
+            if (key >= Key.NumPad0 && key <= Key.NumPad9)
+            {
+                var digit = (int)(key - Key.NumPad0);
+                OnNumpadClick(digit.ToString());
+                return;
+            }
+
+            // Üst sıra sayı tuşları
+            if (key >= Key.D0 && key <= Key.D9)
+            {
+                var digit = (int)(key - Key.D0);
+                OnNumpadClick(digit.ToString());
+                return;
+            }
+
+            // Enter tuşu
+            if (key == Key.Enter && PinInput.Length == 4)
+            {
+                OnConfirm();
+                return;
+            }
+
+            // Backspace tuşu
+            if (key == Key.Back || key == Key.Delete)
+            {
+                DeleteLastDigit();
+            }
+        }
+
+        #endregion
+
+        #region INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+    }
+}

@@ -1,0 +1,230 @@
+﻿<UserControl x:Class="AlparslanOBS.Views.Components.StudentCardComponent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="160" d:DesignWidth="420">
+    
+    <UserControl.Resources>
+        <Style x:Key="KunyeButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#ef5350"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#f44336"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#e53935"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    
+    <Border Background="#1c2127" 
+            BorderBrush="#283039" 
+            BorderThickness="1" 
+            CornerRadius="8" 
+            Padding="16"
+            Cursor="Hand"
+            MouseEnter="Card_MouseEnter"
+            MouseLeave="Card_MouseLeave">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="6" 
+                            ShadowDepth="1" 
+                            Opacity="0.2"
+                            Color="#000000"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: Profile Image -->
+            <Border Grid.Column="0" 
+                    Width="80" 
+                    Height="80" 
+                    CornerRadius="6" 
+                    Background="#283039"
+                    Margin="0,0,16,0"
+                    BorderBrush="#137fec"
+                    BorderThickness="2">
+                <Image Source="{Binding PhotoPath}" 
+                       Stretch="UniformToFill"
+                       ContextMenuOpening="Photo_ContextMenuOpening">
+                    <Image.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="PNG olarak kaydet" 
+                                     Click="ExportToPng_Click"/>
+                        </ContextMenu>
+                    </Image.ContextMenu>
+                </Image>
+            </Border>
+
+            <!-- Center: Student Info -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Name Row -->
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding FullName}" 
+                               FontSize="15" 
+                               FontWeight="SemiBold" 
+                               Foreground="#ffffff"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <!-- Star Button -->
+                    <Button Grid.Column="1"
+                            Content="☆" 
+                            Width="28" 
+                            Height="28" 
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="16"
+                            Cursor="Hand"
+                            Click="FavoriteButton_Click"
+                            Margin="8,0,0,0"
+                            ToolTip="{Binding FavoriteTooltip}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Foreground" Value="#7a8a96"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                        <Setter Property="Content" Value="★"/>
+                                        <Setter Property="Foreground" Value="#ffc107"/>
+                                    </DataTrigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="#ffc107"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <!-- Info Grid -->
+                <Grid Grid.Row="1" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- NO -->
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Text="NO:" 
+                               FontSize="11" 
+                               Foreground="#7a8a96" 
+                               FontWeight="SemiBold"
+                               Margin="0,0,8,4"
+                               Width="50"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1"
+                               Text="{Binding StudentNumber}" 
+                               FontSize="11" 
+                               Foreground="#cccccc"
+                               Margin="0,0,0,4"/>
+
+                    <!-- SINIF -->
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Text="SINIF:" 
+                               FontSize="11" 
+                               Foreground="#7a8a96" 
+                               FontWeight="SemiBold"
+                               Margin="0,0,8,4"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1"
+                               Text="{Binding Class}" 
+                               FontSize="11" 
+                               Foreground="#137fec"
+                               FontWeight="Bold"
+                               Margin="0,0,0,4"/>
+
+                    <!-- TC -->
+                    <TextBlock Grid.Row="2" Grid.Column="0"
+                               Text="TC:" 
+                               FontSize="11" 
+                               Foreground="#7a8a96" 
+                               FontWeight="SemiBold"
+                               Margin="0,0,8,4"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1"
+                               Text="{Binding TcNo}" 
+                               FontSize="11" 
+                               Foreground="#cccccc"
+                               Margin="0,0,0,4"/>
+
+                    <!-- Doğum Tarihi -->
+                    <TextBlock Grid.Row="3" Grid.Column="0"
+                               Text="Doğum T.:" 
+                               FontSize="11" 
+                               Foreground="#7a8a96" 
+                               FontWeight="SemiBold"
+                               Margin="0,0,8,4"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1"
+                               Text="{Binding BirthDateString}" 
+                               FontSize="11" 
+                               Foreground="#cccccc"
+                               Margin="0,0,0,4"/>
+
+                    <!-- Veli No -->
+                    <TextBlock Grid.Row="4" Grid.Column="0"
+                               Text="VELİ NO:" 
+                               FontSize="11" 
+                               Foreground="#7a8a96" 
+                               FontWeight="SemiBold"
+                               Margin="0,0,8,0"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1"
+                               Text="{Binding GuardianPhone}" 
+                               FontSize="11" 
+                               Foreground="#cccccc"
+                               Margin="0,0,0,0"
+                               TextTrimming="CharacterEllipsis"/>
+                </Grid>
+
+                <!-- Künye Button -->
+                <Button Grid.Row="2"
+                        Content="📋 Künye" 
+                        Style="{StaticResource KunyeButtonStyle}"
+                        HorizontalAlignment="Right"
+                        Click="KunyeButton_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="4"
+                                    Padding="{TemplateBinding Padding}">
+                                <TextBlock Text="{TemplateBinding Content}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           FontSize="{TemplateBinding FontSize}"
+                                           FontWeight="{TemplateBinding FontWeight}"
+                                           TextAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

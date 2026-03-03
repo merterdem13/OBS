@@ -1,0 +1,436 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using AlparslanOBS.Models;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
+using iText.Kernel.Pdf.Xobject;
+
+namespace AlparslanOBS.Services
+{
+    /// <summary>
+    /// PDF ayrıştırma işlemleri için arayüz. Bağımlılık enjeksiyonu (DI) ve test edilebilirlik için eklendi.
+    /// </summary>
+    public interface IPdfExtractionService
+    {
+        IEnumerable<Student> ExtractStudentsFromKunyePdf(string pdfPath);
+        IEnumerable<(string StudentNumber, string Class)> ExtractClassList(string pdfPath);
+        void CleanupTempFiles();
+    }
+
+    /// <summary>
+    /// iText7 kullanarak PDF'lerden metin ve embedded fotoğraf ayrıştıran servis.
+    /// Anayasa Kuralı: IDisposable yönetimi ile RAM tahliyesi yapılır. 
+    /// Çıkarılan resimler sistemin Temp klasörüne atılır ve işlem bitince temizlenir.
+    /// </summary>
+    public class PdfExtractionService : IPdfExtractionService
+    {
+        // Temizlik kuralı için işlem sırasında oluşturulan geçici (temp) dosyaların kaydını tutarız
+        private readonly List<string> _tempFilesCreated = new List<string>();
+
+        public IEnumerable<Student> ExtractStudentsFromKunyePdf(string pdfPath)
+        {
+            var results = new List<Student>();
+
+            if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
+                return results;
+
+            try
+            {
+                // Anayasa Kuralı: IDisposable kullanımı. using bloğu ile bellek işlem biter bitmez tahliye edilir.
+                using var pdfReader = new PdfReader(pdfPath);
+                using var pdfDocument = new PdfDocument(pdfReader);
+
+                for (int pageNum = 1; pageNum <= pdfDocument.GetNumberOfPages(); pageNum++)
+                {
+                    try
+                    {
+                        var page = pdfDocument.GetPage(pageNum);
+                        var text = ExtractTextFromPage(page);
+
+                        if (string.IsNullOrWhiteSpace(text)) continue;
+
+                        var student = new Student
+                        {
+                            StudentNumber = FindStudentNumber(text) ?? string.Empty,
+                            TcNo = FindTcNo(text) ?? string.Empty,
+                            BirthDate = FindBirthDate(text)
+                        };
+
+                        var name = FindName(text);
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            student.FirstName = parts.Length > 0 ? parts[0] : string.Empty;
+                            student.LastName = parts.Length > 1 ? string.Join(' ', parts.Skip(1)) : string.Empty;
+                        }
+
+                        // Fotoğraf Çıkarma ve Geçici (Temp) Dosya Kuralı
+                        var imageData = ExtractImageFromPage(page);
+                        if (imageData != null && imageData.Length > 0)
+                        {
+                            // Fotoğrafı geçici klasöre kaydet. MergeService onaylarsa kalıcıya kopyalayacak.
+                            string tempFileName = Path.Combine(Path.GetTempPath(), $"OBS_Temp_{Guid.NewGuid()}.jpg");
+                            File.WriteAllBytes(tempFileName, imageData);
+
+                            student.PhotoPath = tempFileName;
+                            _tempFilesCreated.Add(tempFileName); // Çöp toplayıcı için listeye ekle
+                        }
+
+                        results.Add(student);
+                    }
+                    catch
+                    {
+                        // Hatalı sayfa tüm süreci çökertmemeli, diğer sayfaya geç
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"PDF Ayrıştırma Hatası: {ex.Message}");
+            }
+
+            return results;
+        }
+
+        public IEnumerable<(string StudentNumber, string Class)> ExtractClassList(string pdfPath)
+        {
+            var results = new List<(string, string)>();
+
+            if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
+                return results;
+
+            try
+            {
+                using var pdfReader = new PdfReader(pdfPath);
+                using var pdfDocument = new PdfDocument(pdfReader);
+
+                for (int pageNum = 1; pageNum <= pdfDocument.GetNumberOfPages(); pageNum++)
+                {
+                    try
+                    {
+                        var page = pdfDocument.GetPage(pageNum);
+                        var text = ExtractTextFromPage(page);
+
+                        if (string.IsNullOrWhiteSpace(text)) continue;
+
+                        var classInfo = ExtractClassFromHeader(text);
+                        if (string.IsNullOrEmpty(classInfo)) continue;
+
+                        var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var line in lines)
+                        {
+                            var sn = FindStudentNumberFromClassListLine(line);
+                            if (!string.IsNullOrEmpty(sn))
+                            {
+                                results.Add((sn, classInfo));
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Sayfayı atla
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Sınıf Listesi Ayrıştırma Hatası: {ex.Message}");
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Anayasa Kuralı: İşlem sırasında oluşan geçici dosyalar sistemden temizlenmelidir.
+        /// Merge işlemi bittikten sonra ViewModel tarafından çağrılır.
+        /// </summary>
+        public void CleanupTempFiles()
+        {
+            foreach (var tempFile in _tempFilesCreated)
+            {
+                if (File.Exists(tempFile))
+                {
+                    try { File.Delete(tempFile); } catch { /* Kilitlenmişse yoksay */ }
+                }
+            }
+            _tempFilesCreated.Clear();
+        }
+
+        private static string ExtractTextFromPage(PdfPage page)
+        {
+            try
+            {
+                return PdfTextExtractor.GetTextFromPage(page) ?? string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// PDF içerisindeki en büyük gömülü (embedded) resmi bulur ve RAM'i şişirmeden baytlarını çıkarır.
+        /// </summary>
+        private static byte[]? ExtractImageFromPage(PdfPage page)
+        {
+            try
+            {
+                var resources = page.GetResources();
+                if (resources == null) return null;
+
+                var xObjectResource = resources.GetResource(new PdfName("XObject"));
+                if (!(xObjectResource is PdfDictionary xObjects) || xObjects.IsEmpty()) return null;
+
+                byte[]? largestImage = null;
+                int largestSize = 0;
+
+                foreach (var xObjectName in xObjects.KeySet())
+                {
+                    var obj = xObjects.Get(xObjectName);
+                    if (obj is PdfStream stream)
+                    {
+                        var subtype = stream.GetAsName(new PdfName("Subtype"));
+                        if (PdfName.Image.Equals(subtype))
+                        {
+                            try
+                            {
+                                // iText7'nin güvenli resim okuma nesnesi
+                                var imageXObject = new PdfImageXObject(stream);
+                                byte[] imageBytes = imageXObject.GetImageBytes();
+
+                                // En büyük image alınır kuralı
+                                if (imageBytes != null && imageBytes.Length > largestSize)
+                                {
+                                    largestSize = imageBytes.Length;
+                                    largestImage = imageBytes;
+                                }
+                            }
+                            catch { continue; }
+                        }
+                    }
+                }
+                return largestImage;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #region Heuristics (Metin Arama Algoritmaları)
+
+        /// <summary>
+        /// Künye PDF'inden öğrenci numarasını bulur.
+        /// Önce "Okul No:", "Öğrenci No:", "No:" gibi etiketlere bakar, bulamazsa sayısal bir değer arar.
+        /// </summary>
+        private static string? FindStudentNumber(string text)
+        {
+            // Etiket bazlı arama: "Okul No", "Öğrenci No", "No" vb.
+            var patterns = new[]
+            {
+                @"(?:Okul|Öğrenci|Ögrenci|Ogrenci)\s*(?:Numarası|No\.?|Numarasi)\s*[:\-]?\s*(\d+)",
+                @"(?:Sınıf|Sinif)\s*No\s*[:\-]?\s*(\d+)",
+                @"\bNo\s*[:\-]\s*(\d+)"
+            };
+
+            foreach (var pattern in patterns)
+            {
+                var m = Regex.Match(text, pattern, RegexOptions.IgnoreCase);
+                if (m.Success && m.Groups[1].Value.Length >= 3)
+                    return m.Groups[1].Value.Trim();
+            }
+
+            // Fallback: En az 3 haneli sayı (TC'den ayırmak için 11 haneli olanları yoksay)
+            var fallback = Regex.Match(text, @"\b(\d{3,10})\b");
+            return fallback.Success ? fallback.Value : null;
+        }
+
+        /// <summary>
+        /// Künye PDF'inden öğrenci adını ve soyadını bulur.
+        /// "Adı:" ve "Soyadı:" etiketlerini arar. Ebeveyn bilgilerini filtreler.
+        /// </summary>
+        private static string? FindName(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+            var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            string? firstName = null, lastName = null;
+
+            foreach (var line in lines)
+            {
+                // "Baba Adı" veya "Anne Adı" satırlarını yoksay
+                if (line.Contains("Baba", StringComparison.OrdinalIgnoreCase) ||
+                    line.Contains("Anne", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // Ad arama (Türkçe karakterler dahil)
+                if (Regex.IsMatch(line, @"(?:Öğrenci\s+)?Adı\s*[:\-]", RegexOptions.IgnoreCase))
+                {
+                    var match = Regex.Match(line, @"(?:Öğrenci\s+)?Adı\s*[:\-]\s*([A-ZİIŞÇĞÜÖa-zışçğüö\s]+)", RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        firstName = match.Groups[1].Value.Trim();
+                        // Soyadı kısmını temizle
+                        firstName = Regex.Replace(firstName, @"\s*Soyadı.*", "", RegexOptions.IgnoreCase).Trim();
+                    }
+                }
+
+                // Soyad arama
+                if (Regex.IsMatch(line, @"Soyadı\s*[:\-]", RegexOptions.IgnoreCase))
+                {
+                    var match = Regex.Match(line, @"Soyadı\s*[:\-]\s*([A-ZİIŞÇĞÜÖa-zışçğüö\s]+)", RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        lastName = match.Groups[1].Value.Trim();
+                        // Sonraki alan varsa temizle (örn: TC No, Cinsiyet vb.)
+                        lastName = Regex.Split(lastName, @"\s{2,}|\t")[0].Trim();
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName))
+                    return $"{firstName} {lastName}";
+            }
+
+            // Tek parça bulunduysa onu döndür
+            return !string.IsNullOrEmpty(firstName) ? firstName : 
+                   !string.IsNullOrEmpty(lastName) ? lastName : null;
+        }
+
+        /// <summary>
+        /// TC Kimlik numarasını bulur. Türkiye Cumhuriyeti formatında 11 haneli sayı arar.
+        /// </summary>
+        private static string? FindTcNo(string text)
+        {
+            // Etiket bazlı arama: "T.C. Kimlik No", "TC No", "Kimlik No" vb.
+            var patterns = new[]
+            {
+                @"T\.?\s*C\.?\s*(?:Kimlik)?\s*(?:No\.?|Numarası)\s*[:\-]?\s*(\d{11})",
+                @"(?:Kimlik|TC)\s*(?:No\.?|Numarası)\s*[:\-]?\s*(\d{11})"
+            };
+
+            foreach (var pattern in patterns)
+            {
+                var m = Regex.Match(text, pattern, RegexOptions.IgnoreCase);
+                if (m.Success && m.Groups[1].Value.Length == 11)
+                    return m.Groups[1].Value.Trim();
+            }
+
+            // Fallback: Tam olarak 11 haneli herhangi bir sayı (ancak ilk rakam 0 olmamalı - TC kuralı)
+            var fallback = Regex.Match(text, @"\b([1-9]\d{10})\b");
+            return fallback.Success ? fallback.Value : null;
+        }
+
+        /// <summary>
+        /// Doğum tarihini bulur. "Doğum Tarihi:" veya "Doğum Yeri, Tarihi:" formatlarını destekler.
+        /// Tarih formatları: GG.AA.YYYY, GG/AA/YYYY, GG-AA-YYYY
+        /// </summary>
+        private static DateTime? FindBirthDate(string text)
+        {
+            // Pattern 1: "Doğum Yeri, Tarihi: İSTANBUL 15.03.2010" formatı
+            var pattern1 = Regex.Match(text, 
+                @"Doğum\s+(?:Yeri\s*,?\s*)?Tarihi?\s*[:\-]\s*(?:[A-ZİIŞÇĞÜÖa-zışçğüö/]+\s+)?(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})", 
+                RegexOptions.IgnoreCase);
+            
+            if (pattern1.Success)
+            {
+                var dateStr = pattern1.Groups[1].Value.Trim();
+                if (TryParseDate(dateStr, out var dt))
+                    return dt;
+            }
+
+            // Pattern 2: "Doğum Tarihi: 15.03.2010" basit format
+            var pattern2 = Regex.Match(text, 
+                @"(?:Doğum|Dogum)\s+Tarihi?\s*[:\-]\s*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})", 
+                RegexOptions.IgnoreCase);
+            
+            if (pattern2.Success)
+            {
+                var dateStr = pattern2.Groups[1].Value.Trim();
+                if (TryParseDate(dateStr, out var dt))
+                    return dt;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Tarih string'ini DateTime'a çevirir. Farklı ayırıcıları (. / -) destekler.
+        /// </summary>
+        private static bool TryParseDate(string dateStr, out DateTime result)
+        {
+            // Önce standart parse dene
+            if (DateTime.TryParse(dateStr, out result))
+                return true;
+
+            // Manuel parse: GG.AA.YYYY veya GG/AA/YYYY
+            var parts = dateStr.Split(new[] { '.', '/', '-' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 3 &&
+                int.TryParse(parts[0], out int day) &&
+                int.TryParse(parts[1], out int month) &&
+                int.TryParse(parts[2], out int year))
+            {
+                // Yıl 2 haneliyse 20xx varsay
+                if (year < 100)
+                    year += 2000;
+
+                try
+                {
+                    result = new DateTime(year, month, day);
+                    return true;
+                }
+                catch
+                {
+                    result = default;
+                    return false;
+                }
+            }
+
+            result = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Sınıf listesi PDF başlığından sınıf bilgisini çıkarır.
+        /// Format: "5. Sınıf / A Şubesi" veya "5. Sınıf A Şubesi" → "5/A"
+        /// </summary>
+        private static string? ExtractClassFromHeader(string text)
+        {
+            // Pattern 1: "5. Sınıf / A Şubesi" veya "5. Sınıf A Şubesi"
+            var m = Regex.Match(text, @"(\d+)\.\s*(?:Sınıf|Sinif)\s*(?:/\s*)?([A-Za-z])\s*(?:Şubesi|Subesi)?", RegexOptions.IgnoreCase);
+            if (m.Success)
+            {
+                var classNum = m.Groups[1].Value.Trim();
+                var section = m.Groups[2].Value.Trim().ToUpperInvariant();
+                return $"{classNum}/{section}";
+            }
+
+            // Pattern 2: Sadece sınıf numarası (şube yok)
+            m = Regex.Match(text, @"(\d+)\.\s*(?:Sınıf|Sinif)", RegexOptions.IgnoreCase);
+            if (m.Success)
+            {
+                return m.Groups[1].Value.Trim();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Sınıf listesi satırından öğrenci numarasını çıkarır.
+        /// Format: "1234  Ahmet YILMAZ" → "1234"
+        /// </summary>
+        private static string? FindStudentNumberFromClassListLine(string line)
+        {
+            // Satır başında sayı arama (sıra numarası olabilir)
+            var m = Regex.Match(line, @"^\s*(\d+)\s+", RegexOptions.Multiline);
+            if (m.Success && m.Groups[1].Value.Length >= 3)
+                return m.Groups[1].Value.Trim();
+
+            // Satır içinde 3+ haneli sayı arama
+            m = Regex.Match(line, @"\b(\d{3,10})\b");
+            return m.Success ? m.Value : null;
+        }
+        #endregion
+    }
+}

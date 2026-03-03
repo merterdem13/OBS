@@ -1,0 +1,137 @@
+﻿using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using AlparslanOBS.ViewModels;
+
+namespace AlparslanOBS.Views
+{
+    /// <summary>
+    /// Ana pencere - Modüler bileşenlerden oluşur.
+    /// İSTEM METNİ GEREĞİ:
+    /// - 400x750 piksel sabit boyut
+    /// - Topmost (Her zaman üstte)
+    /// - Taşınabilir
+    /// - Favoriler paneli animasyonları
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        private readonly MainViewModel _viewModel;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            
+            // ViewModel oluştur ve DataContext'e ata
+            _viewModel = new MainViewModel();
+            DataContext = _viewModel;
+
+            // ViewModel event'lerini dinle (Favoriler paneli animasyonları için)
+            _viewModel.FavoritesPanelShowRequested += OnFavoritesPanelShowRequested;
+            _viewModel.FavoritesPanelHideRequested += OnFavoritesPanelHideRequested;
+            _viewModel.FavoritesPanelSparkleRequested += OnFavoritesPanelSparkleRequested;
+        }
+
+        /// <summary>
+        /// Pencereyi taşınabilir yap.
+        /// İSTEM METNİ GEREĞİ: Manuel resize yok, ancak taşınabilir.
+        /// </summary>
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                try
+                {
+                    this.DragMove();
+                }
+                catch
+                {
+                    // DragMove bazen exception fırlatabilir, yoksay
+                }
+            }
+        }
+
+        private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ManagementButton is null || !ManagementButton.IsMenuOpen)
+                return;
+
+            if (e.OriginalSource is not DependencyObject source)
+                return;
+
+            if (!IsDescendantOf(source, ManagementButton))
+            {
+                ManagementButton.CloseMenu();
+            }
+        }
+
+        private static bool IsDescendantOf(DependencyObject source, DependencyObject parent)
+        {
+            while (source != null)
+            {
+                if (ReferenceEquals(source, parent))
+                    return true;
+
+                source = VisualTreeHelper.GetParent(source);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Student Card'dan gelen favori toggle eventi.
+        /// </summary>
+        private void StudentCard_FavoriteToggled(object sender, RoutedEventArgs e)
+        {
+            if (sender is Components.StudentCardComponent card && 
+                card.DataContext is StudentViewModel student)
+            {
+                _viewModel.ToggleFavoriteCommand.Execute(student);
+            }
+        }
+
+
+        /// <summary>
+        /// Student Card'dan gelen künye açma eventi.
+        /// </summary>
+        private void StudentCard_KunyeOpened(object sender, RoutedEventArgs e)
+        {
+            if (sender is Components.StudentCardComponent card && 
+                card.DataContext is StudentViewModel student)
+            {
+                _viewModel.OpenKunyeCommand.Execute(student);
+            }
+        }
+
+        /// <summary>
+        /// Favoriler panelini göster (Fade in animasyonu).
+        /// İSTEM METNİ GEREĞİ: Fade in/out animasyonu.
+        /// </summary>
+        private void OnFavoritesPanelShowRequested()
+        {
+            FavoritesPanel.Show();
+        }
+
+        /// <summary>
+        /// Favoriler panelini gizle (Fade out animasyonu).
+        /// </summary>
+        private void OnFavoritesPanelHideRequested()
+        {
+            FavoritesPanel.Hide();
+        }
+
+        /// <summary>
+        /// Favoriler panelinde parıldama animasyonu oynat.
+        /// İSTEM METNİ GEREĞİ: Favoriye eklendiğinde parıldayan görsel efekt.
+        /// </summary>
+        private void OnFavoritesPanelSparkleRequested()
+        {
+            FavoritesPanel.PlaySparkleAnimation();
+        }
+    }
+}
+
+
+
+
+
+

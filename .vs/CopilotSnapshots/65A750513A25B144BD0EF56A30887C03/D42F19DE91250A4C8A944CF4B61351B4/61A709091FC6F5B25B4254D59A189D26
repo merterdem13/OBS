@@ -1,0 +1,105 @@
+﻿<UserControl x:Class="AlparslanOBS.Views.Components.FloatingActionPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:converters="clr-namespace:AlparslanOBS.Converters">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Menü dışı tıklamaları yakalamak için tam ekran invisible buton -->
+        <Button Background="Transparent" BorderThickness="0"
+                Visibility="{Binding IsSettingsPanelVisible, Converter={StaticResource BoolToVisibility}}"
+                Command="{Binding CloseSettingsPanelCommand}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="Transparent"/>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+
+        <Grid VerticalAlignment="Bottom" Margin="16,0,16,16">
+            <!-- Favoriler Butonu -->
+            <Button HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                    Width="56" Height="56"
+                    BorderThickness="0"
+                    Background="{StaticResource AccentBrush}"
+                    Cursor="Hand"
+                    Command="{Binding ToggleFavoriteCommand}"
+                    Visibility="{Binding HasFavorites, Converter={StaticResource BoolToVisibility}, FallbackValue=Visible}">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="28">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="12" Opacity="0.3" ShadowDepth="3"/>
+                            </Border.Effect>
+                            <ui:SymbolIcon Symbol="Star24" FontSize="28" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <!-- Ayarlar Butonu -->
+            <Button HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Width="56" Height="56"
+                    BorderThickness="0"
+                    Background="{StaticResource AccentBrush}"
+                    Cursor="Hand"
+                    Command="{Binding ToggleSettingsCommand}">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="28">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="12" Opacity="0.3" ShadowDepth="3"/>
+                            </Border.Effect>
+                            <TextBlock Text="☰" FontSize="26" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <!-- Dinamik Yönetim Menüsü (Pop-up) -->
+            <Border HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Background="{StaticResource BgCardBrush}"
+                    BorderBrush="{StaticResource BorderColorBrush}"
+                    BorderThickness="1" CornerRadius="8"
+                    Padding="12"
+                    Margin="0,0,0,70"
+                    Width="220"
+                    Visibility="{Binding IsSettingsPanelVisible, Converter={StaticResource BoolToVisibility}}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="16" Opacity="0.15" Direction="90" ShadowDepth="4"/>
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="YÖNETİM"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="11" FontWeight="Bold"
+                               Margin="4,0,0,8"/>
+
+                    <ui:Button Content="PDF Yükle"
+                               Appearance="Primary" Margin="0,0,0,8" Padding="12,8"
+                               HorizontalAlignment="Stretch"
+                               Command="{Binding ImportKunyePdfCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="DocumentPdf24"/>
+                        </ui:Button.Icon>
+                    </ui:Button>
+
+                    <ui:Button Content="Sistemi Sıfırla"
+                               Appearance="Danger" Padding="12,8"
+                               HorizontalAlignment="Stretch"
+                               Command="{Binding ResetSystemCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="Warning24"/>
+                        </ui:Button.Icon>
+                    </ui:Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

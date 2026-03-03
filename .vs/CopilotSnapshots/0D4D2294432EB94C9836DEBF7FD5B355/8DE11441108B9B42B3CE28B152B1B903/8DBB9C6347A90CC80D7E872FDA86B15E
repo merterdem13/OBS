@@ -1,0 +1,274 @@
+﻿<Window x:Class="AlparslanOBS.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:AlparslanOBS.Views"
+        xmlns:converters="clr-namespace:AlparslanOBS.Converters"
+        Title="ÖĞRENCİ BİLGİ SİSTEMİ"
+        Height="700"
+        SizeToContent="Width"
+        Topmost="True"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        MouseDown="Window_MouseDown"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <converters:PathToImageConverter x:Key="PathToImageConverter" />
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
+    <Border Background="White" CornerRadius="10" Margin="10">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.2"/>
+        </Border.Effect>
+
+        <Grid>
+            <StackPanel Orientation="Horizontal">
+
+                <Border x:Name="MainPanel" Width="400" Background="White" CornerRadius="10,0,0,10" ClipToBounds="True">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsTeamPanelOpen}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width" To="50" Duration="0:0:0.3" DecelerationRatio="0.9"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width" To="400" Duration="0:0:0.3" DecelerationRatio="0.9"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <Grid>
+                        <Grid Margin="10">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsTeamPanelOpen}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                                <TextBlock Text="ÖĞRENCİ BİLGİ SİSTEMİ" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Height="30" Padding="5" VerticalContentAlignment="Center" />
+                            </StackPanel>
+
+                            <ListBox Grid.Row="1" ItemsSource="{Binding Students}" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#EEEEEE" BorderThickness="1" CornerRadius="5" Margin="0,0,0,8" Background="White">
+                                            <Grid Margin="8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Grid.Column="0" Width="60" Height="60" Margin="0,0,10,0" Stretch="UniformToFill"
+                                                       Source="{Binding PhotoPath, Converter={StaticResource PathToImageConverter}, ConverterParameter=150}" />
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock FontWeight="Bold" FontSize="14">
+														<Run Text="{Binding FirstName}" />
+														<Run Text="{Binding LastName}" />
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Class}" Foreground="DarkGray" FontSize="12"/>
+                                                    <TextBlock Text="{Binding StudentNumber}" Foreground="Gray" FontSize="12" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                                <Button Content="📄 Künye Yükle" Width="100" Height="30" Margin="0,0,10,0" Cursor="Hand"
+                                        Command="{Binding ImportKunyeCommand}" />
+
+                                <Button Content="Takımlar 👉" Width="90" Height="30" Cursor="Hand"
+                                        Command="{Binding ToggleTeamPanelCommand}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Button Command="{Binding ToggleTeamPanelCommand}" Background="Transparent" BorderThickness="0" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsTeamPanelOpen}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock Text="◀ ANA EKRANA DÖN" FontWeight="Bold" Foreground="#333333" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock.LayoutTransform>
+                                    <RotateTransform Angle="-90"/>
+                                </TextBlock.LayoutTransform>
+                            </TextBlock>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="TeamPanel" Width="0" Background="#F8F9FA" CornerRadius="0,10,10,0" ClipToBounds="True">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsTeamPanelOpen}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width" To="600" Duration="0:0:0.3" DecelerationRatio="0.9"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width" To="0" Duration="0:0:0.3" DecelerationRatio="0.9"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <Grid Margin="20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                            <TextBlock Text="OKUL TAKIMLARI" FontWeight="Bold" FontSize="20" Foreground="#333" VerticalAlignment="Center"/>
+                            <Button Content="+ Yeni Takım" Margin="20,0,0,0" Padding="10,5" Background="#2196F3" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        </StackPanel>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding Teams}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="5" Margin="0,0,0,10" Background="White">
+                                            <StackPanel>
+
+                                                <Button Command="{Binding ToggleExpandCommand}" Background="Transparent" BorderThickness="0" Cursor="Hand" HorizontalContentAlignment="Stretch">
+                                                    <Grid Margin="15">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="{Binding Team.TeamName}" FontWeight="Bold" FontSize="16"/>
+                                                            <TextBlock Text="{Binding Team.Description}" Foreground="Gray" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                                        </StackPanel>
+
+                                                        <Border Grid.Column="1" Background="#E0E0E0" CornerRadius="12" Padding="10,5" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Team.MemberCount, StringFormat='{}{0} Oyuncu'}" FontSize="12" FontWeight="Bold"/>
+                                                        </Border>
+                                                    </Grid>
+                                                </Button>
+
+                                                <Border Background="#FAFAFA" BorderBrush="#EEE" BorderThickness="0,1,0,0">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+
+                                                    <StackPanel Margin="15">
+                                                        <TextBlock Text="Takım Kadrosu" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                                                        <ItemsControl ItemsSource="{Binding Members}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Grid Margin="0,0,0,5">
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <ColumnDefinition Width="*"/>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <Image Width="32" Height="32" Source="{Binding PhotoPath, Converter={StaticResource PathToImageConverter}, ConverterParameter=64}">
+                                                                            <Image.Clip>
+                                                                                <EllipseGeometry RadiusX="16" RadiusY="16" Center="16,16"/>
+                                                                            </Image.Clip>
+                                                                        </Image>
+                                                                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+																			<Run Text="{Binding FirstName}" FontWeight="Bold"/>
+																			<Run Text="{Binding LastName}" FontWeight="Bold"/>
+																			<Run Text="{Binding Class, StringFormat=' - ({0})'}" Foreground="Gray"/>
+                                                                        </TextBlock>
+
+                                                                        <Button Grid.Column="2" Content="❌" Background="Transparent" BorderThickness="0" ToolTip="Takımdan Çıkar" Cursor="Hand" Foreground="Red"/>
+                                                                    </Grid>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+                                                            <Button Content="🖨 Çıktı Al (PDF)" Command="{Binding ExportToPdfCommand}" Background="#FF9800" Foreground="White" BorderThickness="0" Padding="10,5" Margin="0,0,10,0" Cursor="Hand" ToolTip="Takım listesini PDF olarak kaydet"/>
+
+                                                            <Button Content="🗑 Takımı Sil" Command="{Binding DeleteTeamCommand}" Background="#FFF0F0" Foreground="Red" BorderBrush="Red" BorderThickness="1" Padding="10,5" Margin="0,0,10,0" Cursor="Hand"/>
+
+                                                            <Button Content="+ Öğrenci Ekle" Command="{Binding AddStudentCommand}" Background="#4CAF50" Foreground="White" BorderThickness="0" Padding="10,5" Cursor="Hand"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+            </StackPanel>
+
+            <Border HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Margin="0,0,20,20" Padding="15,10" CornerRadius="5"
+                    Visibility="{Binding IsToastVisible, Converter={StaticResource BoolToVis}}"
+                    Panel.ZIndex="999">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="#4CAF50"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsToastError}" Value="True">
+                                <Setter Property="Background" Value="#F44336"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                </Border.Effect>
+
+                <TextBlock Text="{Binding ToastMessage}" Foreground="White" FontWeight="Bold" TextWrapping="Wrap" MaxWidth="250"/>
+            </Border>
+
+        </Grid>
+    </Border>
+</Window>

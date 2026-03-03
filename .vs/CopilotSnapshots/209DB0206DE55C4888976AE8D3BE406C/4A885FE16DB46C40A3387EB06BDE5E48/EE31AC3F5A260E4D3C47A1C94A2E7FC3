@@ -1,0 +1,178 @@
+﻿using System;
+using System.Collections.Generic;
+using AlparslanOBS.Models;
+
+namespace AlparslanOBS.DataAccess
+{
+    public class TeamRepository
+    {
+        public void Insert(Team team)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                INSERT INTO Teams (TeamName, Category, MatchDate, Description)
+                VALUES (@teamName, @category, @matchDate, @description);
+            ";
+            cmd.Parameters.AddWithValue("@teamName", team.TeamName);
+            cmd.Parameters.AddWithValue("@category", team.Category);
+            cmd.Parameters.AddWithValue("@matchDate", (object?)team.MatchDate ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@description", (object?)team.Description ?? DBNull.Value);
+            cmd.ExecuteNonQuery();
+        }
+
+        public void UpdateName(int teamId, string newName)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "UPDATE Teams SET TeamName = @name WHERE Id = @id;";
+            cmd.Parameters.AddWithValue("@name", newName);
+            cmd.Parameters.AddWithValue("@id", teamId);
+            cmd.ExecuteNonQuery();
+        }
+
+        public void Delete(int teamId)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DELETE FROM Teams WHERE Id = @id;";
+            cmd.Parameters.AddWithValue("@id", teamId);
+            cmd.ExecuteNonQuery();
+        }
+
+        public List<Team> GetAll()
+        {
+            var results = new List<Team>();
+
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT t.Id, t.TeamName, t.Category, t.MatchDate, t.Description,
+                       (SELECT COUNT(*) FROM TeamMembers tm WHERE tm.TeamId = t.Id) AS MemberCount
+                FROM Teams t
+                ORDER BY t.TeamName;
+            ";
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                results.Add(new Team
+                {
+                    Id = reader.GetInt32(0),
+                    TeamName = reader.GetString(1),
+                    Category = reader.GetString(2),
+                    MatchDate = reader.IsDBNull(3) ? null : reader.GetString(3),
+                    Description = reader.IsDBNull(4) ? null : reader.GetString(4),
+                    MemberCount = reader.GetInt32(5)
+                });
+            }
+
+            return results;
+        }
+
+        public bool Exists(string teamName)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*) FROM Teams WHERE TeamName = @name;";
+            cmd.Parameters.AddWithValue("@name", teamName);
+            var count = Convert.ToInt32(cmd.ExecuteScalar());
+            return count > 0;
+        }
+
+        // ── Üye (TeamMembers) İşlemleri ────────────────────────────────────
+
+        /// <summary>
+        /// Öğrencinin halihazırda kayıtlı olduğu takımın adını döndürür.
+        /// Hiçbir takımda değilse null döner.
+        /// </summary>
+        public string? GetTeamNameForStudent(string studentNumber)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT t.TeamName
+                FROM TeamMembers tm
+                INNER JOIN Teams t ON t.Id = tm.TeamId
+                WHERE tm.StudentNumber = @sn
+                LIMIT 1;
+            ";
+            cmd.Parameters.AddWithValue("@sn", studentNumber);
+            var result = cmd.ExecuteScalar();
+            return result as string;
+        }
+
+        public void AddMember(int teamId, string studentNumber)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                INSERT OR IGNORE INTO TeamMembers (TeamId, StudentNumber, AddedDate)
+                VALUES (@teamId, @sn, @date);
+            ";
+            cmd.Parameters.AddWithValue("@teamId", teamId);
+            cmd.Parameters.AddWithValue("@sn", studentNumber);
+            cmd.Parameters.AddWithValue("@date", DateTime.Now.ToString("o"));
+            cmd.ExecuteNonQuery();
+        }
+
+        public void RemoveMember(int teamId, string studentNumber)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DELETE FROM TeamMembers WHERE TeamId = @teamId AND StudentNumber = @sn;";
+            cmd.Parameters.AddWithValue("@teamId", teamId);
+            cmd.Parameters.AddWithValue("@sn", studentNumber);
+            cmd.ExecuteNonQuery();
+        }
+
+        public List<Student> GetMembers(int teamId)
+        {
+            var results = new List<Student>();
+
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT s.StudentNumber, s.FirstName, s.LastName, s.Class, s.PhotoPath
+                FROM TeamMembers tm
+                INNER JOIN Students s ON s.StudentNumber = tm.StudentNumber
+                WHERE tm.TeamId = @teamId
+                ORDER BY s.FirstName, s.LastName;
+            ";
+            cmd.Parameters.AddWithValue("@teamId", teamId);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                results.Add(new Student
+                {
+                    StudentNumber = reader.GetString(0),
+                    FirstName = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                    LastName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                    Class = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                    PhotoPath = reader.IsDBNull(4) ? string.Empty : reader.GetString(4)
+                });
+            }
+
+            return results;
+        }
+    }
+}

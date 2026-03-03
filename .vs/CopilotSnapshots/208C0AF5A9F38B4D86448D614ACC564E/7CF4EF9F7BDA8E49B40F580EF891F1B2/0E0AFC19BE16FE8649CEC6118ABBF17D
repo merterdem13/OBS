@@ -1,0 +1,330 @@
+﻿<Window x:Class="AlparslanOBS.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:AlparslanOBS.ViewModels"
+        xmlns:converters="clr-namespace:AlparslanOBS.Converters"
+        mc:Ignorable="d"
+        Title="Öğrenci Bilgi Sistemi (OBS)" Height="720" Width="1280"
+        WindowStartupLocation="CenterScreen"
+        Topmost="{Binding IsTopmost}"
+        Background="#F5F7FA" FontFamily="Segoe UI">
+
+	<Window.Resources>
+		<converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+	</Window.Resources>
+
+    <Grid Background="{StaticResource BgBodyBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Header -->
+            <RowDefinition Height="*"/>    <!-- Main Content -->
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <Border Grid.Row="0" Background="{StaticResource HeaderBgBrush}" Padding="15" 
+                BorderBrush="{StaticResource BorderColorBrush}" BorderThickness="0,0,0,1">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Opacity="0.03" BlurRadius="10" Direction="270" ShadowDepth="2"/>
+            </Border.Effect>
+            
+            <StackPanel>
+                <!-- Header Top (Brand & Settings) -->
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Brand -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Note: Ensure favicon.ico or logo is added to resources or use a generic icon for now -->
+                        <TextBlock Text="🏫" FontSize="32" Margin="0,0,12,0"/>
+                        <TextBlock Text="Alparslan Ortaokulu" FontSize="19" FontWeight="ExtraBold" 
+                                   Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Action Icons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Style="{StaticResource IconBtnStyle}" ToolTip="Favori Modunu Aç/Kapat" Content="☆"/>
+                        <Button Style="{StaticResource IconBtnStyle}" ToolTip="Ayarlar" Content="⚙️"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Search Box -->
+                <TextBox Style="{StaticResource SearchTextBoxStyle}" x:Name="SearchInputTextBox" 
+                         Tag="Öğrenci Ara (Ad, No)..." Margin="0,0,0,10" Height="40" FontSize="14"/>
+
+                <!-- Filter Box -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <ComboBox Grid.Column="0" x:Name="ClassFilterCombo" Height="40" FontSize="14"
+                              BorderBrush="{StaticResource BorderColorBrush}" Background="{StaticResource BgBodyBrush}"
+                              Foreground="{StaticResource TextPrimaryBrush}" Padding="10,0" VerticalContentAlignment="Center">
+                        <ComboBoxItem Content="Sınıf Seçiniz..." IsSelected="True"/>
+                    </ComboBox>
+                    
+                    <!-- Favorite Tools (Hidden by default) -->
+                    <Button Grid.Column="1" x:Name="ClearFavsBtn" Content="🗑️" FontSize="20" Background="Transparent" BorderThickness="0" 
+                            Foreground="#ef4444" Margin="10,0,0,0" Visibility="Collapsed" ToolTip="Favorileri Temizle" Cursor="Hand"/>
+                </Grid>
+
+                <!-- Class Actions (Hidden by default, show when class selected) -->
+                <UniformGrid x:Name="ClassActionsPanel" Columns="3" Margin="0,10,0,0" Visibility="Collapsed">
+                    <Button Content="Sınıf Listesi" Background="{StaticResource AccentBrush}" Foreground="White" 
+                            BorderThickness="0" Padding="8" Margin="0,0,5,0" Cursor="Hand" FontWeight="SemiBold">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Content="Fotoğraf Listesi" Background="{StaticResource AccentBrush}" Foreground="White" 
+                            BorderThickness="0" Padding="8" Margin="5,0,5,0" Cursor="Hand" FontWeight="SemiBold">
+                         <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Content="Excel Aktar" Background="#27ae60" Foreground="White" 
+                            BorderThickness="0" Padding="8" Margin="5,0,0,0" Cursor="Hand" FontWeight="SemiBold">
+                         <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </UniformGrid>
+            </StackPanel>
+        </Border>
+
+        <!-- MAIN CONTENT -->
+        <ScrollViewer Grid.Row="1" Padding="15" VerticalScrollBarVisibility="Auto">
+            <!-- ItemsControl will replace the existing ContentControl to list students -->
+            <ItemsControl x:Name="StudentItemsControl">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel ItemWidth="300" ItemHeight="120"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!-- Card Design -->
+                        <Border Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderColorBrush}" 
+                                BorderThickness="1" Margin="0,0,15,15" Height="120" Width="300"
+                                Cursor="Hand">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="BorderBrush" Value="#3182ce"/>
+                                            <!-- BoxShadow effect on hover is tough in pure wpf without heavy custom templates.
+                                                 Border color change is standard. -->
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="85"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Left: Student Image -->
+                                <Border Grid.Column="0" Background="#edf2f7" BorderBrush="{StaticResource BorderColorBrush}" BorderThickness="0,0,1,0" ClipToBounds="True">
+                                    <Image Source="{Binding ImagePath}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="imgStudent"/>
+                                </Border>
+
+                                <!-- Right: Details -->
+                                <Grid Grid.Column="1" Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Name -->
+                                    <Border Grid.Row="0" BorderBrush="#eee" BorderThickness="0,0,0,1" Padding="0,0,0,5" Margin="0,0,0,5">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                                    </Border>
+
+                                    <!-- Details Rows -->
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,2">
+                                        <TextBlock Text="No:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Width="60"/>
+                                        <TextBlock Text="{Binding StudentNumber}" FontSize="12"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,2">
+                                        <TextBlock Text="Sınıf:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Width="60"/>
+                                        <TextBlock Text="{Binding ClassName}" FontSize="12"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,2">
+                                        <TextBlock Text="Cinsiyet:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Width="60"/>
+                                        <TextBlock Text="{Binding Gender}" FontSize="12"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Fav Button (Top Right) -->
+                                <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="#cbd5e0" 
+                                        FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5" Cursor="Hand"
+                                        ToolTip="Favorilere Ekle">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}">
+                                                <TextBlock.RenderTransform>
+                                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                                </TextBlock.RenderTransform>
+                                            </TextBlock>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Content" Value="☆"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Foreground" Value="#a0aec0"/>
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                    <Setter Property="Foreground" Value="#f1c40f"/>
+                                                    <Setter Property="Content" Value="★"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <!-- PDF Button (Bottom Right) -->
+                                <Button Grid.Column="1" Background="#e53e3e" Foreground="White" BorderThickness="0" 
+                                        HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="8" Padding="10,3" 
+                                        Content="PDF" FontSize="10" Cursor="Hand" ToolTip="Öğrenci Künyesi PDF">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#c53030"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- OVERLAYS AND MODALS -->
+        
+        <!-- Modal Overlay Background -->
+        <Border x:Name="ModalOverlay" Grid.RowSpan="2" Background="#66000000" Visibility="Collapsed" Panel.ZIndex="100"/>
+        
+        <!-- Settings Modal Sheet -->
+        <Border x:Name="SettingsModal" Grid.RowSpan="2" Background="{StaticResource ModalBgBrush}" VerticalAlignment="Bottom"
+                Padding="20" Visibility="Collapsed" Panel.ZIndex="101" MaxHeight="500">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" Opacity="0.15" Direction="90" ShadowDepth="4"/>
+            </Border.Effect>
+            <StackPanel>
+                <!-- Drag Handle -->
+                <Border Width="40" Height="5" Background="{StaticResource BorderColorBrush}" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                
+                <TextBlock Text="Yönetim Paneli" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                
+                <!-- Stats -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Border Grid.Column="0" Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderColorBrush}" BorderThickness="1" Padding="12">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="0" Foreground="{StaticResource AccentBrush}" FontSize="24" FontWeight="ExtraBold" HorizontalAlignment="Center"/>
+                            <TextBlock Text="ÖĞRENCİ" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <Border Grid.Column="2" Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderColorBrush}" BorderThickness="1" Padding="12">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="0" Foreground="{StaticResource AccentBrush}" FontSize="24" FontWeight="ExtraBold" HorizontalAlignment="Center"/>
+                            <TextBlock Text="SINIF" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Data Imports -->
+                <TextBlock Text="VERİ AKTARIMI" Foreground="#94a3b8" FontSize="12" FontWeight="ExtraBold" Margin="5,0,0,10"/>
+                <StackPanel>
+                    <Button Style="{StaticResource ActionBtnBlue}" Content="Künye PDF Yükle" Margin="0,0,0,10"/>
+                    <Button Style="{StaticResource ActionBtnPurple}" Content="Sınıf Listesi PDF Yükle" Margin="0,0,0,10"/>
+                    <Button Style="{StaticResource ActionBtnOrange}" Content="Fotoğraf Listesi PDF Yükle" Margin="0,0,0,10"/>
+                    <Button Style="{StaticResource ActionBtnGreen}" Content="Veli NO Excel Yükle" Margin="0,0,0,10"/>
+                </StackPanel>
+
+                <!-- Security -->
+                <TextBlock Text="GÜVENLİK VE BAKIM" Foreground="#94a3b8" FontSize="12" FontWeight="ExtraBold" Margin="5,10,0,10"/>
+                <Button Style="{StaticResource ActionBtnRed}" Content="Sistemi Sıfırla" Margin="0,0,0,20"/>
+
+                <!-- Close Button -->
+                <Button Content="Kapat" Background="{StaticResource BgBodyBrush}" Foreground="{StaticResource TextSecondaryBrush}" 
+                        BorderThickness="0" Padding="12" FontSize="14" FontWeight="SemiBold" Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay" Grid.RowSpan="2" Background="#E6FFFFFF" Visibility="Collapsed" Panel.ZIndex="200">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="İşlem Yapılıyor..." FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,20,0,5"/>
+                <TextBlock Text="Lütfen bekleyiniz." FontSize="14" Foreground="#555" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <ProgressBar x:Name="LoadingProgressBar" Width="300" Height="10" Margin="0,10" Foreground="{StaticResource AccentBrush}"/>
+                <TextBlock x:Name="ProgressPercentText" Text="%0" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Confirm Overlay -->
+        <Grid x:Name="ConfirmOverlay" Grid.RowSpan="2" Background="#99000000" Visibility="Collapsed" Panel.ZIndex="300">
+            <Border Background="White" Width="280" Padding="25" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="35" Opacity="0.3" Direction="270" ShadowDepth="15"/>
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="⚠️" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                    <TextBlock Text="Emin misiniz?" FontSize="19" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                    <TextBlock Text="Tüm öğrenci verileri ve dosyalar kalıcı olarak silinecek. Bu işlem geri alınamaz!" 
+                               FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,20"/>
+                    
+                    <UniformGrid Columns="2" Rows="1">
+                        <Button Content="Vazgeç" Background="#f1f5f9" Foreground="#475569" BorderThickness="0" Padding="12" Margin="0,0,6,0" FontWeight="SemiBold" Cursor="Hand"/>
+                        <Button Content="Evet, Sil" Background="#ef4444" Foreground="White" BorderThickness="0" Padding="12" Margin="6,0,0,0" FontWeight="SemiBold" Cursor="Hand"/>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Toast Container -->
+        <StackPanel x:Name="ToastContainer" Grid.RowSpan="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="20" Panel.ZIndex="1000">
+            <!-- Toasts will be added here programmatically during runtime -->
+        </StackPanel>
+
+    </Grid>
+</Window>

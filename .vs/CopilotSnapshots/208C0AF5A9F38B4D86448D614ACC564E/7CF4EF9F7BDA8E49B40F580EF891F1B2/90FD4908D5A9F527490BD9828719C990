@@ -1,0 +1,21 @@
+﻿using System.Windows;
+using AlparslanOBS.DataAccess;
+using Wpf.Ui.Appearance;
+
+namespace AlparslanOBS
+{
+    public partial class App : Application
+    {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            ApplicationThemeManager.Apply(ApplicationTheme.Light);
+
+            DatabaseConnection.EnsureDatabase();
+
+            var loginWindow = new Views.LoginWindow();
+            loginWindow.Show();
+        }
+    }
+}

@@ -1,0 +1,221 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
+using AlparslanOBS.Models;
+using AlparslanOBS.DataAccess;
+
+namespace AlparslanOBS.Services
+{
+    /// <summary>
+    /// PDF extraction implementation using UglyToad.PdfPig.
+    /// Extracts selectable text and embedded images per page. Designed to be memory-conscious
+    /// and to save extracted images into the Photos folder managed by DatabaseConnection.
+    /// </summary>
+    public class PdfExtractionService
+    {
+        /// <summary>
+        /// Extracts students from a Künye PDF. Assumes one student per page and fixed-ish layout.
+        /// This method attempts to extract the largest image on each page as the student photo.
+        /// Parsing rules are best-effort and may need adjustment to match the exact PDF layout.
+        /// </summary>
+        public IEnumerable<Student> ExtractStudentsFromKunyePdf(string pdfPath)
+        {
+            if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
+                yield break;
+
+            var photosFolder = DatabaseConnection.GetPhotosFolder();
+            Directory.CreateDirectory(photosFolder);
+
+            using var document = PdfDocument.Open(pdfPath);
+
+            foreach (var page in document.GetPages())
+            {
+                var text = page.Text?.Trim() ?? string.Empty;
+                var student = new Student();
+
+                // Attempt to find StudentNumber using common patterns
+                var sn = FindStudentNumber(text);
+                student.StudentNumber = sn ?? string.Empty;
+
+                // Attempt to find name: look for line with two words (First Last)
+                var name = FindName(text);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    student.FirstName = parts.Length > 0 ? parts[0] : string.Empty;
+                    student.LastName = parts.Length > 1 ? string.Join(' ', parts.Skip(1)) : string.Empty;
+                }
+
+                // Attempt to find TC No (11 digits) and birth date (date-like)
+                student.TcNo = FindTcNo(text) ?? string.Empty;
+                student.BirthDate = FindBirthDate(text);
+
+                // Class and ClassNo detection (best effort)
+                student.Class = FindClass(text) ?? string.Empty;
+                student.ClassNo = FindClassNo(text) ?? 0;
+
+                // Extract largest image on page (if any)
+                try
+                {
+                    var images = page.GetImages().ToList();
+                    if (images.Count > 0)
+                    {
+                        var largest = images.OrderByDescending(i => i.RawBytes?.Count ?? 0).First();
+                        if (largest != null && largest.RawBytes != null && largest.RawBytes.Count > 0)
+                        {
+                            var ext = ".jpg"; // PdfPig gives raw image data; assume jpeg or png may be ok. Try jpeg.
+                            var fileName = Slugify($"{student.FirstName}_{student.LastName}_{student.StudentNumber}") + ext;
+                            var dest = Path.Combine(photosFolder, fileName);
+                            File.WriteAllBytes(dest, largest.RawBytes.ToArray());
+                            student.PhotoPath = dest;
+                        }
+                    }
+                }
+                catch
+                {
+                    // Image extraction best-effort; failure should not break whole extraction
+                }
+
+                yield return student;
+            }
+        }
+
+        /// <summary>
+        /// Extracts class list (StudentNumber -> Class) from a class list PDF.
+        /// Parsing is best-effort and depends on the PDF text layout.
+        /// </summary>
+        public IEnumerable<(string StudentNumber, string Class)> ExtractClassList(string pdfPath)
+        {
+            if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
+                yield break;
+
+            using var document = PdfDocument.Open(pdfPath);
+            foreach (var page in document.GetPages())
+            {
+                var lines = (page.Text ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var line in lines)
+                {
+                    var sn = FindStudentNumber(line);
+                    var cls = FindClass(line);
+                    if (!string.IsNullOrEmpty(sn) && !string.IsNullOrEmpty(cls))
+                    {
+                        yield return (sn, cls);
+                    }
+                }
+            }
+        }
+
+        private static string? FindStudentNumber(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+            // Try common labels first (StudentNumber, No, Numara)
+            var patterns = new[] { "StudentNumber", "Student No", "No", "Numara", "Öğrenci No", "ÖğrenciNo" };
+            foreach (var p in patterns)
+            {
+                var idx = text.IndexOf(p, StringComparison.OrdinalIgnoreCase);
+                if (idx >= 0)
+                {
+                    // take following digits/word
+                    var rest = text.Substring(idx + p.Length);
+                    var m = Regex.Match(rest, "\\d{3,}");
+                    if (m.Success) return m.Value.Trim();
+                }
+            }
+
+            // Fallback: first long digit sequence
+            var m2 = Regex.Match(text, "\\b\\d{3,}\\b");
+            if (m2.Success) return m2.Value;
+            return null;
+        }
+
+        private static string? FindName(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+            var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                var clean = line.Trim();
+                if (clean.Length < 3) continue;
+                // heuristics: contain letters and at least one space and not contain 'TC' or 'No' etc.
+                if (Regex.IsMatch(clean, "[A-Za-zİıŞşÇçĞğÜüÖö]+") && clean.Contains(' ') && !Regex.IsMatch(clean, "TC|No|Numara|Öğrenci", RegexOptions.IgnoreCase))
+                {
+                    return clean;
+                }
+            }
+
+            return null;
+        }
+
+        private static string? FindTcNo(string text)
+        {
+            var m = Regex.Match(text, "\\b\\d{11}\\b");
+            return m.Success ? m.Value : null;
+        }
+
+        private static DateTime? FindBirthDate(string text)
+        {
+            // Look for date patterns dd.mm.yyyy or yyyy-mm-dd
+            var m = Regex.Match(text, "(\\d{1,2}[./-]\\d{1,2}[./-]\\d{2,4})");
+            if (m.Success)
+            {
+                if (DateTime.TryParse(m.Value, out var dt)) return dt;
+            }
+
+            m = Regex.Match(text, "(\\d{4}-\\d{2}-\\d{2})");
+            if (m.Success)
+            {
+                if (DateTime.TryParse(m.Value, out var dt)) return dt;
+            }
+
+            return null;
+        }
+
+        private static string? FindClass(string text)
+        {
+            // Look for patterns like 'Class: 10A' or lines with pattern like '10A'
+            var m = Regex.Match(text, "Class[:\\s]*([A-Za-z0-9]+)", RegexOptions.IgnoreCase);
+            if (m.Success) return m.Groups[1].Value.Trim();
+
+            // Turkish 'Sınıf' label
+            m = Regex.Match(text, "Sınıf[:\\s]*([A-Za-z0-9]+)", RegexOptions.IgnoreCase);
+            if (m.Success) return m.Groups[1].Value.Trim();
+
+            // fallback: any token like 10A or 11B
+            m = Regex.Match(text, "\\b\\d{1,2}[A-Za-z]?\\b");
+            if (m.Success) return m.Value;
+
+            return null;
+        }
+
+        private static int? FindClassNo(string text)
+        {
+            var m = Regex.Match(text, "\\b(\\d{1,3})\\b");
+            if (m.Success && int.TryParse(m.Value, out var n)) return n;
+            return null;
+        }
+
+        private static string Slugify(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            var map = new Dictionary<char, char>
+            {
+                ['ç'] = 'c', ['Ç'] = 'C', ['ş'] = 's', ['Ş'] = 'S', ['ğ'] = 'g', ['Ğ'] = 'G',
+                ['ü'] = 'u', ['Ü'] = 'U', ['ö'] = 'o', ['Ö'] = 'O', ['ı'] = 'i', ['İ'] = 'I'
+            };
+            var sb = new System.Text.StringBuilder();
+            foreach (var ch in input)
+            {
+                if (map.TryGetValue(ch, out var r)) sb.Append(r);
+                else sb.Append(ch);
+            }
+            var s = sb.ToString();
+            foreach (var c in Path.GetInvalidFileNameChars()) s = s.Replace(c, '_');
+            s = Regex.Replace(s, "\\s+", "_").ToLowerInvariant();
+            return s;
+        }
+    }
+}

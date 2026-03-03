@@ -1,0 +1,208 @@
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+
+namespace AlparslanOBS.Views.Components
+{
+    /// <summary>
+    /// Yönetim Paneli Butonu Component - Sağ alt köşe dişli butonu.
+    /// İSTEM METNİ GEREĞİ:
+    /// - Blurlu görünüm (çok göz almayacak)
+    /// - Hover: Blur kalkacak + bump efekti
+    /// - Menu: Ayarlar (Künye, Sıfırla) + Takım Yönetimi
+    /// </summary>
+    public partial class ManagementButtonComponent : UserControl
+    {
+        private bool _isMenuOpen = false;
+
+        public ManagementButtonComponent()
+        {
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// Dişli butonuna basıldığında menu aç/kapat.
+        /// </summary>
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMenu();
+        }
+
+        /// <summary>
+        /// Mouse hover - Blur kalkacak + bump efekti.
+        /// İSTEM METNİ GEREĞİ: Hover'da blur kalkacak, hafif bump olacak.
+        /// </summary>
+        private void SettingsButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            // Blur'u kaldır
+            SettingsButton.Effect = null;
+
+            // Bump animasyonu oynat
+            var storyboard = (Storyboard)Resources["BumpInStoryboard"];
+            storyboard.Begin();
+        }
+
+        /// <summary>
+        /// Mouse leave - Blur geri gelecek + normal boyut.
+        /// </summary>
+        private void SettingsButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            // Menu açık değilse blur'u geri getir
+            if (!_isMenuOpen)
+            {
+                SettingsButton.Effect = (BlurEffect)Resources["BlurEffect"];
+            }
+
+            // Normal boyuta dön
+            var storyboard = (Storyboard)Resources["BumpOutStoryboard"];
+            storyboard.Begin();
+        }
+
+        /// <summary>
+        /// Menu'yu aç/kapat.
+        /// </summary>
+        private void ToggleMenu()
+        {
+            _isMenuOpen = !_isMenuOpen;
+
+            if (_isMenuOpen)
+            {
+                MenuPopup.Visibility = Visibility.Visible;
+                SettingsButton.Effect = null; // Menu açıkken blur yok
+                
+                // Fade in animasyonu
+                var fadeIn = new DoubleAnimation
+                {
+                    From = 0,
+                    To = 1,
+                    Duration = new Duration(System.TimeSpan.FromMilliseconds(200))
+                };
+                MenuPopup.BeginAnimation(OpacityProperty, fadeIn);
+            }
+            else
+            {
+                // Fade out animasyonu
+                var fadeOut = new DoubleAnimation
+                {
+                    From = 1,
+                    To = 0,
+                    Duration = new Duration(System.TimeSpan.FromMilliseconds(200))
+                };
+                
+                fadeOut.Completed += (s, e) =>
+                {
+                    MenuPopup.Visibility = Visibility.Collapsed;
+                    SettingsButton.Effect = (BlurEffect)Resources["BlurEffect"]; // Blur geri gelsin
+                };
+                
+                MenuPopup.BeginAnimation(OpacityProperty, fadeOut);
+            }
+        }
+
+        /// <summary>
+        /// Künye PDF Yükle.
+        /// </summary>
+        private void LoadKunyePdf_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMenu(); // Menu'yu kapat
+            
+            // TODO: PDF yükleme dialogu
+            MessageBox.Show("Künye PDF yükleme özelliği yakında eklenecek!",
+                "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
+        /// Sistemi Sıfırla.
+        /// İSTEM METNİ GEREĞİ: Çift onay ister, tüm DB silinir, PIN korunur.
+        /// </summary>
+        private void ResetSystem_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMenu(); // Menu'yu kapat
+
+            // İlk onay
+            var result1 = MessageBox.Show(
+                "Sistemi sıfırlamak istediğinizden emin misiniz?\n\n" +
+                "Bu işlem:\n" +
+                "• Tüm öğrenci verilerini\n" +
+                "• Tüm takımları\n" +
+                "• Tüm favorileri\n" +
+                "• Tüm fotoğrafları\n\n" +
+                "KALICI OLARAK SİLECEKTİR!\n\n" +
+                "(PIN ayarı korunacaktır)",
+                "⚠️ Sistemi Sıfırla - 1. Onay",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            );
+
+            if (result1 != MessageBoxResult.Yes)
+                return;
+
+            // İkinci onay (Çift onay)
+            var result2 = MessageBox.Show(
+                "SON UYARI!\n\n" +
+                "Bu işlem GERİ ALINAMAZ!\n\n" +
+                "Devam etmek istediğinizden EMİN MİSİNİZ?",
+                "⚠️ Sistemi Sıfırla - 2. Onay",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Stop
+            );
+
+            if (result2 == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    // Sistemi sıfırla
+                    DataAccess.DatabaseConnection.ResetDatabase();
+
+                    MessageBox.Show(
+                        "Sistem başarıyla sıfırlandı!\n\n" +
+                        "Uygulama yeniden başlatılacak.",
+                        "✅ Başarılı",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+
+                    // Uygulamayı yeniden başlat
+                    System.Diagnostics.Process.Start(
+                        System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName!
+                    );
+                    Application.Current.Shutdown();
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Sistem sıfırlama hatası:\n\n{ex.Message}",
+                        "❌ Hata",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Takım Oluştur.
+        /// </summary>
+        private void CreateTeam_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMenu(); // Menu'yu kapat
+            
+            // TODO: Takım oluşturma penceresi
+            MessageBox.Show("Takım oluşturma özelliği yakında eklenecek!",
+                "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
+        /// Takımları Yönet (Takım panelini aç).
+        /// </summary>
+        private void ManageTeams_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleMenu(); // Menu'yu kapat
+            
+            // TODO: Takım yönetimi panelini aç
+            MessageBox.Show("Takım yönetimi paneli yakında eklenecek!",
+                "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
+}

@@ -1,0 +1,1102 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\services\\pdfexportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\services\\pdfexportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\mainwindow.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\mainwindow.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-8c74154e-8fce-4c0d-902f-fa5d89a8956d.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\dataaccess\\studentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\dataaccess\\studentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\editteamwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\editteamwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\services\\pdfextractionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\services\\pdfextractionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\services\\mergeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\services\\mergeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\viewmodels\\studentviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\viewmodels\\studentviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\viewmodels\\teammanagementviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\viewmodels\\teammanagementviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\searchfiltercomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\searchfiltercomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\dataaccess\\databaseconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\dataaccess\\databaseconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3132d7ac-2bba-4b4e-9f4c-1ad4528e8d37.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b3f28d-0202-4314-964c-3c1cfe041071.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\confirmdialogoverlay.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\confirmdialogoverlay.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-2889229d-d717-449a-86e8-8cefd1ae86b8.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\alparslanobs.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\alparslanobs.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\floatingactionpanel.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\floatingactionpanel.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-358d5cad-e53b-4108-9615-d1bf046b5a3b.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a1ad8246-0741-4f3e-a77c-c73ad375f804.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\teammanagementwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\teammanagementwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\teamdetailwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\teamdetailwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\loginwindow.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\loginwindow.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\dotnet\\sdk\\10.0.103\\Sdks\\Microsoft.NET.Sdk.WindowsDesktop\\targets\\Microsoft.WinFX.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\editteamwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\editteamwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\createteamwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\createteamwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-9a5b9c0b-3956-4a14-98ee-f1e7ead9a029.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\services\\excelexportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\services\\excelexportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\services\\resetsystemservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\services\\resetsystemservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A20861A9-411E-6150-BF5C-69E8196E5D22}|BenchmarkSuite1\\BenchmarkSuite1.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\benchmarksuite1\\pdfextractionbenchmark.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A20861A9-411E-6150-BF5C-69E8196E5D22}|BenchmarkSuite1\\BenchmarkSuite1.csproj|solutionrelative:benchmarksuite1\\pdfextractionbenchmark.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3b420da9-0203-4de9-9ab4-7f5e09014a05.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b09d20-e56d-485c-8897-6ae8d3be406c.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\teamcardcomponent.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\teamcardcomponent.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-4b7beb26-5a96-4cb0-8f70-3c1fd15060c5.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\managementbuttoncomponent.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\managementbuttoncomponent.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\studentcardcomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\studentcardcomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\models\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\models\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-41e8f42c-d23d-4a3e-9a66-a8edd227622d.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a9a1c4c8-99a7-4833-aa22-04016b9a2da9.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-5150a765-253a-44b1-bd0e-f56a30887c03.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-e97a94d1-8ae4-4db2-9255-528ca3aae505.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\loadingoverlay.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\loadingoverlay.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\emptystatecomponent.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\emptystatecomponent.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\managementbuttoncomponent.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\managementbuttoncomponent.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\managementbuttoncomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\managementbuttoncomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\emptystatecomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\emptystatecomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\floatingactionpanel.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\floatingactionpanel.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\loadingoverlay.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\loadingoverlay.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\viewmodels\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\viewmodels\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\studentcardcomponent.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\studentcardcomponent.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\dataaccess\\favoriterepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\dataaccess\\favoriterepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\dataaccess\\teamrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\dataaccess\\teamrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\viewmodels\\teamcardviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\viewmodels\\teamcardviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\teamcardcomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\teamcardcomponent.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\createteamwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\createteamwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\teammanagementwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\teammanagementwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\viewmodels\\teamdetailviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\viewmodels\\teamdetailviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\teamdetailwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\teamdetailwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\App.xaml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:App.xaml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\services\\toastservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\services\\toastservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\services\\updateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\services\\updateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|c:\\users\\mertm\\source\\repos\\alparslanobs\\alparslanobs\\views\\components\\confirmdialogoverlay.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D894452-3902-D1B9-E8DA-B22FB008CA46}|AlparslanOBS\\AlparslanOBS.csproj|solutionrelative:alparslanobs\\views\\components\\confirmdialogoverlay.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "MergeService.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\MergeService.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Services\\MergeService.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\MergeService.cs",
+              "RelativeToolTip": "AlparslanOBS\\Services\\MergeService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-28T13:06:05.351Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PdfExportService.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\PdfExportService.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Services\\PdfExportService.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\PdfExportService.cs",
+              "RelativeToolTip": "AlparslanOBS\\Services\\PdfExportService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T21:01:09.275Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\MainViewModel.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\ViewModels\\MainViewModel.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\MainViewModel.cs",
+              "RelativeToolTip": "AlparslanOBS\\ViewModels\\MainViewModel.cs",
+              "ViewState": "AgIAAHoAAAAAAAAAAAAzwIsAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T21:16:50.976Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "PdfExtractionService.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\PdfExtractionService.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Services\\PdfExtractionService.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\PdfExtractionService.cs",
+              "RelativeToolTip": "AlparslanOBS\\Services\\PdfExtractionService.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-28T23:05:28.439Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "StudentRepository.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\DataAccess\\StudentRepository.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\DataAccess\\StudentRepository.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\DataAccess\\StudentRepository.cs",
+              "RelativeToolTip": "AlparslanOBS\\DataAccess\\StudentRepository.cs",
+              "ViewState": "AgIAAO4AAAAAAAAAAIBZwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T21:15:37.568Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\MainWindow.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\MainWindow.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-27T19:39:09.679Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "plan-8c74154e-8fce-4c0d-902f-fa5d89a8956d.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-8c74154e-8fce-4c0d-902f-fa5d89a8956d.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-8c74154e-8fce-4c0d-902f-fa5d89a8956d.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-8c74154e-8fce-4c0d-902f-fa5d89a8956d.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-8c74154e-8fce-4c0d-902f-fa5d89a8956d.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-02T23:01:42.043Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "EditTeamWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\EditTeamWindow.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\EditTeamWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\EditTeamWindow.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\EditTeamWindow.xaml.cs",
+              "ViewState": "AgIAAGoAAAAAAAAAAAD4v1AAAABVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T16:13:42.957Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "StudentViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\StudentViewModel.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\ViewModels\\StudentViewModel.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\StudentViewModel.cs",
+              "RelativeToolTip": "AlparslanOBS\\ViewModels\\StudentViewModel.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAvwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-28T13:05:43.222Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "TeamManagementViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\TeamManagementViewModel.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\ViewModels\\TeamManagementViewModel.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\TeamManagementViewModel.cs",
+              "RelativeToolTip": "AlparslanOBS\\ViewModels\\TeamManagementViewModel.cs",
+              "ViewState": "AgIAAHEAAAAAAAAAAAAuwKcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T15:54:38.48Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\MainWindow.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\MainWindow.xaml.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAYwAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-28T17:49:58.631Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "SearchFilterComponent.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\SearchFilterComponent.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\SearchFilterComponent.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\SearchFilterComponent.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\SearchFilterComponent.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T21:08:20.145Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "DatabaseConnection.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\DataAccess\\DatabaseConnection.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\DataAccess\\DatabaseConnection.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\DataAccess\\DatabaseConnection.cs",
+              "RelativeToolTip": "AlparslanOBS\\DataAccess\\DatabaseConnection.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-28T13:04:11.236Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "plan-3132d7ac-2bba-4b4e-9f4c-1ad4528e8d37.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3132d7ac-2bba-4b4e-9f4c-1ad4528e8d37.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3132d7ac-2bba-4b4e-9f4c-1ad4528e8d37.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3132d7ac-2bba-4b4e-9f4c-1ad4528e8d37.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3132d7ac-2bba-4b4e-9f4c-1ad4528e8d37.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-02T21:15:59.84Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 64,
+              "Title": "UpdateService.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\UpdateService.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Services\\UpdateService.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\UpdateService.cs",
+              "RelativeToolTip": "AlparslanOBS\\Services\\UpdateService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-02T21:18:44.595Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "plan-2889229d-d717-449a-86e8-8cefd1ae86b8.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-2889229d-d717-449a-86e8-8cefd1ae86b8.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-2889229d-d717-449a-86e8-8cefd1ae86b8.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-2889229d-d717-449a-86e8-8cefd1ae86b8.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-2889229d-d717-449a-86e8-8cefd1ae86b8.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-02T22:12:53.41Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "plan-20b3f28d-0202-4314-964c-3c1cfe041071.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b3f28d-0202-4314-964c-3c1cfe041071.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b3f28d-0202-4314-964c-3c1cfe041071.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b3f28d-0202-4314-964c-3c1cfe041071.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b3f28d-0202-4314-964c-3c1cfe041071.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-02T22:19:53.287Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "ConfirmDialogOverlay.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ConfirmDialogOverlay.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\ConfirmDialogOverlay.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ConfirmDialogOverlay.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\ConfirmDialogOverlay.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-02T22:20:53.61Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 65,
+              "Title": "ConfirmDialogOverlay.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ConfirmDialogOverlay.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\ConfirmDialogOverlay.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ConfirmDialogOverlay.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\ConfirmDialogOverlay.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-02T22:21:17.312Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 63,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Program.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Program.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Program.cs",
+              "RelativeToolTip": "AlparslanOBS\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-02T21:17:00.093Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "plan-a1ad8246-0741-4f3e-a77c-c73ad375f804.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a1ad8246-0741-4f3e-a77c-c73ad375f804.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a1ad8246-0741-4f3e-a77c-c73ad375f804.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a1ad8246-0741-4f3e-a77c-c73ad375f804.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a1ad8246-0741-4f3e-a77c-c73ad375f804.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-01T22:00:55.646Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "AlparslanOBS.csproj",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\AlparslanOBS.csproj",
+              "RelativeDocumentMoniker": "AlparslanOBS\\AlparslanOBS.csproj",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\AlparslanOBS.csproj",
+              "RelativeToolTip": "AlparslanOBS\\AlparslanOBS.csproj",
+              "ViewState": "AgIAAAQAAAAAAAAAAABBwA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-03-01T20:58:40.562Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "plan-358d5cad-e53b-4108-9615-d1bf046b5a3b.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-358d5cad-e53b-4108-9615-d1bf046b5a3b.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-358d5cad-e53b-4108-9615-d1bf046b5a3b.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-358d5cad-e53b-4108-9615-d1bf046b5a3b.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-358d5cad-e53b-4108-9615-d1bf046b5a3b.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-01T22:14:54.188Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "Microsoft.WinFX.targets",
+              "DocumentMoniker": "C:\\Program Files\\dotnet\\sdk\\10.0.103\\Sdks\\Microsoft.NET.Sdk.WindowsDesktop\\targets\\Microsoft.WinFX.targets",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Program Files\\dotnet\\sdk\\10.0.103\\Sdks\\Microsoft.NET.Sdk.WindowsDesktop\\targets\\Microsoft.WinFX.targets",
+              "ToolTip": "C:\\Program Files\\dotnet\\sdk\\10.0.103\\Sdks\\Microsoft.NET.Sdk.WindowsDesktop\\targets\\Microsoft.WinFX.targets",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\Program Files\\dotnet\\sdk\\10.0.103\\Sdks\\Microsoft.NET.Sdk.WindowsDesktop\\targets\\Microsoft.WinFX.targets",
+              "ViewState": "AgIAALECAAAAAAAAAAAnwMICAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2026-03-01T21:23:43.722Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 62,
+              "Title": "ToastService.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\ToastService.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Services\\ToastService.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\ToastService.cs",
+              "RelativeToolTip": "AlparslanOBS\\Services\\ToastService.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAEBVwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T22:15:31.713Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "LoginWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\LoginWindow.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\LoginWindow.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\LoginWindow.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\LoginWindow.xaml",
+              "ViewState": "AgIAAFsAAAAAAAAAAABRwEcAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-27T19:00:45.761Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "ResetSystemService.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\ResetSystemService.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Services\\ResetSystemService.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\ResetSystemService.cs",
+              "RelativeToolTip": "AlparslanOBS\\Services\\ResetSystemService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAL4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T00:50:04.069Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "plan-9a5b9c0b-3956-4a14-98ee-f1e7ead9a029.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-9a5b9c0b-3956-4a14-98ee-f1e7ead9a029.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-9a5b9c0b-3956-4a14-98ee-f1e7ead9a029.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-9a5b9c0b-3956-4a14-98ee-f1e7ead9a029.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-9a5b9c0b-3956-4a14-98ee-f1e7ead9a029.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-01T21:15:35.381Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 61,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\App.xaml",
+              "RelativeDocumentMoniker": "App.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\App.xaml",
+              "RelativeToolTip": "App.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-01T21:20:19.668Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "plan-fd9eee69-5900-4753-b317-6936bc43aee9.md",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-01T20:48:47.954Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "PdfExtractionBenchmark.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\BenchmarkSuite1\\PdfExtractionBenchmark.cs",
+              "RelativeDocumentMoniker": "BenchmarkSuite1\\PdfExtractionBenchmark.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\BenchmarkSuite1\\PdfExtractionBenchmark.cs",
+              "RelativeToolTip": "BenchmarkSuite1\\PdfExtractionBenchmark.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T17:28:56.974Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "ExcelExportService.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\ExcelExportService.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Services\\ExcelExportService.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Services\\ExcelExportService.cs",
+              "RelativeToolTip": "AlparslanOBS\\Services\\ExcelExportService.cs",
+              "ViewState": "AgIAADQAAAAAAAAAAIBZwGMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T17:02:46.191Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 59,
+              "Title": "TeamDetailViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\TeamDetailViewModel.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\ViewModels\\TeamDetailViewModel.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\TeamDetailViewModel.cs",
+              "RelativeToolTip": "AlparslanOBS\\ViewModels\\TeamDetailViewModel.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAEBVwLgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T16:32:24.724Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "TeamDetailWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\TeamDetailWindow.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\TeamDetailWindow.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\TeamDetailWindow.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\TeamDetailWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-01T16:32:57.134Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "plan-3b420da9-0203-4de9-9ab4-7f5e09014a05.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3b420da9-0203-4de9-9ab4-7f5e09014a05.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3b420da9-0203-4de9-9ab4-7f5e09014a05.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3b420da9-0203-4de9-9ab4-7f5e09014a05.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-3b420da9-0203-4de9-9ab4-7f5e09014a05.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-01T17:26:17.234Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 54,
+              "Title": "TeamRepository.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\DataAccess\\TeamRepository.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\DataAccess\\TeamRepository.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\DataAccess\\TeamRepository.cs",
+              "RelativeToolTip": "AlparslanOBS\\DataAccess\\TeamRepository.cs",
+              "ViewState": "AgIAANUAAAAAAAAAACBjwN8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T15:54:04.849Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "plan-20b09d20-e56d-485c-8897-6ae8d3be406c.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b09d20-e56d-485c-8897-6ae8d3be406c.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b09d20-e56d-485c-8897-6ae8d3be406c.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b09d20-e56d-485c-8897-6ae8d3be406c.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-20b09d20-e56d-485c-8897-6ae8d3be406c.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-01T15:53:46.915Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 60,
+              "Title": "TeamDetailWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\TeamDetailWindow.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\TeamDetailWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\TeamDetailWindow.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\TeamDetailWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T16:33:23.901Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "EditTeamWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\EditTeamWindow.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\EditTeamWindow.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\EditTeamWindow.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\EditTeamWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-01T16:13:11.122Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "TeamCardViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\TeamCardViewModel.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\ViewModels\\TeamCardViewModel.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\TeamCardViewModel.cs",
+              "RelativeToolTip": "AlparslanOBS\\ViewModels\\TeamCardViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAxwCcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T15:54:21.119Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "TeamCardComponent.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\TeamCardComponent.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\TeamCardComponent.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\TeamCardComponent.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\TeamCardComponent.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-01T15:55:02.69Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 58,
+              "Title": "TeamManagementWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\TeamManagementWindow.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\TeamManagementWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\TeamManagementWindow.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\TeamManagementWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T15:56:48.37Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "TeamManagementWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\TeamManagementWindow.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\TeamManagementWindow.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\TeamManagementWindow.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\TeamManagementWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-01T15:56:37.381Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 57,
+              "Title": "CreateTeamWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\CreateTeamWindow.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\CreateTeamWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\CreateTeamWindow.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\CreateTeamWindow.xaml.cs",
+              "ViewState": "AgIAAEEAAAAAAAAAAAAuwEcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T15:55:51.75Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "CreateTeamWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\CreateTeamWindow.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\CreateTeamWindow.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\CreateTeamWindow.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\CreateTeamWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-03-01T15:55:39.205Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "TeamCardComponent.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\TeamCardComponent.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\TeamCardComponent.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\TeamCardComponent.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\TeamCardComponent.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T15:55:15.239Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "plan-4b7beb26-5a96-4cb0-8f70-3c1fd15060c5.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-4b7beb26-5a96-4cb0-8f70-3c1fd15060c5.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-4b7beb26-5a96-4cb0-8f70-3c1fd15060c5.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-4b7beb26-5a96-4cb0-8f70-3c1fd15060c5.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-4b7beb26-5a96-4cb0-8f70-3c1fd15060c5.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-01T01:05:03.655Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "plan-fd9eee69-5900-4753-b317-6936bc43aee9.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-fd9eee69-5900-4753-b317-6936bc43aee9.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-01T00:08:35.186Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "FavoriteRepository.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\DataAccess\\FavoriteRepository.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\DataAccess\\FavoriteRepository.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\DataAccess\\FavoriteRepository.cs",
+              "RelativeToolTip": "AlparslanOBS\\DataAccess\\FavoriteRepository.cs",
+              "ViewState": "AgIAAD0AAAAAAAAAACBjwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-01T01:05:17.753Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "Student.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Models\\Student.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Models\\Student.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Models\\Student.cs",
+              "RelativeToolTip": "AlparslanOBS\\Models\\Student.cs",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAuwF8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T20:55:54.178Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "StudentCardComponent.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\StudentCardComponent.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\StudentCardComponent.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\StudentCardComponent.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\StudentCardComponent.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T21:09:01.175Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "StudentCardComponent.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\StudentCardComponent.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\StudentCardComponent.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\StudentCardComponent.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\StudentCardComponent.xaml",
+              "ViewState": "AgIAAHAAAAAAAAAAAIBZwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-28T22:36:51.847Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "plan-a9a1c4c8-99a7-4833-aa22-04016b9a2da9.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a9a1c4c8-99a7-4833-aa22-04016b9a2da9.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a9a1c4c8-99a7-4833-aa22-04016b9a2da9.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a9a1c4c8-99a7-4833-aa22-04016b9a2da9.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-a9a1c4c8-99a7-4833-aa22-04016b9a2da9.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-02-28T13:03:53.34Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "LoginViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\LoginViewModel.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\ViewModels\\LoginViewModel.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\ViewModels\\LoginViewModel.cs",
+              "RelativeToolTip": "AlparslanOBS\\ViewModels\\LoginViewModel.cs",
+              "ViewState": "AgIAAKEAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-28T17:49:43.797Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "plan-41e8f42c-d23d-4a3e-9a66-a8edd227622d.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-41e8f42c-d23d-4a3e-9a66-a8edd227622d.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-41e8f42c-d23d-4a3e-9a66-a8edd227622d.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-41e8f42c-d23d-4a3e-9a66-a8edd227622d.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-41e8f42c-d23d-4a3e-9a66-a8edd227622d.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-02-28T17:08:00.483Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "FloatingActionPanel.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\FloatingActionPanel.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\FloatingActionPanel.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\FloatingActionPanel.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\FloatingActionPanel.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-27T21:09:59.529Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "plan-5150a765-253a-44b1-bd0e-f56a30887c03.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-5150a765-253a-44b1-bd0e-f56a30887c03.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-5150a765-253a-44b1-bd0e-f56a30887c03.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-5150a765-253a-44b1-bd0e-f56a30887c03.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-5150a765-253a-44b1-bd0e-f56a30887c03.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-02-27T23:06:29.91Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "plan-e97a94d1-8ae4-4db2-9255-528ca3aae505.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-e97a94d1-8ae4-4db2-9255-528ca3aae505.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-e97a94d1-8ae4-4db2-9255-528ca3aae505.md",
+              "ToolTip": "C:\\Users\\mertm\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-e97a94d1-8ae4-4db2-9255-528ca3aae505.md [Preview]",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\VisualStudio\\copilot-vs\\plan-e97a94d1-8ae4-4db2-9255-528ca3aae505.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-02-27T21:07:42.95Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "LoadingOverlay.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\LoadingOverlay.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\LoadingOverlay.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\LoadingOverlay.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\LoadingOverlay.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T21:10:31.115Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "LoadingOverlay.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\LoadingOverlay.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\LoadingOverlay.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\LoadingOverlay.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\LoadingOverlay.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-27T21:10:23.273Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "FloatingActionPanel.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\FloatingActionPanel.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\FloatingActionPanel.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\FloatingActionPanel.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\FloatingActionPanel.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T21:10:08.667Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "EmptyStateComponent.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\EmptyStateComponent.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\EmptyStateComponent.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\EmptyStateComponent.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\EmptyStateComponent.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T21:09:33.755Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "EmptyStateComponent.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\EmptyStateComponent.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\EmptyStateComponent.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\EmptyStateComponent.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\EmptyStateComponent.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-27T21:09:19.025Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "ManagementButtonComponent.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml.cs",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml.cs",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml.cs",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml.cs",
+              "ViewState": "AgIAAOAAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T21:05:24.206Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "ManagementButtonComponent.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-27T20:52:57.456Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "ManagementButtonComponent.xaml",
+              "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml",
+              "RelativeDocumentMoniker": "AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml",
+              "ToolTip": "C:\\Users\\mertm\\source\\repos\\AlparslanOBS\\AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml",
+              "RelativeToolTip": "AlparslanOBS\\Views\\Components\\ManagementButtonComponent.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-27T20:52:56.114Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

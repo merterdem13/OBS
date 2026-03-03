@@ -1,0 +1,53 @@
+﻿using System;
+using System.IO;
+using Microsoft.Data.Sqlite;
+
+namespace AlparslanOBS.DataAccess
+{
+    /// <summary>
+    /// Responsible for creating/opening the SQLite database file and ensuring required PRAGMA settings.
+    /// Database file is placed under AppData\Local\OBS_System to avoid admin permission issues.
+    /// Uses Microsoft.Data.Sqlite which is compatible with .NET 10.
+    /// </summary>
+    public static class DatabaseConnection
+    {
+        private static readonly string _appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OBS_System");
+        private static readonly string _dbPath = Path.Combine(_appFolder, "alparslanobs.db");
+        private static readonly string _connectionString = $"Data Source={_dbPath}";
+
+        /// <summary>
+        /// Ensure database file and folders exist.
+        /// Opening a connection will create the file if it does not exist.
+        /// </summary>
+        public static void EnsureDatabase()
+        {
+            if (!Directory.Exists(_appFolder))
+                Directory.CreateDirectory(_appFolder);
+
+            if (!File.Exists(_dbPath))
+            {
+                using var conn = GetConnection();
+                conn.Open();
+                // Enable foreign keys explicitly for this initial connection
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "PRAGMA foreign_keys = ON;";
+                cmd.ExecuteNonQuery();
+
+                // TODO: create tables here or use migrations
+            }
+        }
+
+        /// <summary>
+        /// Returns a new SqliteConnection for use by repositories. Caller must Open() the connection.
+        /// </summary>
+        public static SqliteConnection GetConnection()
+        {
+            return new SqliteConnection(_connectionString);
+        }
+
+        /// <summary>
+        /// Returns path to DB file (useful for diagnostics/logging).
+        /// </summary>
+        public static string GetDatabasePath() => _dbPath;
+    }
+}

@@ -1,0 +1,71 @@
+using System.Windows;
+using System.Windows.Controls;
+using OBS.DataAccess;
+using OBS.Models;
+using OBS.Services;
+
+namespace OBS.Views
+{
+    public partial class CreateTeamWindow
+    {
+        private readonly TeamRepository _teamRepo;
+
+        public CreateTeamWindow()
+        {
+            InitializeComponent();
+            _teamRepo = new TeamRepository();
+        }
+
+        private void OnConfirmClick(object sender, RoutedEventArgs e)
+        {
+            var teamName = TeamNameBox.Text?.Trim();
+
+            if (string.IsNullOrWhiteSpace(teamName))
+            {
+                ShowError("Takım adı boş bırakılamaz.");
+                return;
+            }
+
+            if (_teamRepo.Exists(teamName))
+            {
+                ShowError("Bu isimde bir takım zaten mevcut.");
+                return;
+            }
+
+            var selectedCategory = (CategoryCombo.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Futbol";
+
+            if (RadioKiz.IsChecked == true)
+            {
+                selectedCategory += " (Kadınlar)";
+            }
+            else if (RadioBelirtilmemis.IsChecked == true)
+            {
+                selectedCategory += " (Karma)";
+            }
+
+            var team = new Team
+            {
+                TeamName = teamName,
+                Category = selectedCategory
+            };
+
+            _teamRepo.Insert(team);
+            ToastService.ShowSuccess($"\"{teamName}\" takımı oluşturuldu.");
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void OnCancelClick(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+
+        private void ShowError(string message)
+        {
+            ErrorText.Text = message;
+            ErrorText.Visibility = Visibility.Visible;
+        }
+    }
+}

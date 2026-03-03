@@ -1,0 +1,41 @@
+﻿using System.Collections.Generic;
+using System.IO;
+using AlparslanOBS.Models;
+
+namespace AlparslanOBS.Services
+{
+    /// <summary>
+    /// PDF extraction service placeholder. The execution environment may not have
+    /// a PDF library available. To enable real PDF extraction, add an open-source
+    /// PDF library (e.g., UglyToad.PdfPig) as a NuGet package and implement
+    /// the extraction logic. This class currently compiles and returns no results
+    /// to keep the project buildable.
+    /// </summary>
+    public class PdfExtractionService
+    {
+        /// <summary>
+        /// Extracts students from a Künye PDF. Currently not implemented - returns empty sequence.
+        /// To implement: add UglyToad.PdfPig (MIT) or another OSS PDF parser and extract selectable text
+        /// and the embedded images per page, then map to Student objects. Save images under
+        /// DatabaseConnection.GetPhotosFolder() and set Student.PhotoPath accordingly.
+        /// </summary>
+        public IEnumerable<Student> ExtractStudentsFromKunyePdf(string pdfPath)
+        {
+            if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
+                yield break;
+
+            // Placeholder behavior: no PDF library available in this environment.
+            // Implement real extraction after adding a PDF parsing library.
+            yield break;
+        }
+
+        /// <summary>
+        /// Extracts class list (StudentNumber -> Class) from a class list PDF.
+        /// Not implemented in the scaffold.
+        /// </summary>
+        public IEnumerable<(string StudentNumber, string Class)> ExtractClassList(string pdfPath)
+        {
+            yield break;
+        }
+    }
+}

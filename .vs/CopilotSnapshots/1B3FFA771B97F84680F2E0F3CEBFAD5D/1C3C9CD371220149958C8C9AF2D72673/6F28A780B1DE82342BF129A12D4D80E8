@@ -1,0 +1,132 @@
+﻿using System;
+using System.IO;
+using System.Windows.Media.Imaging;
+
+namespace AlparslanOBS.Helpers
+{
+    /// <summary>
+    /// Fotoğraf işlemleri için yardımcı sınıf.
+    /// İSTEM METNİ GEREĞİ: Bellek optimizasyonu için DecodePixelWidth kullanılmalı.
+    /// </summary>
+    public static class PhotoHelper
+    {
+        /// <summary>
+        /// Varsayılan avatar (öğrenci fotoğrafı yoksa kullanılır).
+        /// Pack URI formatında embedded resource olarak saklanabilir.
+        /// </summary>
+        private const string DefaultAvatarPath = "pack://application:,,,/Assets/default_avatar.png";
+
+        /// <summary>
+        /// Fotoğraf yolundan thumbnail boyutunda BitmapImage oluşturur.
+        /// İSTEM METNİ GEREĞİ: DecodePixelWidth kullanarak bellek optimizasyonu yapılır.
+        /// </summary>
+        /// <param name="photoPath">Fotoğraf dosyasının yolu</param>
+        /// <param name="thumbnailWidth">Thumbnail genişliği (piksel)</param>
+        /// <returns>BitmapImage nesnesi</returns>
+        public static BitmapImage LoadPhotoAsThumbnail(string photoPath, int thumbnailWidth = 150)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(photoPath) || !File.Exists(photoPath))
+                {
+                    return LoadDefaultAvatar(thumbnailWidth);
+                }
+
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(photoPath, UriKind.Absolute);
+                bitmap.DecodePixelWidth = thumbnailWidth; // Bellek optimizasyonu
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze(); // UI thread dışından erişim için
+
+                return bitmap;
+            }
+            catch
+            {
+                return LoadDefaultAvatar(thumbnailWidth);
+            }
+        }
+
+        /// <summary>
+        /// Varsayılan avatar resmini yükler.
+        /// </summary>
+        private static BitmapImage LoadDefaultAvatar(int thumbnailWidth = 150)
+        {
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(DefaultAvatarPath, UriKind.Absolute);
+                bitmap.DecodePixelWidth = thumbnailWidth;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
+            }
+            catch
+            {
+                // Varsayılan avatar bile yüklenemezse boş bitmap döndür
+                return new BitmapImage();
+            }
+        }
+
+        /// <summary>
+        /// Fotoğraf dosyasını siler (öğrenci silindiğinde kullanılır).
+        /// İSTEM METNİ GEREĞİ: Disk temizliği - öğrenci silinince fotoğraf da silinmeli.
+        /// </summary>
+        public static void DeletePhoto(string photoPath)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(photoPath) && File.Exists(photoPath))
+                {
+                    File.Delete(photoPath);
+                }
+            }
+            catch
+            {
+                // Silme hatalarını sessizce yoksay (log'a yazdırılabilir)
+            }
+        }
+
+        /// <summary>
+        /// Byte array'den fotoğraf dosyası oluşturur (PDF'den çıkarılan fotoğraflar için).
+        /// </summary>
+        public static void SavePhotoFromBytes(byte[] photoBytes, string destinationPath)
+        {
+            try
+            {
+                File.WriteAllBytes(destinationPath, photoBytes);
+            }
+            catch (Exception ex)
+            {
+                throw new IOException($"Fotoğraf kaydedilemedi: {destinationPath}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Fotoğrafı PNG olarak export eder (sağ tık → PNG export özelliği için).
+        /// </summary>
+        public static void ExportPhotoAsPng(string sourcePath, string destinationPath)
+        {
+            try
+            {
+                if (!File.Exists(sourcePath))
+                    throw new FileNotFoundException("Kaynak fotoğraf bulunamadı.", sourcePath);
+
+                // JPG'den PNG'ye dönüştür
+                var bitmap = new BitmapImage(new Uri(sourcePath, UriKind.Absolute));
+                
+                using var fileStream = new FileStream(destinationPath, FileMode.Create);
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                encoder.Save(fileStream);
+            }
+            catch (Exception ex)
+            {
+                throw new IOException($"Fotoğraf export edilemedi: {ex.Message}", ex);
+            }
+        }
+    }
+}

@@ -1,0 +1,58 @@
+﻿using System;
+
+namespace AlparslanOBS.Models
+{
+    /// <summary>
+    /// Represents a student entity stored in the database.
+    /// This model maps to the Students table in SQLite and contains only primitive
+    /// properties (no behavior) to keep separation of concerns.
+    /// </summary>
+    public class Student
+    {
+        /// <summary>
+        /// Unique student identifier coming from external sources (e.g., school PDFs).
+        /// This field must be normalized before merge and is UNIQUE in the DB.
+        /// </summary>
+        public string StudentNumber { get; set; } = string.Empty;
+
+        /// <summary>
+        /// First name of the student.
+        /// </summary>
+        public string FirstName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Last name of the student.
+        /// </summary>
+        public string LastName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Class name or code (e.g., "10A").
+        /// </summary>
+        public string Class { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Numeric class number (sınıf no).
+        /// </summary>
+        public int ClassNo { get; set; }
+
+        /// <summary>
+        /// Turkish national id number (TC No).
+        /// </summary>
+        public string TcNo { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Birth date of the student.
+        /// </summary>
+        public DateTime? BirthDate { get; set; }
+
+        /// <summary>
+        /// Filesystem path to the student's photo. Photos are stored on disk; DB stores only path.
+        /// </summary>
+        public string PhotoPath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Guardian id reference (if any).
+        /// </summary>
+        public int? GuardianId { get; set; }
+    }
+}

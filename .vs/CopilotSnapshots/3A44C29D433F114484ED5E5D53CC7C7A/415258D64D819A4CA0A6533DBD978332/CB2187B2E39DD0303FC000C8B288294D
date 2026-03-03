@@ -1,0 +1,73 @@
+﻿using System.Windows;
+using System.Windows.Input;
+using AlparslanOBS.ViewModels;
+
+namespace AlparslanOBS.Views
+{
+    /// <summary>
+    /// Ana pencere - Modüler bileşenlerden oluşur
+    /// İSTEM METNİ GEREĞİ:
+    /// - 400x750 piksel sabit boyut
+    /// - Manuel resize yok, ancak taşınabilir
+    /// - Her zaman üstte (Topmost)
+    /// - Modüler mimari
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        private readonly MainViewModel _viewModel;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            
+            // ViewModel oluştur ve DataContext'e ata
+            _viewModel = new MainViewModel();
+            DataContext = _viewModel;
+        }
+
+        /// <summary>
+        /// Pencereyi taşınabilir yap (başlık çubuğu olmadığı için)
+        /// İSTEM METNİ GEREĞİ: Kullanıcı manual resize yapamaz ancak taşınabilir olmalı.
+        /// </summary>
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                try
+                {
+                    this.DragMove();
+                }
+                catch
+                {
+                    // DragMove bazen exception fırlatabilir, yoksay
+                }
+            }
+        }
+
+        /// <summary>
+        /// Student Card'dan gelen favori toggle eventi
+        /// </summary>
+        private void StudentCard_FavoriteToggled(object sender, RoutedEventArgs e)
+        {
+            // StudentCardComponent'in DataContext'inden öğrenciyi al
+            if (sender is Components.StudentCardComponent card && 
+                card.DataContext is StudentViewModel student)
+            {
+                _viewModel.ToggleFavoriteCommand.Execute(student);
+            }
+        }
+
+        /// <summary>
+        /// Student Card'dan gelen künye açma eventi
+        /// </summary>
+        private void StudentCard_KunyeOpened(object sender, RoutedEventArgs e)
+        {
+            // StudentCardComponent'in DataContext'inden öğrenciyi al
+            if (sender is Components.StudentCardComponent card && 
+                card.DataContext is StudentViewModel student)
+            {
+                _viewModel.OpenKunyeCommand.Execute(student);
+            }
+        }
+    }
+}

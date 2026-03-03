@@ -1,0 +1,53 @@
+﻿using System;
+using System.Data.SQLite;
+using System.IO;
+
+namespace AlparslanOBS.DataAccess
+{
+    /// <summary>
+    /// Responsible for creating/opening the SQLite database file and ensuring required PRAGMA settings.
+    /// Database file is placed under AppData\Local\OBS_System to avoid admin permission issues.
+    /// </summary>
+    public static class DatabaseConnection
+    {
+        private static readonly string _appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OBS_System");
+        private static readonly string _dbPath = Path.Combine(_appFolder, "alparslanobs.db");
+        private static readonly string _connectionString = $"Data Source={_dbPath};Version=3;Foreign Keys=True;";
+
+        /// <summary>
+        /// Ensure database file and folders exist.
+        /// </summary>
+        public static void EnsureDatabase()
+        {
+            if (!Directory.Exists(_appFolder))
+                Directory.CreateDirectory(_appFolder);
+
+            if (!File.Exists(_dbPath))
+            {
+                SQLiteConnection.CreateFile(_dbPath);
+                using var conn = GetConnection();
+                conn.Open();
+                // Enable foreign keys explicitly
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "PRAGMA foreign_keys = ON;";
+                cmd.ExecuteNonQuery();
+
+                // TODO: create tables here or use migrations
+            }
+        }
+
+        /// <summary>
+        /// Returns a new SQLiteConnection for use by repositories. Caller must Open() the connection.
+        /// </summary>
+        public static SQLiteConnection GetConnection()
+        {
+            var conn = new SQLiteConnection(_connectionString);
+            return conn;
+        }
+
+        /// <summary>
+        /// Returns path to DB file (useful for diagnostics/logging).
+        /// </summary>
+        public static string GetDatabasePath() => _dbPath;
+    }
+}

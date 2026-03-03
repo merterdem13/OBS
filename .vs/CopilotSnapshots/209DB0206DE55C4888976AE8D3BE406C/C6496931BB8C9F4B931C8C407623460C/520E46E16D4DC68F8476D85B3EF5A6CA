@@ -1,0 +1,133 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using AlparslanOBS.DataAccess;
+using AlparslanOBS.Models;
+using AlparslanOBS.Services;
+
+namespace AlparslanOBS.ViewModels
+{
+    public partial class TeamManagementViewModel : ObservableObject
+    {
+        private readonly TeamRepository _teamRepo;
+
+        [ObservableProperty]
+        private ObservableCollection<TeamCardViewModel> _teams = new();
+
+        [ObservableProperty]
+        private bool _isTopmost = true;
+
+        public TeamManagementViewModel()
+        {
+            _teamRepo = new TeamRepository();
+            RefreshTeams();
+        }
+
+        [RelayCommand]
+        private void ToggleTopmost() => IsTopmost = !IsTopmost;
+
+        [RelayCommand]
+        private void OpenCreateTeam()
+        {
+            var dialog = new Views.CreateTeamWindow();
+            dialog.Owner = Application.Current.Windows.OfType<Views.TeamManagementWindow>().FirstOrDefault();
+            var result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                RefreshTeams();
+            }
+        }
+
+        [RelayCommand]
+        private void ToggleExpandTeam(TeamCardViewModel? team)
+        {
+            if (team is null) return;
+
+            if (team.IsExpanded)
+            {
+                team.IsExpanded = false;
+                team.Members.Clear();
+                return;
+            }
+
+            // Diğer açık kartları kapat
+            foreach (var t in Teams)
+            {
+                if (t != team && t.IsExpanded)
+                {
+                    t.IsExpanded = false;
+                    t.Members.Clear();
+                }
+            }
+
+            var members = _teamRepo.GetMembers(team.Id);
+            team.Members = new ObservableCollection<Student>(members);
+            team.IsExpanded = true;
+        }
+
+        [RelayCommand]
+        private void EditTeam(TeamCardViewModel? team)
+        {
+            if (team is null) return;
+
+            var dialog = new Views.EditTeamWindow(team.Id, team.TeamName, team.Category);
+            dialog.Owner = Application.Current.Windows.OfType<Views.TeamManagementWindow>().FirstOrDefault();
+            dialog.ShowDialog();
+
+            if (dialog.HasChanges)
+            {
+                RefreshTeams();
+            }
+        }
+
+        [RelayCommand]
+        private async Task DeleteTeam(TeamCardViewModel? team)
+        {
+            if (team is null) return;
+
+            var result = MessageBox.Show(
+                $"\"{team.TeamName}\" takımı silinecek.\n\nDevam etmek istiyor musunuz?",
+                "Takımı Sil",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            try
+            {
+                team.IsRemoving = true;
+                await Task.Delay(300);
+                _teamRepo.Delete(team.Id);
+                RefreshTeams();
+                ToastService.ShowSuccess($"\"{team.TeamName}\" takımı silindi.");
+            }
+            catch (Exception ex)
+            {
+                ToastService.ShowError($"Takım silme hatası: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private void GoBackToMain()
+        {
+            var mainWindow = new Views.MainWindow();
+            mainWindow.Show();
+
+            var currentWindow = Application.Current.Windows.OfType<Views.TeamManagementWindow>().FirstOrDefault();
+            currentWindow?.Close();
+        }
+
+        public void RefreshTeams()
+        {
+            var allTeams = _teamRepo.GetAll();
+            Teams = new ObservableCollection<TeamCardViewModel>(
+                allTeams.Select(t => new TeamCardViewModel(t))
+            );
+        }
+    }
+}

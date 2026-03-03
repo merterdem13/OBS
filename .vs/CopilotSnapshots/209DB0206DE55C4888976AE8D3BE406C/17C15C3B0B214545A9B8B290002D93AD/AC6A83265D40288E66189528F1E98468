@@ -1,0 +1,282 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.Data.Sqlite;
+using AlparslanOBS.Models;
+
+namespace AlparslanOBS.DataAccess
+{
+    /// <summary>
+    /// Students tablosu için veritabanı işlemlerini yürüten katman (Repository).
+    /// İş mantığı barındırmaz, sadece SQL sorgularını ve parametreleri güvenli bir şekilde yönetir.
+    /// </summary>
+    public class StudentRepository
+    {
+        public StudentRepository()
+        {
+            DatabaseConnection.EnsureDatabase();
+        }
+
+        /// <summary>
+        /// Tüm öğrencileri getirir. Büyük veri setleri için ileride pagination eklenebilir.
+        /// </summary>
+        public IEnumerable<Student> GetAll()
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath FROM Students;";
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                yield return Map(reader);
+            }
+        }
+
+        private Student Map(SqliteDataReader r)
+        {
+            static string getString(SqliteDataReader rd, string name)
+            {
+                var idx = rd.GetOrdinal(name);
+                return rd.IsDBNull(idx) ? string.Empty : rd.GetString(idx);
+            }
+
+            static int getInt(SqliteDataReader rd, string name)
+            {
+                var idx = rd.GetOrdinal(name);
+                return rd.IsDBNull(idx) ? 0 : rd.GetInt32(idx);
+            }
+
+            static DateTime? getDate(SqliteDataReader rd, string name)
+            {
+                var idx = rd.GetOrdinal(name);
+                if (rd.IsDBNull(idx)) return null;
+                try
+                {
+                    return rd.GetDateTime(idx);
+                }
+                catch
+                {
+                    var s = rd.GetString(idx);
+                    if (DateTime.TryParse(s, out var dt)) return dt;
+                    return null;
+                }
+            }
+
+            return new Student
+            {
+                StudentNumber = getString(r, "StudentNumber"),
+                FirstName = getString(r, "FirstName"),
+                LastName = getString(r, "LastName"),
+                Class = getString(r, "Class"),
+                ClassNo = getInt(r, "ClassNo"),
+                TcNo = getString(r, "TcNo"),
+                BirthDate = getDate(r, "BirthDate"),
+                PhotoPath = getString(r, "PhotoPath"),
+                Gender = getString(r, "Gender"),
+                GuardianId = r.IsDBNull(r.GetOrdinal("GuardianId")) ? (int?)null : r.GetInt32(r.GetOrdinal("GuardianId")),
+                KunyePdfPath = getString(r, "KunyePdfPath")
+            };
+        }
+
+        /// <summary>
+        /// ON CONFLICT(StudentNumber) DO UPDATE kullanarak UPSERT (Merge) işlemi yapar.
+        /// Transaction yönetimi için harici bağlantı kabul edebilir.
+        /// </summary>
+        public void Upsert(Student s, SqliteConnection? connection = null, SqliteTransaction? transaction = null)
+        {
+            var externalConn = connection != null;
+            using var conn = externalConn ? null : DatabaseConnection.GetConnection();
+            if (!externalConn) conn!.Open();
+
+            var cmd = (connection ?? conn)!.CreateCommand();
+            if (transaction != null) cmd.Transaction = transaction;
+
+            cmd.CommandText = @"
+                INSERT INTO Students (StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath)
+                VALUES (@StudentNumber, @FirstName, @LastName, @Class, @ClassNo, @TcNo, @BirthDate, @PhotoPath, @Gender, @GuardianId, @KunyePdfPath)
+                ON CONFLICT(StudentNumber) DO UPDATE SET
+                    FirstName  = COALESCE(NULLIF(excluded.FirstName, ''),  Students.FirstName),
+                    LastName   = COALESCE(NULLIF(excluded.LastName, ''),   Students.LastName),
+                    Class      = COALESCE(NULLIF(excluded.Class, ''),      Students.Class),
+                    ClassNo    = CASE WHEN excluded.ClassNo != 0 THEN excluded.ClassNo ELSE Students.ClassNo END,
+                    TcNo       = COALESCE(NULLIF(excluded.TcNo, ''),       Students.TcNo),
+                    BirthDate  = COALESCE(excluded.BirthDate,              Students.BirthDate),
+                    PhotoPath  = COALESCE(NULLIF(excluded.PhotoPath, ''),  Students.PhotoPath),
+                    Gender     = COALESCE(NULLIF(excluded.Gender, ''),     Students.Gender),
+                    GuardianId = COALESCE(excluded.GuardianId,             Students.GuardianId),
+                    KunyePdfPath = COALESCE(NULLIF(excluded.KunyePdfPath, ''), Students.KunyePdfPath);
+            ";
+
+            cmd.Parameters.AddWithValue("@StudentNumber", s.StudentNumber ?? string.Empty);
+            cmd.Parameters.AddWithValue("@FirstName", s.FirstName ?? string.Empty);
+            cmd.Parameters.AddWithValue("@LastName", s.LastName ?? string.Empty);
+            cmd.Parameters.AddWithValue("@Class", s.Class ?? string.Empty);
+            cmd.Parameters.AddWithValue("@ClassNo", s.ClassNo);
+            cmd.Parameters.AddWithValue("@TcNo", s.TcNo ?? string.Empty);
+            cmd.Parameters.AddWithValue("@BirthDate", s.BirthDate.HasValue ? s.BirthDate.Value.ToString("o") : (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@PhotoPath", s.PhotoPath ?? string.Empty);
+            cmd.Parameters.AddWithValue("@Gender", s.Gender ?? string.Empty);
+            cmd.Parameters.AddWithValue("@GuardianId", s.GuardianId.HasValue ? (object)s.GuardianId.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@KunyePdfPath", s.KunyePdfPath ?? string.Empty);
+
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Sınıf listesi PDF'inden veri okunduğunda sadece mevcut öğrencinin sınıfını ve cinsiyetini günceller.
+        /// Anayasa Kuralı: Öğrenci sistemde yoksa YENİ KAYIT EKLENMEZ, durum loglanır.
+        /// </summary>
+        public void UpsertClass(Student s, SqliteConnection? connection = null, SqliteTransaction? transaction = null)
+        {
+            var externalConn = connection != null;
+            using var conn = externalConn ? null : DatabaseConnection.GetConnection();
+            if (!externalConn) conn!.Open();
+
+            var cmd = (connection ?? conn)!.CreateCommand();
+            if (transaction != null) cmd.Transaction = transaction;
+
+            // Class ve Gender'ı güncelle
+            cmd.CommandText = @"
+                UPDATE Students 
+                SET Class = @Class, Gender = @Gender
+                WHERE StudentNumber = @StudentNumber;
+            ";
+
+            cmd.Parameters.AddWithValue("@StudentNumber", s.StudentNumber ?? string.Empty);
+            cmd.Parameters.AddWithValue("@Class", s.Class ?? string.Empty);
+            cmd.Parameters.AddWithValue("@Gender", s.Gender ?? string.Empty);
+
+            int rowsAffected = cmd.ExecuteNonQuery();
+
+            if (rowsAffected == 0)
+            {
+                LogMissingStudent(s.StudentNumber);
+            }
+        }
+
+        /// <summary>
+        /// Sistemde bulunamayan öğrencileri 'Logs/app_log.txt' dosyasına kaydeder.
+        /// </summary>
+        private void LogMissingStudent(string? studentNumber)
+        {
+            try
+            {
+                string logDir = DatabaseConnection.GetLogsFolder();
+                string logFile = Path.Combine(logDir, "app_log.txt");
+                string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] UYARI: Sınıf listesinde bulunan ancak veritabanında kaydı olmayan öğrenci numarası atlandı: {studentNumber}{Environment.NewLine}";
+
+                File.AppendAllText(logFile, logMessage);
+            }
+            catch
+            {
+                // Dosya kilitlenmesi vb. log hataları asıl süreci (merge) kesmemeli
+            }
+        }
+
+        /// <summary>
+        /// Belirli bir sınıftaki öğrencileri getirir.
+        /// </summary>
+        public IEnumerable<Student> GetByClass(string className)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath FROM Students WHERE Class = @Class ORDER BY CAST(StudentNumber AS INTEGER), StudentNumber;";
+            cmd.Parameters.AddWithValue("@Class", className ?? string.Empty);
+
+            using var reader = cmd.ExecuteReader();
+            var list = new List<Student>();
+            while (reader.Read())
+                list.Add(Map(reader));
+            return list;
+        }
+
+        /// <summary>
+        /// Ad, soyad veya okul numarasına göre öğrenci arar.
+        /// </summary>
+        public IEnumerable<Student> Search(string keyword)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath 
+                FROM Students 
+                WHERE FirstName LIKE @kw OR LastName LIKE @kw OR StudentNumber LIKE @kw
+                      OR (FirstName || ' ' || LastName) LIKE @kw
+                ORDER BY 
+                    CASE WHEN StudentNumber = @exact THEN 0 ELSE 1 END,
+                    CAST(StudentNumber AS INTEGER),
+                    StudentNumber,
+                    LastName, FirstName;";
+            cmd.Parameters.AddWithValue("@kw", $"%{keyword ?? ""}%");
+            cmd.Parameters.AddWithValue("@exact", keyword ?? "");
+
+            using var reader = cmd.ExecuteReader();
+            var list = new List<Student>();
+            while (reader.Read())
+                list.Add(Map(reader));
+            return list;
+        }
+
+        /// <summary>
+        /// Veritabanındaki benzersiz sınıf isimlerini döndürür.
+        /// </summary>
+        public List<string> GetDistinctClasses()
+        {
+            var list = new List<string>();
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT DISTINCT Class FROM Students WHERE Class IS NOT NULL AND Class != '' ORDER BY Class;";
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                list.Add(reader.GetString(0));
+            return list;
+        }
+
+        /// <summary>
+        /// Öğrencinin ID'sini StudentNumber üzerinden bulur.
+        /// </summary>
+        public int? FindStudentIdByStudentNumber(string studentNumber)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT Id FROM Students WHERE StudentNumber = @sn LIMIT 1;";
+            cmd.Parameters.AddWithValue("@sn", studentNumber ?? string.Empty);
+            var r = cmd.ExecuteScalar();
+            if (r == null || r is DBNull) return null;
+            return Convert.ToInt32(r);
+        }
+
+        /// <summary>
+        /// Anayasa Kuralı: Otomatik silme yasaktır! 
+        /// Bu metot SADECE kullanıcının "Öğrenciyi Sil" butonuna basması (manuel) durumunda çalışır.
+        /// Öğrenci silinirken fiziksel diskteki fotoğrafının da silinebilmesi için PhotoPath bilgisini geriye döndürür.
+        /// Not: Bağlı takım kayıtları (TeamMembers) veritabanındaki ON DELETE CASCADE kuralı sayesinde otomatik temizlenir.
+        /// </summary>
+        public string? Delete(string studentNumber)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+
+            // 1. İşlem: Silmeden önce fiziksel dosyayı silebilmek için fotoğraf yolunu (Path) al
+            using var selectCmd = conn.CreateCommand();
+            selectCmd.CommandText = "SELECT PhotoPath FROM Students WHERE StudentNumber = @sn LIMIT 1;";
+            selectCmd.Parameters.AddWithValue("@sn", studentNumber ?? string.Empty);
+            var photoPath = selectCmd.ExecuteScalar() as string;
+
+            // 2. İşlem: Öğrenciyi sil (ON DELETE CASCADE yoluyla bağlı takım üyelikleri otomatik silinir)
+            using var deleteCmd = conn.CreateCommand();
+            deleteCmd.CommandText = "DELETE FROM Students WHERE StudentNumber = @sn;";
+            deleteCmd.Parameters.AddWithValue("@sn", studentNumber ?? string.Empty);
+            deleteCmd.ExecuteNonQuery();
+
+            return photoPath;
+        }
+    }
+}

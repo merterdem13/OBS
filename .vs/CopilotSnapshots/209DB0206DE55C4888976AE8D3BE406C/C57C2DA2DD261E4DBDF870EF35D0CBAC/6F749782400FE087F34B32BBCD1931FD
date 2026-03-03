@@ -1,0 +1,121 @@
+﻿<ui:FluentWindow x:Class="AlparslanOBS.Views.CreateTeamWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Takım Oluştur"
+    Width="380" Height="420"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    ExtendsContentIntoTitleBar="True"
+    Background="#F4F3F1">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Başlık -->
+        <TextBlock Grid.Row="0"
+                   Text="Yeni Takım Oluştur"
+                   FontSize="20" FontWeight="Bold"
+                   Foreground="{StaticResource TextPrimaryBrush}"
+                   Margin="0,28,0,20"
+                   HorizontalAlignment="Center"/>
+
+        <!-- Takım Adı -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,14">
+            <TextBlock Text="Takım Adı"
+                       FontSize="12" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       Margin="0,0,0,6"/>
+            <ui:TextBox x:Name="TeamNameBox"
+                        PlaceholderText="Takım adını giriniz..."
+                        MaxLength="100"/>
+        </StackPanel>
+
+        <!-- Cinsiyet Seçimi -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,14">
+            <TextBlock Text="Cinsiyet"
+                       FontSize="12" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       Margin="0,0,0,6"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <RadioButton x:Name="RadioErkek"
+                             Grid.Column="0"
+                             Content="Erkek"
+                             GroupName="Gender"
+                             IsChecked="True"
+                             FontSize="13"
+                             VerticalContentAlignment="Center"
+                             Padding="8,6"/>
+                <RadioButton x:Name="RadioKiz"
+                             Grid.Column="2"
+                             Content="Kız"
+                             GroupName="Gender"
+                             FontSize="13"
+                             VerticalContentAlignment="Center"
+                             Padding="8,6"/>
+                <RadioButton x:Name="RadioBelirtilmemis"
+                             Grid.Column="4"
+                             Content="Belirtilmemiş"
+                             GroupName="Gender"
+                             FontSize="13"
+                             VerticalContentAlignment="Center"
+                             Padding="8,6"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Kategori Seçimi -->
+        <StackPanel Grid.Row="3" Margin="0,0,0,14">
+            <TextBlock Text="Kategori"
+                       FontSize="12" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       Margin="0,0,0,6"/>
+            <ComboBox x:Name="CategoryCombo"
+                      SelectedIndex="0"
+                      Height="34"
+                      VerticalContentAlignment="Center">
+                <ComboBoxItem Content="Futbol"/>
+                <ComboBoxItem Content="Futsal"/>
+                <ComboBoxItem Content="Basketbol"/>
+                <ComboBoxItem Content="Hentbol"/>
+                <ComboBoxItem Content="Voleybol"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Hata Mesajı -->
+        <TextBlock Grid.Row="4"
+                   x:Name="ErrorText"
+                   Foreground="#ef4444"
+                   FontSize="12"
+                   Visibility="Collapsed"
+                   Margin="0,0,0,8"/>
+
+        <!-- Onayla Butonu -->
+        <ui:Button Grid.Row="6"
+                   Content="Onayla"
+                   Appearance="Primary"
+                   HorizontalAlignment="Stretch"
+                   Padding="12,10"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   Click="OnConfirmClick">
+            <ui:Button.Icon>
+                <ui:SymbolIcon Symbol="Checkmark24"/>
+            </ui:Button.Icon>
+        </ui:Button>
+    </Grid>
+</ui:FluentWindow>

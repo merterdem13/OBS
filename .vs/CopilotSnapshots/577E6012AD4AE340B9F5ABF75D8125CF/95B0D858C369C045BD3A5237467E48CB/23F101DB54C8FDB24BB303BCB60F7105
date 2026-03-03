@@ -1,0 +1,142 @@
+﻿using System;
+using System.IO;
+using Microsoft.Data.Sqlite;
+
+namespace AlparslanOBS.DataAccess
+{
+    /// <summary>
+    /// Responsible for creating/opening the SQLite database file and ensuring required PRAGMA settings.
+    /// Database file is placed under AppData\Local\OBS_System to avoid admin permission issues.
+    /// Uses Microsoft.Data.Sqlite which is compatible with .NET 10.
+    /// </summary>
+    public static class DatabaseConnection
+    {
+        private static readonly string _appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OBS_System");
+        private static readonly string _dbPath = Path.Combine(_appFolder, "alparslanobs.db");
+        private static readonly string _connectionString = $"Data Source={_dbPath}";
+
+        /// <summary>
+        /// Ensure database file and folders exist.
+        /// Opening a connection will create the file if it does not exist.
+        /// </summary>
+        public static void EnsureDatabase()
+        {
+            if (!Directory.Exists(_appFolder))
+                Directory.CreateDirectory(_appFolder);
+
+            // Ensure supporting folders
+            var photosFolder = Path.Combine(_appFolder, "Photos");
+            var logsFolder = Path.Combine(_appFolder, "Logs");
+            var pdfFolder = Path.Combine(_appFolder, "Pdf");
+            if (!Directory.Exists(photosFolder)) Directory.CreateDirectory(photosFolder);
+            if (!Directory.Exists(logsFolder)) Directory.CreateDirectory(logsFolder);
+            if (!Directory.Exists(pdfFolder)) Directory.CreateDirectory(pdfFolder);
+
+            var isNew = !File.Exists(_dbPath);
+
+            using var conn = GetConnection();
+            conn.Open();
+
+            // Enable foreign keys for this connection
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = "PRAGMA foreign_keys = ON;";
+                cmd.ExecuteNonQuery();
+            }
+
+            if (isNew)
+            {
+                // Create required tables on first run
+                CreateTablesIfNotExist(conn);
+            }
+        }
+
+        private static void CreateTablesIfNotExist(SqliteConnection conn)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Guardians (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Name TEXT,
+                    Phone TEXT
+                );
+
+                CREATE TABLE IF NOT EXISTS Students (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    StudentNumber TEXT NOT NULL UNIQUE,
+                    FirstName TEXT,
+                    LastName TEXT,
+                    Class TEXT,
+                    ClassNo INTEGER,
+                    TcNo TEXT,
+                    BirthDate TEXT,
+                    PhotoPath TEXT,
+                    GuardianId INTEGER,
+                    FOREIGN KEY(GuardianId) REFERENCES Guardians(Id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS Teams (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    TeamName TEXT NOT NULL UNIQUE,
+                    MatchDate TEXT,
+                    Description TEXT
+                );
+
+                CREATE TABLE IF NOT EXISTS TeamMembers (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    TeamId INTEGER NOT NULL,
+                    StudentId INTEGER NOT NULL,
+                    UNIQUE(TeamId, StudentId),
+                    FOREIGN KEY(TeamId) REFERENCES Teams(Id) ON DELETE CASCADE,
+                    FOREIGN KEY(StudentId) REFERENCES Students(Id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS Favorites (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    StudentId INTEGER NOT NULL UNIQUE,
+                    FOREIGN KEY(StudentId) REFERENCES Students(Id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS Classes (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ClassName TEXT NOT NULL UNIQUE
+                );
+
+                CREATE TABLE IF NOT EXISTS Settings (
+                    Key TEXT PRIMARY KEY,
+                    Value TEXT
+                );
+            ";
+
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Returns a new SqliteConnection for use by repositories. Caller must Open() the connection.
+        /// </summary>
+        public static SqliteConnection GetConnection()
+        {
+            return new SqliteConnection(_connectionString);
+        }
+
+        /// <summary>
+        /// Returns path to DB file (useful for diagnostics/logging).
+        /// </summary>
+        public static string GetDatabasePath() => _dbPath;
+
+        /// <summary>
+        /// Returns path to photos folder.
+        /// </summary>
+        public static string GetPhotosFolder() => Path.Combine(_appFolder, "Photos");
+
+        /// <summary>
+        /// Returns path to logs folder.
+        /// </summary>
+        public static string GetLogsFolder() => Path.Combine(_appFolder, "Logs");
+
+        /// <summary>
+        /// Returns path to PDF storage folder.
+        /// </summary>
+        public static string GetPdfFolder() => Path.Combine(_appFolder, "Pdf");
+    }
+}

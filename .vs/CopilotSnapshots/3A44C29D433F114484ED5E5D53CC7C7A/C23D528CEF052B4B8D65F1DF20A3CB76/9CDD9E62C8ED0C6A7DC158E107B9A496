@@ -1,0 +1,24 @@
+﻿using System.Windows;
+using AlparslanOBS.ViewModels;
+using AlparslanOBS.Views;
+
+namespace AlparslanOBS
+{
+    public partial class LoginWindow : Window
+    {
+        public LoginWindow()
+        {
+            InitializeComponent();
+            var vm = new LoginViewModel();
+            this.DataContext = vm;
+
+            // ViewModel başarılı girişi yakaladığında:
+            vm.OnLoginSuccess = () =>
+            {
+                var mainWindow = new MainWindow();
+                mainWindow.Show();
+                this.Close(); // Login ekranını imha et
+            };
+        }
+    }
+}

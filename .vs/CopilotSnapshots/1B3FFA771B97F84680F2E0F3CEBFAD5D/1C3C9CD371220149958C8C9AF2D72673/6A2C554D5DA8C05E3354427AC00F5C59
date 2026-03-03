@@ -1,0 +1,340 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Input;
+using AlparslanOBS.DataAccess;
+using AlparslanOBS.Models;
+
+namespace AlparslanOBS.ViewModels
+{
+    /// <summary>
+    /// Ana pencere için ViewModel.
+    /// İSTEM METNİ GEREĞİ: Live search, favori yönetimi, favoriler paneli kontrolü.
+    /// </summary>
+    public class MainViewModel : INotifyPropertyChanged
+    {
+        private readonly StudentRepository _studentRepo;
+        private readonly FavoriteRepository _favoriteRepo;
+        
+        private string _searchQuery = string.Empty;
+        private ObservableCollection<StudentViewModel> _allStudents;
+        private ObservableCollection<StudentViewModel> _filteredStudents;
+        private ObservableCollection<StudentViewModel> _favoriteStudents;
+        private bool _isFavoritesPanelOpen = false;
+
+        // Favoriler paneli animasyon eventi (UI component'e sinyal göndermek için)
+        public event Action? FavoritesPanelShowRequested;
+        public event Action? FavoritesPanelHideRequested;
+        public event Action? FavoritesPanelSparkleRequested;
+
+        public MainViewModel()
+        {
+            _studentRepo = new StudentRepository();
+            _favoriteRepo = new FavoriteRepository();
+            
+            _allStudents = new ObservableCollection<StudentViewModel>();
+            _filteredStudents = new ObservableCollection<StudentViewModel>();
+            _favoriteStudents = new ObservableCollection<StudentViewModel>();
+
+            // Commands
+            ToggleFavoriteCommand = new RelayCommand(ToggleFavorite);
+            OpenKunyeCommand = new RelayCommand(OpenKunye);
+            ToggleFavoritesPanelCommand = new RelayCommand(_ => ToggleFavoritesPanel());
+            CloseFavoritesPanelCommand = new RelayCommand(_ => CloseFavoritesPanel());
+            ClearAllFavoritesCommand = new RelayCommand(_ => ClearAllFavorites());
+
+            // İlk yükleme
+            LoadStudents();
+        }
+
+        #region Properties
+
+        /// <summary>
+        /// Arama sorgusu (Live search için).
+        /// </summary>
+        public string SearchQuery
+        {
+            get => _searchQuery;
+            set
+            {
+                if (_searchQuery != value)
+                {
+                    _searchQuery = value;
+                    OnPropertyChanged();
+                    FilterStudents();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Filtrelenmiş öğrenci listesi (Ana panel).
+        /// </summary>
+        public ObservableCollection<StudentViewModel> FilteredStudents
+        {
+            get => _filteredStudents;
+            set
+            {
+                if (_filteredStudents != value)
+                {
+                    _filteredStudents = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Favori öğrenciler listesi (Favoriler paneli).
+        /// </summary>
+        public ObservableCollection<StudentViewModel> FavoriteStudents
+        {
+            get => _favoriteStudents;
+            set
+            {
+                if (_favoriteStudents != value)
+                {
+                    _favoriteStudents = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(FavoriteCount));
+                    OnPropertyChanged(nameof(HasFavorites));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Favoriler paneli açık mı?
+        /// </summary>
+        public bool IsFavoritesPanelOpen
+        {
+            get => _isFavoritesPanelOpen;
+            set
+            {
+                if (_isFavoritesPanelOpen != value)
+                {
+                    _isFavoritesPanelOpen = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Favori sayısı.
+        /// </summary>
+        public int FavoriteCount => _favoriteStudents.Count;
+
+        /// <summary>
+        /// Favori var mı? (Toplu silme butonunun görünürlüğü için).
+        /// </summary>
+        public bool HasFavorites => _favoriteStudents.Count > 0;
+
+        /// <summary>
+        /// Toplam öğrenci sayısı.
+        /// </summary>
+        public int TotalStudentCount => _allStudents.Count;
+
+        #endregion
+
+        #region Commands
+
+        public ICommand ToggleFavoriteCommand { get; }
+        public ICommand OpenKunyeCommand { get; }
+        public ICommand ToggleFavoritesPanelCommand { get; }
+        public ICommand CloseFavoritesPanelCommand { get; }
+        public ICommand ClearAllFavoritesCommand { get; }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Tüm öğrencileri yükler.
+        /// </summary>
+        private void LoadStudents()
+        {
+            _allStudents.Clear();
+
+            var students = _studentRepo.GetAll();
+            var favoriteNumbers = _favoriteRepo.GetAllFavoriteStudentNumbers();
+
+            foreach (var student in students)
+            {
+                var isFavorite = favoriteNumbers.Contains(student.StudentNumber);
+                var viewModel = new StudentViewModel(student, isFavorite);
+                _allStudents.Add(viewModel);
+            }
+
+            FilterStudents();
+            LoadFavoriteStudents();
+            OnPropertyChanged(nameof(TotalStudentCount));
+        }
+
+        /// <summary>
+        /// Favori öğrencileri yükler.
+        /// </summary>
+        private void LoadFavoriteStudents()
+        {
+            FavoriteStudents.Clear();
+
+            var favorites = _allStudents.Where(s => s.IsFavorite).ToList();
+            foreach (var fav in favorites)
+            {
+                FavoriteStudents.Add(fav);
+            }
+        }
+
+        /// <summary>
+        /// Öğrencileri filtreler (Arama).
+        /// </summary>
+        private void FilterStudents()
+        {
+            FilteredStudents.Clear();
+
+            if (string.IsNullOrWhiteSpace(_searchQuery))
+            {
+                foreach (var student in _allStudents)
+                {
+                    FilteredStudents.Add(student);
+                }
+            }
+            else
+            {
+                var query = _searchQuery.ToLowerInvariant();
+                var filtered = _allStudents.Where(s =>
+                    s.StudentNumber.ToLowerInvariant().Contains(query) ||
+                    s.FirstName.ToLowerInvariant().Contains(query) ||
+                    s.LastName.ToLowerInvariant().Contains(query) ||
+                    s.FullName.ToLowerInvariant().Contains(query)
+                );
+
+                foreach (var student in filtered)
+                {
+                    FilteredStudents.Add(student);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Favori toggle (Ekleme/Çıkarma).
+        /// İSTEM METNİ GEREĞİ: Favoriye eklendiğinde panel parıldayarak çıkar.
+        /// </summary>
+        private void ToggleFavorite(object? parameter)
+        {
+            if (parameter is StudentViewModel student)
+            {
+                if (student.IsFavorite)
+                {
+                    // Favoriden çıkar
+                    _favoriteRepo.RemoveFavorite(student.StudentNumber);
+                    student.IsFavorite = false;
+                    FavoriteStudents.Remove(student);
+                }
+                else
+                {
+                    // Favoriye ekle
+                    _favoriteRepo.AddFavorite(student.StudentNumber);
+                    student.IsFavorite = true;
+                    FavoriteStudents.Add(student);
+
+                    // İSTEM METNİ GEREĞİ: Favoriler paneli parıldayarak çıkar
+                    if (!IsFavoritesPanelOpen)
+                    {
+                        IsFavoritesPanelOpen = true;
+                        FavoritesPanelShowRequested?.Invoke();
+                    }
+                    FavoritesPanelSparkleRequested?.Invoke();
+                }
+
+                OnPropertyChanged(nameof(FavoriteCount));
+                OnPropertyChanged(nameof(HasFavorites));
+            }
+        }
+
+        /// <summary>
+        /// Favoriler panelini aç/kapat.
+        /// İSTEM METNİ GEREĞİ: Basıldığında açılır/kapanır.
+        /// </summary>
+        private void ToggleFavoritesPanel()
+        {
+            if (IsFavoritesPanelOpen)
+            {
+                CloseFavoritesPanel();
+            }
+            else
+            {
+                IsFavoritesPanelOpen = true;
+                FavoritesPanelShowRequested?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// Favoriler panelini kapat.
+        /// </summary>
+        private void CloseFavoritesPanel()
+        {
+            IsFavoritesPanelOpen = false;
+            FavoritesPanelHideRequested?.Invoke();
+        }
+
+        /// <summary>
+        /// Tüm favorileri temizle.
+        /// İSTEM METNİ GEREĞİ: Toplu silme özelliği.
+        /// </summary>
+        private void ClearAllFavorites()
+        {
+            _favoriteRepo.ClearAllFavorites();
+
+            // Tüm öğrencilerin favori durumunu kaldır
+            foreach (var student in _allStudents)
+            {
+                student.IsFavorite = false;
+            }
+
+            FavoriteStudents.Clear();
+            OnPropertyChanged(nameof(FavoriteCount));
+            OnPropertyChanged(nameof(HasFavorites));
+        }
+
+        /// <summary>
+        /// Künye penceresi aç.
+        /// </summary>
+        private void OpenKunye(object? parameter)
+        {
+            if (parameter is StudentViewModel student)
+            {
+                MessageBox.Show(
+                    $"Künye bilgileri:\n\n" +
+                    $"Ad Soyad: {student.FullName}\n" +
+                    $"Öğrenci No: {student.StudentNumber}\n" +
+                    $"Sınıf: {student.Class}\n" +
+                    $"TC No: {student.TcNo}",
+                    "Öğrenci Künyesi",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+            }
+        }
+
+        /// <summary>
+        /// Öğrenci listesini yenile.
+        /// </summary>
+        public void RefreshStudents()
+        {
+            LoadStudents();
+        }
+
+        #endregion
+
+        #region INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+    }
+}

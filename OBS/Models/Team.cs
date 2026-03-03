@@ -1,0 +1,41 @@
+using System;
+
+namespace OBS.Models
+{
+    /// <summary>
+    /// Veritabanındaki Teams tablosunu temsil eden saf C# sınıfı.
+    /// UI ve iş mantığı (örneğin Accordion'un açık/kapalı olma durumu) bu sınıfta yer almaz, 
+    /// UI yönetimi ViewModel tarafında yapılacaktır.
+    /// </summary>
+    public class Team
+    {
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Takımın benzersiz adı. Boş olamaz ve aynı isimden iki tane olamaz.
+        /// </summary>
+        public string TeamName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Spor kategorisi (Zorunlu): Futbol, Futsal, Basketbol, Hentbol, Voleybol, Badminton
+        /// veya bunların Kadınlar versiyonu.
+        /// </summary>
+        public string Category { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Takımın maç veya etkinlik tarihi (Opsiyonel).
+        /// </summary>
+        public string? MatchDate { get; set; }
+
+        /// <summary>
+        /// Takım hakkında kısa açıklama (Opsiyonel).
+        /// </summary>
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// UI'da "Oyuncu Sayısı" badge'i için sadece okuma amaçlı kullanılacak.
+        /// Repository tarafından doldurulur.
+        /// </summary>
+        public int MemberCount { get; set; }
+    }
+}

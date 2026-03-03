@@ -1,0 +1,46 @@
+﻿<Window x:Class="AlparslanOBS.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AlparslanOBS"
+        xmlns:conv="clr-namespace:AlparslanOBS.Converters;assembly=AlparslanOBS"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="700" Width="450">
+    <Window.Resources>
+        <conv:PathToImageConverter x:Key="PathToImageConverter" />
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Left" Margin="0,0,0,8">
+            <Button x:Name="BtnImportKunye" Content="Künye PDF Yükle" Padding="10,6" Click="ImportKunye_Click" />
+            <Button x:Name="BtnRefresh" Content="Listeyi Yenile" Padding="10,6" Margin="8,0,0,0" Click="Refresh_Click" />
+        </StackPanel>
+
+        <ListBox Grid.Row="1" ItemsSource="{Binding Students}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="LightGray" BorderThickness="1" Padding="6" Margin="0,0,0,6">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="64" Height="64" Margin="0,0,8,0" Source="{Binding PhotoPath, Converter={StaticResource PathToImageConverter}}" />
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold">
+                                    <Run Text="{Binding FirstName}" />
+                                    <Run Text=" " />
+                                    <Run Text="{Binding LastName}" />
+                                </TextBlock>
+                                <TextBlock Text="{Binding Class}" />
+                                <TextBlock FontSize="11" Foreground="Gray" Text="{Binding StudentNumber}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</Window>
