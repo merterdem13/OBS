@@ -24,6 +24,7 @@ namespace AlparslanOBS.ViewModels
         private readonly IMergeService _mergeService;
         private readonly ResetSystemService _resetService;
         private readonly PdfExportService _pdfExportService;
+        private readonly UpdateService _updateService;
 
         // ── Pencere Durumu ──────────────────────────────────────────────────
         [ObservableProperty]
@@ -75,11 +76,27 @@ namespace AlparslanOBS.ViewModels
         [ObservableProperty]
         private bool _hasMoreStudents = false;
 
-        // ── Sayfalama (Infinite Scroll) ─────────────────────────────────────
+        // ── Güncelleme Durumu ────────────────────────────────────────────
+        [ObservableProperty]
+        private bool _isUpdateAvailable = false;
+
+        [ObservableProperty]
+        private string _updateVersion = string.Empty;
+
+        [ObservableProperty]
+        private bool _isUpdateDownloading = false;
+
+        [ObservableProperty]
+        private int _updateDownloadProgress = 0;
+
+        // ── Sayfalama (Infinite Scroll)
         private const int PageSize = 6;
         private List<StudentViewModel> _allViewModels = new();
         private int _loadedCount;
         private CancellationTokenSource? _searchDebounceCts;
+
+        // ── Onay Diyaloğu Delegate ──────────────────────────────────────────
+        public Func<string, string, string, string, Task<bool>>? ConfirmAsync { get; set; }
 
         // ── Constructor ─────────────────────────────────────────────────────
 
@@ -91,25 +108,33 @@ namespace AlparslanOBS.ViewModels
             _mergeService = new MergeService();
             _resetService = new ResetSystemService();
             _pdfExportService = new PdfExportService();
+            _updateService = new UpdateService();
 
             LoadClassList();
             UpdateFavoriteState();
+            _ = CheckForUpdateSilentlyAsync();
         }
 
         // ── Partial Callbacks ───────────────────────────────────────────────
-
-        private bool _suppressFilterSync;
+        // Kardeş property'leri değiştirirken backing field'a doğrudan yazılır.
+        // Böylece karşılıklı callback zinciri (re-entrant loop) oluşmaz,
+        // her kullanıcı aksiyonu tam olarak BİR RefreshStudents() tetikler.
 
         partial void OnSelectedClassChanged(string? value)
         {
             IsClassSelected = !string.IsNullOrEmpty(value);
-            if (IsFavoriteMode) return;
 
-            if (!string.IsNullOrEmpty(value) && !_suppressFilterSync)
+            if (_isFavoriteMode && !string.IsNullOrEmpty(value))
             {
-                _suppressFilterSync = true;
-                SearchText = string.Empty;
-                _suppressFilterSync = false;
+                _isFavoriteMode = false;
+                OnPropertyChanged(nameof(IsFavoriteMode));
+                Students.Clear();
+            }
+
+            if (!string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(_searchText))
+            {
+                _searchText = string.Empty;
+                OnPropertyChanged(nameof(SearchText));
             }
 
             RefreshStudents();
@@ -117,13 +142,39 @@ namespace AlparslanOBS.ViewModels
 
         partial void OnSearchTextChanged(string value)
         {
-            if (IsFavoriteMode) return;
-
-            if (!string.IsNullOrWhiteSpace(value) && !_suppressFilterSync)
+            if (_isFavoriteMode && !string.IsNullOrWhiteSpace(value))
             {
-                _suppressFilterSync = true;
-                SelectedClass = null;
-                _suppressFilterSync = false;
+                _isFavoriteMode = false;
+                OnPropertyChanged(nameof(IsFavoriteMode));
+                Students.Clear();
+            }
+
+            if (!string.IsNullOrWhiteSpace(value) && _selectedClass != null)
+            {
+                _selectedClass = null;
+                IsClassSelected = false;
+                OnPropertyChanged(nameof(SelectedClass));
+            }
+
+            // Boş girdi → listeyi sıfırla.
+            var trimmed = value.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                _searchDebounceCts?.Cancel();
+                RefreshStudents();
+                return;
+            }
+
+            // Minimum karakter kontrolü:
+            //   • Sayısal girdi (numara araması) → 1 karakter yeterli (tek haneli numaralar mevcut).
+            //   • Alfabetik girdi (ad/soyad araması) → 2 karakter gerekli.
+            bool isNumeric = trimmed.All(char.IsDigit);
+            int minLength = isNumeric ? 1 : 2;
+
+            if (trimmed.Length < minLength)
+            {
+                _searchDebounceCts?.Cancel();
+                return;
             }
 
             // Debounce: Her tuşa basmada DB sorgusu yerine 300ms bekle.
@@ -145,6 +196,21 @@ namespace AlparslanOBS.ViewModels
 
         partial void OnIsFavoriteModeChanged(bool value)
         {
+            if (value)
+            {
+                if (_selectedClass != null)
+                {
+                    _selectedClass = null;
+                    IsClassSelected = false;
+                    OnPropertyChanged(nameof(SelectedClass));
+                }
+                if (!string.IsNullOrEmpty(_searchText))
+                {
+                    _searchText = string.Empty;
+                    OnPropertyChanged(nameof(SearchText));
+                }
+            }
+
             RefreshStudents();
         }
 
@@ -188,6 +254,101 @@ namespace AlparslanOBS.ViewModels
 
         [RelayCommand]
         private void ClearClassFilter() => SelectedClass = null;
+
+        // ── Komutlar — Güncelleme ───────────────────────────────────────────
+
+        private async Task CheckForUpdateSilentlyAsync()
+        {
+            try
+            {
+                await Task.Delay(2000); // Uygulama açılışını yavaşlatma
+                var hasUpdate = await _updateService.CheckForUpdateAsync();
+                if (hasUpdate)
+                {
+                    IsUpdateAvailable = true;
+                    UpdateVersion = _updateService.GetPendingVersion() ?? "?";
+                }
+            }
+            catch
+            {
+                // Sessiz kontrol — hata durumunda kullanıcıyı rahatsız etme
+            }
+        }
+
+        [RelayCommand]
+        private async Task CheckForUpdateAsync()
+        {
+            IsSettingsPanelVisible = false;
+
+            try
+            {
+                SetLoading(true, "Güncellemeler kontrol ediliyor...");
+
+                var hasUpdate = await _updateService.CheckForUpdateAsync();
+
+                if (hasUpdate)
+                {
+                    IsUpdateAvailable = true;
+                    UpdateVersion = _updateService.GetPendingVersion() ?? "?";
+                    ToastService.ShowInfo($"Yeni sürüm mevcut: v{UpdateVersion}");
+                }
+                else
+                {
+                    ToastService.ShowSuccess("Uygulama güncel.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastService.ShowError($"Güncelleme kontrolü hatası: {ex.Message}");
+            }
+            finally
+            {
+                SetLoading(false);
+            }
+        }
+
+        [RelayCommand]
+        private async Task DownloadAndApplyUpdateAsync()
+        {
+            if (!IsUpdateAvailable) return;
+
+            try
+            {
+                IsUpdateDownloading = true;
+                UpdateDownloadProgress = 0;
+
+                await _updateService.DownloadUpdateAsync(progress =>
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                        UpdateDownloadProgress = progress);
+                });
+
+                var result = MessageBox.Show(
+                    $"v{UpdateVersion} sürümü indirildi.\n\nUygulama yeniden başlatılarak güncellensin mi?",
+                    "Güncelleme Hazır",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    _updateService.ApplyUpdateAndRestart();
+                }
+                else
+                {
+                    _updateService.ApplyUpdateOnExit();
+                    ToastService.ShowInfo("Güncelleme uygulama kapatıldığında yüklenecek.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastService.ShowError($"Güncelleme indirme hatası: {ex.Message}");
+            }
+            finally
+            {
+                IsUpdateDownloading = false;
+                IsUpdateAvailable = false;
+            }
+        }
 
         // ── Komutlar — Favoriler ────────────────────────────────────────────
 
@@ -456,13 +617,29 @@ namespace AlparslanOBS.ViewModels
         {
             IsSettingsPanelVisible = false;
 
-            var result = MessageBox.Show(
-                "Tüm öğrenci verileri, fotoğraflar ve favoriler silinecektir.\n\nDevam etmek istiyor musunuz?",
-                "Sistemi Sıfırla",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+            if (ConfirmAsync != null)
+            {
+                var firstConfirm = await ConfirmAsync(
+                    "Sistemi Sıfırla",
+                    "Sistemi sıfırlamak istediğinizden emin misiniz?\n\n" +
+                    "• Tüm öğrenci verileri\n" +
+                    "• Tüm takımlar\n" +
+                    "• Tüm favoriler\n" +
+                    "• Tüm fotoğraflar\n\n" +
+                    "kalıcı olarak silinecektir.\n(PIN ayarı korunacaktır)",
+                    "Devam Et",
+                    "Vazgeç");
 
-            if (result != MessageBoxResult.Yes) return;
+                if (!firstConfirm) return;
+
+                var secondConfirm = await ConfirmAsync(
+                    "Son Uyarı",
+                    "Bu işlem GERİ ALINAMAZ!\n\nDevam etmek istediğinizden emin misiniz?",
+                    "Evet, Sıfırla",
+                    "İptal");
+
+                if (!secondConfirm) return;
+            }
 
             try
             {
@@ -652,11 +829,9 @@ namespace AlparslanOBS.ViewModels
 
             if (IsFavoriteMode)
             {
-                var allStudents = _studentRepo.GetAll().ToList();
-                var studentMap = allStudents.ToDictionary(s => s.StudentNumber);
                 rawStudents = favoriteNumbersList
-                    .Where(sn => studentMap.ContainsKey(sn))
-                    .Select(sn => studentMap[sn]);
+                    .Select(sn => _studentRepo.GetByStudentNumber(sn))
+                    .Where(s => s != null)!;
             }
             else if (!string.IsNullOrWhiteSpace(SearchText))
             {
@@ -735,7 +910,7 @@ namespace AlparslanOBS.ViewModels
             var classes = _studentRepo.GetDistinctClasses();
             ClassList = new ObservableCollection<string>(classes);
             TotalClassCount = classes.Count;
-            TotalStudentCount = _studentRepo.GetAll().Count();
+            TotalStudentCount = _studentRepo.GetCount();
         }
 
         private void UpdateFavoriteState()

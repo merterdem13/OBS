@@ -9,6 +9,7 @@
     Title="Alparslan OBS"
     Width="400" Height="750"
     MinWidth="400" MinHeight="750"
+	MaxWidth="400" MaxHeight="750"
     ResizeMode="NoResize"
     WindowStartupLocation="Manual"
     Topmost="True"
@@ -97,6 +98,9 @@
 
         <!-- Yükleme Katmanı -->
         <components:LoadingOverlay Grid.RowSpan="3" Panel.ZIndex="200"/>
+
+        <!-- Onay Diyaloğu Katmanı -->
+        <components:ConfirmDialogOverlay x:Name="ConfirmDialog" Grid.RowSpan="3" Panel.ZIndex="300"/>
 
     </Grid>
 </ui:FluentWindow>

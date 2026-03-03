@@ -5,13 +5,17 @@ using System.Threading.Tasks;
 using System.Windows;
 using AlparslanOBS.DataAccess;
 using AlparslanOBS.Helpers;
+using AlparslanOBS.Services;
 
 namespace AlparslanOBS.ViewModels
 {
     public partial class LoginViewModel : ObservableObject
     {
+        private const string RecoveryPin = "0000";
+
         private readonly SettingsRepository _settingsRepo;
         private bool _isCreateMode = false;
+        private bool _isRecoveryMode = false;
         private string _confirmPin = string.Empty;
 
         [ObservableProperty]
@@ -72,6 +76,13 @@ namespace AlparslanOBS.ViewModels
             {
                 if (string.IsNullOrEmpty(_confirmPin))
                 {
+                    if (PinInput == RecoveryPin)
+                    {
+                        ErrorMessage = "Bu PIN kullanilamaz!";
+                        PinInput = string.Empty;
+                        return;
+                    }
+
                     _confirmPin = PinInput;
                     PinInput = string.Empty;
                     TitleMessage = "PIN'i Tekrar Girin";
@@ -83,21 +94,33 @@ namespace AlparslanOBS.ViewModels
                     {
                         var hashedPin = PinHashHelper.HashPin(PinInput);
                         _settingsRepo.SetSetting("PIN", hashedPin);
-                        MessageBox.Show("PIN basariyla olusturuldu!", "Basarili",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-                        OpenMainWindow();
+                        _isRecoveryMode = false;
+                        OpenMainWindow("PIN basariyla olusturuldu!");
                     }
                     else
                     {
                         ErrorMessage = "PIN'ler eslesmiyor!";
                         PinInput = string.Empty;
                         _confirmPin = string.Empty;
-                        TitleMessage = "Yeni PIN Olusturun";
+                        TitleMessage = _isRecoveryMode
+                            ? "Kurtarma - Yeni PIN Olusturun"
+                            : "Yeni PIN Olusturun";
                     }
                 }
             }
             else
             {
+                if (PinInput == RecoveryPin)
+                {
+                    _isCreateMode = true;
+                    _isRecoveryMode = true;
+                    _confirmPin = string.Empty;
+                    PinInput = string.Empty;
+                    TitleMessage = "Kurtarma - Yeni PIN Olusturun";
+                    ErrorMessage = string.Empty;
+                    return;
+                }
+
                 var storedHash = _settingsRepo.GetSetting("PIN");
                 if (PinHashHelper.VerifyPin(PinInput, storedHash ?? string.Empty))
                 {
@@ -134,7 +157,7 @@ namespace AlparslanOBS.ViewModels
             }
         }
 
-        private void OpenMainWindow()
+        private void OpenMainWindow(string? toastMessage = null)
         {
             var loginWindow = Application.Current.Windows.OfType<Views.LoginWindow>().FirstOrDefault();
 
@@ -164,6 +187,9 @@ namespace AlparslanOBS.ViewModels
                     Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
                     loginWindow.Close();
+
+                    if (!string.IsNullOrEmpty(toastMessage))
+                        ToastService.ShowSuccess(toastMessage, mainWindow);
                 };
 
                 sb.Begin();
@@ -174,6 +200,9 @@ namespace AlparslanOBS.ViewModels
                 mainWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 Application.Current.MainWindow = mainWindow;
                 mainWindow.Show();
+
+                if (!string.IsNullOrEmpty(toastMessage))
+                    ToastService.ShowSuccess(toastMessage, mainWindow);
             }
         }
     }

@@ -197,6 +197,15 @@ namespace AlparslanOBS.DataAccess
         /// <summary>
         /// Ad, soyad veya okul numarasına göre öğrenci arar.
         /// Türkçe büyük/küçük harf duyarsız arama yapar (İ/i, I/ı, Ş/ş, Ç/ç vb.).
+        /// SQLite'ın yerleşik LIKE operatörü Türkçe harfleri desteklemediğinden,
+        /// tr_lower custom fonksiyonu ile Türkçe-duyarlı eşleşme yapılır.
+        ///
+        /// Çekirdek Mantık (Smart Prefix-Match):
+        ///   • Sayısal girdi  → yalnızca StudentNumber prefix eşleşmesi.
+        ///   • Alfabetik girdi → Kelime Bazlı Çapraz Eşleşme (All-Any-StartsWith):
+        ///     Aramadaki HER kelime, hedef Ad+Soyad kelimelerinden EN AZ BİRİNİN
+        ///     başlangıcıyla eşleşmelidir.
+        ///     Örn: "Ec Gün" → "Ecrin Mina Güner" ✓  |  "rin" → ✗ (ortadan eşleşme yok)
         /// </summary>
         public IEnumerable<Student> Search(string keyword)
         {
@@ -206,16 +215,87 @@ namespace AlparslanOBS.DataAccess
             var tr = new CultureInfo("tr-TR");
             var kwLower = keyword.Trim().ToLower(tr);
 
+            // Öğrenci numarası sadece rakamlardan oluşur.
+            // Arama metni tamamen sayısal ise yalnızca numara ile eşleştir.
+            bool isNumeric = kwLower.All(char.IsDigit);
+
+            // Minimum karakter kontrolü:
+            //   • Sayısal girdi → 1 karakter yeterli (tek haneli numaralar mevcut).
+            //   • Alfabetik girdi → 2 karakter gerekli.
+            int minLength = isNumeric ? 1 : 2;
+            if (kwLower.Length < minLength)
+                return [];
+
             using var conn = DatabaseConnection.GetConnection();
             conn.Open();
+
+            // Türkçe büyük/küçük harf duyarsız arama için custom SQLite fonksiyonu.
+            // SQLite yerleşik LIKE yalnızca ASCII (A-Z) harfleri için case-insensitive.
+            // Bu fonksiyon İ/i, I/ı, Ş/ş, Ç/ç, Ğ/ğ, Ö/ö, Ü/ü gibi Türkçe harfleri de kapsar.
+            conn.CreateFunction("tr_lower", (string? s) => s?.ToLower(tr));
+
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath 
-                FROM Students
-                ORDER BY 
-                    CAST(StudentNumber AS INTEGER),
-                    StudentNumber,
-                    LastName, FirstName;";
+
+            // Tek haneli sayısal arama → birebir eşleşme (exact match).
+            // "1" gibi girdilerde yüzlerce prefix sonucu yerine yalnızca numarası "1" olan öğrenci döner.
+            // 2+ haneli sayısal arama → prefix eşleşme (mevcut davranış).
+            bool exactNumeric = isNumeric && kwLower.Length == 1;
+
+            if (isNumeric)
+            {
+                if (exactNumeric)
+                {
+                    cmd.CommandText = @"
+                        SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath 
+                        FROM Students
+                        WHERE StudentNumber = @kwExact
+                        ORDER BY 
+                            CAST(StudentNumber AS INTEGER),
+                            StudentNumber,
+                            LastName, FirstName;";
+                    cmd.Parameters.AddWithValue("@kwExact", keyword.Trim());
+                }
+                else
+                {
+                    cmd.CommandText = @"
+                        SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath 
+                        FROM Students
+                        WHERE StudentNumber LIKE @kwPrefix
+                        ORDER BY 
+                            CAST(StudentNumber AS INTEGER),
+                            StudentNumber,
+                            LastName, FirstName;";
+                    cmd.Parameters.AddWithValue("@kwPrefix", $"{keyword.Trim()}%");
+                }
+            }
+            else
+            {
+                // Kelime Bazlı Çapraz Eşleşme:
+                // Arama metnini kelimelere böl, her kelime için SQL'de OR koşulları oluştur.
+                // Tüm kelime grupları AND ile birleştirilir → geniş ama tutarlı ön-filtre.
+                // Asıl hassas eşleşme bellek-içi All-Any-StartsWith ile yapılır.
+                var searchWords = kwLower.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                var conditions = new List<string>();
+                for (int i = 0; i < searchWords.Length; i++)
+                {
+                    var p = $"@kw{i}";
+                    var pw = $"@kwW{i}";
+                    conditions.Add(
+                        $"(tr_lower(FirstName) LIKE {p} OR tr_lower(FirstName) LIKE {pw} OR tr_lower(LastName) LIKE {p})");
+                    cmd.Parameters.AddWithValue(p, $"{searchWords[i]}%");
+                    cmd.Parameters.AddWithValue(pw, $"% {searchWords[i]}%");
+                }
+
+                cmd.CommandText = $@"
+                    SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath 
+                    FROM Students
+                    WHERE {string.Join(" AND ", conditions)}
+                    ORDER BY 
+                        CAST(StudentNumber AS INTEGER),
+                        StudentNumber,
+                        LastName, FirstName;";
+            }
 
             using var reader = cmd.ExecuteReader();
             var list = new List<Student>();
@@ -224,13 +304,35 @@ namespace AlparslanOBS.DataAccess
                 var s = Map(reader);
                 var firstName = (s.FirstName ?? "").ToLower(tr);
                 var lastName = (s.LastName ?? "").ToLower(tr);
-                var fullName = $"{firstName} {lastName}";
                 var studentNo = (s.StudentNumber ?? "").ToLower(tr);
 
-                if (firstName.Contains(kwLower, StringComparison.Ordinal) ||
-                    lastName.Contains(kwLower, StringComparison.Ordinal) ||
-                    fullName.Contains(kwLower, StringComparison.Ordinal) ||
-                    studentNo.Contains(kwLower, StringComparison.Ordinal))
+                bool match;
+                if (isNumeric)
+                {
+                    // Tek haneli → birebir eşleşme, 2+ haneli → prefix eşleşme.
+                    match = exactNumeric
+                        ? string.Equals(studentNo, kwLower, StringComparison.Ordinal)
+                        : studentNo.StartsWith(kwLower, StringComparison.Ordinal);
+                }
+                else
+                {
+                    // All-Any-StartsWith:
+                    // Aramadaki HER BİR kelime, hedef Ad+Soyad kelimelerinden
+                    // EN AZ BİRİNİN başlangıcıyla eşleşmelidir.
+                    // Örn: "Ec Gün" → ["ec","gün"]
+                    //       "Ecrin Mina Güner" → ["ecrin","mina","güner"]
+                    //       "ec" starts "ecrin" ✓, "gün" starts "güner" ✓ → eşleşme ✓
+                    //       "rin" starts hiçbiri → eşleşme ✗ (ortadan eşleşme engellendi)
+                    var targetWords = $"{firstName} {lastName}"
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var searchWords = kwLower
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    match = searchWords.All(sw =>
+                        targetWords.Any(tw => tw.StartsWith(sw, StringComparison.Ordinal)));
+                }
+
+                if (match)
                 {
                     list.Add(s);
                 }
@@ -246,6 +348,34 @@ namespace AlparslanOBS.DataAccess
             });
 
             return list;
+        }
+
+        /// <summary>
+        /// Toplam öğrenci sayısını veritabanı seviyesinde döndürür.
+        /// GetAll().Count() yerine kullanılmalıdır — tüm satırları belleğe çekmeden sayar.
+        /// </summary>
+        public int GetCount()
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*) FROM Students;";
+            return Convert.ToInt32(cmd.ExecuteScalar());
+        }
+
+        /// <summary>
+        /// Tek bir öğrenciyi okul numarasına göre getirir.
+        /// </summary>
+        public Student? GetByStudentNumber(string studentNumber)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath FROM Students WHERE StudentNumber = @sn LIMIT 1;";
+            cmd.Parameters.AddWithValue("@sn", studentNumber ?? string.Empty);
+
+            using var reader = cmd.ExecuteReader();
+            return reader.Read() ? Map(reader) : null;
         }
 
         /// <summary>

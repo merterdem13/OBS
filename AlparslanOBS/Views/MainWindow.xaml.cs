@@ -1,8 +1,10 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using AlparslanOBS.ViewModels;
+using Wpf.Ui.Controls;
 
 namespace AlparslanOBS.Views
 {
@@ -11,9 +13,21 @@ namespace AlparslanOBS.Views
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
+
+            var vm = new MainViewModel();
+            vm.ConfirmAsync = ShowConfirmDialogAsync;
+            DataContext = vm;
 
             Loaded += MainWindow_Loaded;
+        }
+
+        private async Task<bool> ShowConfirmDialogAsync(
+            string title, string message, string confirmText, string cancelText)
+        {
+            return await ConfirmDialog.ShowAsync(
+                title, message, confirmText, cancelText,
+                title.Contains("Son") ? SymbolRegular.ErrorCircle24 : SymbolRegular.Warning24,
+                title.Contains("Son") ? "#ef4444" : "#f97316");
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)

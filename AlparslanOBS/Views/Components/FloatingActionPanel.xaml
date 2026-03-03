@@ -103,8 +103,51 @@
                             <ui:SymbolIcon Symbol="Warning24"/>
                         </ui:Button.Icon>
                     </ui:Button>
+
+                    <Separator Margin="0,8" Opacity="0.3"/>
+
+                    <ui:Button Content="Güncelleme Kontrol Et"
+                               Appearance="Secondary" Padding="12,8"
+                               HorizontalAlignment="Stretch"
+                               Command="{Binding CheckForUpdateCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="ArrowSync24"/>
+                        </ui:Button.Icon>
+                    </ui:Button>
                 </StackPanel>
             </Border>
         </Grid>
+
+        <!-- Güncelleme Bildirim Çubuğu (Alt) -->
+        <Border VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
+                Margin="12,0,12,12"
+                Background="{StaticResource BtnBlueBrush}"
+                CornerRadius="10"
+                Padding="14,10"
+                Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BoolToVisibility}}">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="12" Opacity="0.2" Direction="270" ShadowDepth="3"/>
+            </Border.Effect>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding UpdateVersion, StringFormat='v{0} mevcut'}"
+                               Foreground="White" FontWeight="SemiBold" FontSize="13"/>
+                    <ProgressBar Value="{Binding UpdateDownloadProgress}" Maximum="100"
+                                 Height="3" Margin="0,4,8,0"
+                                 Visibility="{Binding IsUpdateDownloading, Converter={StaticResource BoolToVisibility}}"
+                                 Foreground="White" Background="#4DFFFFFF"/>
+                </StackPanel>
+
+                <ui:Button Grid.Column="1" Content="Güncelle"
+                           Appearance="Light" Padding="12,6"
+                           FontSize="12"
+                           Command="{Binding DownloadAndApplyUpdateCommand}"/>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

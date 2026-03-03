@@ -89,15 +89,15 @@
                            Margin="0,0,0,16"/>
 
                 <!-- PIN Input Box -->
-                <Border BorderBrush="{StaticResource AccentBrush}" 
+                <Border BorderBrush="#D1855C" 
                         BorderThickness="2" CornerRadius="8" 
-                        Padding="12,6" Margin="0,0,0,10" MinWidth="220">
+                        Padding="12,6" Margin="0,0,0,10" MinWidth="280">
                     <Grid>
                         <!-- PIN Dots -->
                         <TextBlock Text="{Binding PinDisplay}"
                                    FontSize="36" FontWeight="Bold"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Foreground="{StaticResource AccentBrush}" />
+                                   Foreground="#D1855C" />
 
                         <!-- Numpad Toggle Button -->
                         <ToggleButton x:Name="NumpadToggle" 
@@ -120,7 +120,7 @@
             </StackPanel>
 
             <!-- Numpad -->
-            <Grid Grid.Row="2" Margin="32,8,32,32" VerticalAlignment="Stretch" MaxWidth="280">
+            <Grid Grid.Row="2" Margin="32,8,32,32" VerticalAlignment="Stretch" MaxWidth="320">
                 <Grid.Style>
                     <Style TargetType="Grid">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -133,14 +133,14 @@
                 </Grid.Style>
                 <Grid.Resources>
                     <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
-                        <Setter Property="FontFamily" Value="Segoe UI Light"/>
+                        <Setter Property="FontFamily" Value="Segoe UI"/>
                         <Setter Property="FontSize" Value="28"/>
-                        <Setter Property="FontWeight" Value="Normal"/>
-                        <Setter Property="Appearance" Value="Transparent"/>
-                        <Setter Property="Margin" Value="4"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="Appearance" Value="Secondary"/>
+                        <Setter Property="Margin" Value="6"/>
                         <Setter Property="HorizontalAlignment" Value="Stretch"/>
                         <Setter Property="VerticalAlignment" Value="Stretch"/>
-                        <Setter Property="CornerRadius" Value="12"/>
+                        <Setter Property="CornerRadius" Value="8"/>
                     </Style>
                 </Grid.Resources>
                 <Grid.RowDefinitions>
@@ -169,7 +169,7 @@
 
                 <!-- Row 4: empty | 0 | backspace -->
                 <ui:Button Grid.Row="3" Grid.Column="1" Content="0" Command="{Binding NumpadCommand}" CommandParameter="0"/>
-                <ui:Button Grid.Row="3" Grid.Column="2" Appearance="Caution" Command="{Binding DeleteCommand}" CornerRadius="8">
+                <ui:Button Grid.Row="3" Grid.Column="2" Background="#D1855C" BorderBrush="#D1855C" Command="{Binding DeleteCommand}" CornerRadius="8">
                     <ui:SymbolIcon Symbol="Backspace24" FontSize="20" Foreground="White"/>
                 </ui:Button>
             </Grid>

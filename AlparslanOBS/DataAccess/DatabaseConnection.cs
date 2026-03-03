@@ -18,6 +18,12 @@ namespace AlparslanOBS.DataAccess
         private static readonly string _dbPath = Path.Combine(_appFolder, "obs.db");
         private static readonly string _connectionString = $"Data Source={_dbPath}";
 
+        // ── Migrasyon Sistemi ───────────────────────────────────────────────
+        // Her yeni DB değişikliğinde:
+        // 1. LatestSchemaVersion'ı artır
+        // 2. RunMigrations içine yeni case ekle
+        private const int LatestSchemaVersion = 1;
+
         /// <summary>
         /// Veritabanı dosyasının ve klasörlerin var olduğundan emin olur.
         /// Bağlantı açıldığında dosya yoksa otomatik oluşturulur.
@@ -53,11 +59,12 @@ namespace AlparslanOBS.DataAccess
                 // İlk çalıştırmada gerekli tabloları oluştur
                 CreateTablesIfNotExist(conn);
                 CreateIndexes(conn);
+                SetSchemaVersion(conn, LatestSchemaVersion);
             }
             else
             {
-                // Mevcut veritabanları için şemayı güncelle
-                EnsureSchemaUpToDate(conn);
+                // Mevcut veritabanları için migrasyonları çalıştır
+                RunMigrations(conn);
             }
         }
 
@@ -178,95 +185,120 @@ namespace AlparslanOBS.DataAccess
             cmd.ExecuteNonQuery();
         }
 
-        /// <summary>
-        /// Mevcut veritabanları için şemayı günceller (yeni sütunlar ekler).
-        /// </summary>
-        private static void EnsureSchemaUpToDate(SqliteConnection conn)
+        // ── Migrasyon Altyapısı ─────────────────────────────────────────────
+
+        private static int GetSchemaVersion(SqliteConnection conn)
         {
             try
             {
-                // Students tablosuna Gender sütunu ekle (yoksa)
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "PRAGMA table_info(Students);";
-                    
-                    using var reader = cmd.ExecuteReader();
-                    bool hasGender = false;
-                    while (reader.Read())
-                    {
-                        var name = reader.GetString(1);
-                        if (name.Equals("Gender", StringComparison.OrdinalIgnoreCase))
-                        {
-                            hasGender = true;
-                            break;
-                        }
-                    }
-                    reader.Close();
-
-                    if (!hasGender)
-                    {
-                        using var alterCmd = conn.CreateCommand();
-                        alterCmd.CommandText = "ALTER TABLE Students ADD COLUMN Gender TEXT;";
-                        alterCmd.ExecuteNonQuery();
-                    }
-                }
-
-                // Teams tablosuna Category sütunu ekle (yoksa)
-                using var cmdTeams = conn.CreateCommand();
-                cmdTeams.CommandText = "PRAGMA table_info(Teams);";
-                
-                using var readerTeams = cmdTeams.ExecuteReader();
-                bool hasCategory = false;
-                while (readerTeams.Read())
-                {
-                    var name = readerTeams.GetString(1);
-                    if (name.Equals("Category", StringComparison.OrdinalIgnoreCase))
-                    {
-                        hasCategory = true;
-                        break;
-                    }
-                }
-                readerTeams.Close();
-
-                if (!hasCategory)
-                {
-                    using var alterCmd = conn.CreateCommand();
-                    alterCmd.CommandText = "ALTER TABLE Teams ADD COLUMN Category TEXT NOT NULL DEFAULT 'Futbol';";
-                    alterCmd.ExecuteNonQuery();
-                }
-
-                // Students tablosuna KunyePdfPath sütunu ekle (yoksa)
-                using (var cmdKunye = conn.CreateCommand())
-                {
-                    cmdKunye.CommandText = "PRAGMA table_info(Students);";
-                    using var readerKunye = cmdKunye.ExecuteReader();
-                    bool hasKunyePdfPath = false;
-                    while (readerKunye.Read())
-                    {
-                        var name = readerKunye.GetString(1);
-                        if (name.Equals("KunyePdfPath", StringComparison.OrdinalIgnoreCase))
-                        {
-                            hasKunyePdfPath = true;
-                            break;
-                        }
-                    }
-                    readerKunye.Close();
-
-                    if (!hasKunyePdfPath)
-                    {
-                        using var alterCmd = conn.CreateCommand();
-                        alterCmd.CommandText = "ALTER TABLE Students ADD COLUMN KunyePdfPath TEXT;";
-                        alterCmd.ExecuteNonQuery();
-                    }
-                }
-
-                // Index'leri yeniden oluştur
-                CreateIndexes(conn);
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT Value FROM Settings WHERE Key = 'SchemaVersion';";
+                var result = cmd.ExecuteScalar();
+                return result is string s && int.TryParse(s, out var v) ? v : 0;
             }
             catch
             {
-                // Şema güncelleme hatalarını sessizce yoksay
+                // Settings tablosu yoksa veya SchemaVersion kaydı yoksa
+                return 0;
             }
+        }
+
+        private static void SetSchemaVersion(SqliteConnection conn, int version)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                INSERT INTO Settings (Key, Value) VALUES ('SchemaVersion', @v)
+                ON CONFLICT(Key) DO UPDATE SET Value = @v;";
+            cmd.Parameters.AddWithValue("@v", version.ToString());
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Bekleyen migrasyonları sırasıyla çalıştırır.
+        /// v0 → v1 → v2 → ... → LatestSchemaVersion
+        /// </summary>
+        private static void RunMigrations(SqliteConnection conn)
+        {
+            var currentVersion = GetSchemaVersion(conn);
+            if (currentVersion >= LatestSchemaVersion) return;
+
+            while (currentVersion < LatestSchemaVersion)
+            {
+                currentVersion++;
+
+                using var tx = conn.BeginTransaction();
+                try
+                {
+                    switch (currentVersion)
+                    {
+                        case 1: Migration_1(conn); break;
+                        // ── Gelecek migrasyonlar buraya eklenir ──
+                        // case 2: Migration_2(conn); break;
+                        // case 3: Migration_3(conn); break;
+                    }
+
+                    SetSchemaVersion(conn, currentVersion);
+                    tx.Commit();
+                }
+                catch
+                {
+                    tx.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        // ── Migrasyonlar ────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Migration 1: v1.0.0 öncesi kullanıcılar için mevcut şema güncellemelerini konsolide eder.
+        /// Gender, Category, KunyePdfPath sütunlarını ekler (yoksa).
+        /// </summary>
+        private static void Migration_1(SqliteConnection conn)
+        {
+            AddColumnIfNotExists(conn, "Students", "Gender", "TEXT");
+            AddColumnIfNotExists(conn, "Teams", "Category", "TEXT NOT NULL DEFAULT 'Futbol'");
+            AddColumnIfNotExists(conn, "Students", "KunyePdfPath", "TEXT");
+            CreateIndexes(conn);
+        }
+
+        // ── ÖRNEK: Gelecekte yeni tablo/sütun eklemek istediğinizde ─────────
+        //
+        // private static void Migration_2(SqliteConnection conn)
+        // {
+        //     using var cmd = conn.CreateCommand();
+        //     cmd.CommandText = @"
+        //         CREATE TABLE IF NOT EXISTS Notes (
+        //             Id INTEGER PRIMARY KEY AUTOINCREMENT,
+        //             StudentNumber TEXT NOT NULL,
+        //             Content TEXT NOT NULL,
+        //             CreatedAt TEXT NOT NULL,
+        //             FOREIGN KEY(StudentNumber) REFERENCES Students(StudentNumber) ON DELETE CASCADE
+        //         );
+        //         CREATE INDEX IF NOT EXISTS idx_notes_student ON Notes(StudentNumber);";
+        //     cmd.ExecuteNonQuery();
+        // }
+
+        /// <summary>
+        /// Tabloya sütun ekler (yoksa). Migrasyon metotlarından çağrılır.
+        /// </summary>
+        private static void AddColumnIfNotExists(
+            SqliteConnection conn, string table, string column, string definition)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = $"PRAGMA table_info({table});";
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                if (reader.GetString(1).Equals(column, StringComparison.OrdinalIgnoreCase))
+                    return;
+            }
+            reader.Close();
+
+            using var alterCmd = conn.CreateCommand();
+            alterCmd.CommandText = $"ALTER TABLE {table} ADD COLUMN {column} {definition};";
+            alterCmd.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -329,14 +361,14 @@ namespace AlparslanOBS.DataAccess
                     cmd.CommandText = "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;";
                     cmd.ExecuteNonQuery();
 
-                    // PIN hariç tüm verileri sil
+                    // PIN ve SchemaVersion hariç tüm verileri sil
                     cmd.CommandText = @"
                         DELETE FROM TeamMembers;
                         DELETE FROM Teams;
                         DELETE FROM Favorites;
                         DELETE FROM Guardians;
                         DELETE FROM Students;
-                        DELETE FROM Settings WHERE Key != 'PIN';
+                        DELETE FROM Settings WHERE Key NOT IN ('PIN', 'SchemaVersion');
                     ";
                     cmd.ExecuteNonQuery();
 

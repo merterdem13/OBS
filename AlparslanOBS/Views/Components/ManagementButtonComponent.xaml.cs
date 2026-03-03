@@ -220,66 +220,76 @@ namespace AlparslanOBS.Views.Components
 
         #region System Reset
 
-        private void ResetSystem_Click(object sender, RoutedEventArgs e)
+        private async void ResetSystem_Click(object sender, RoutedEventArgs e)
         {
             ToggleMenu();
 
-            var result1 = MessageBox.Show(
-                "Sistemi sıfırlamak istediğinizden emin misiniz?\n\n" +
-                "Bu işlem:\n" +
-                "• Tüm öğrenci verilerini\n" +
-                "• Tüm takımları\n" +
-                "• Tüm favorileri\n" +
-                "• Tüm fotoğrafları\n\n" +
-                "KALICI OLARAK SİLECEKTİR!\n\n" +
-                "(PIN ayarı korunacaktır)",
-                "⚠️ Sistemi Sıfırla - 1. Onay",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning
-            );
-
-            if (result1 != MessageBoxResult.Yes)
+            var dialog = GetConfirmDialog();
+            if (dialog == null)
                 return;
 
-            var result2 = MessageBox.Show(
-                "SON UYARI!\n\n" +
-                "Bu işlem GERİ ALINAMAZ!\n\n" +
-                "Devam etmek istediğinizden EMİN MİSİNİZ?",
-                "⚠️ Sistemi Sıfırla - 2. Onay",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Stop
-            );
+            var firstConfirm = await dialog.ShowAsync(
+                "Sistemi Sıfırla",
+                "Sistemi sıfırlamak istediğinizden emin misiniz?\n\n" +
+                "• Tüm öğrenci verileri\n" +
+                "• Tüm takımlar\n" +
+                "• Tüm favoriler\n" +
+                "• Tüm fotoğraflar\n\n" +
+                "kalıcı olarak silinecektir.\n(PIN ayarı korunacaktır)",
+                confirmText: "Devam Et",
+                cancelText: "Vazgeç");
 
-            if (result2 == MessageBoxResult.Yes)
+            if (!firstConfirm)
+                return;
+
+            var secondConfirm = await dialog.ShowAsync(
+                "Son Uyarı",
+                "Bu işlem GERİ ALINAMAZ!\n\nDevam etmek istediğinizden emin misiniz?",
+                confirmText: "Evet, Sıfırla",
+                cancelText: "İptal",
+                icon: Wpf.Ui.Controls.SymbolRegular.ErrorCircle24,
+                iconColor: "#ef4444");
+
+            if (!secondConfirm)
+                return;
+
+            try
             {
-                try
+                var window = Window.GetWindow(this);
+                if (window is Views.MainWindow mainWindow)
                 {
-                    var window = Window.GetWindow(this);
-                    if (window is Views.MainWindow mainWindow)
+                    if (mainWindow.DataContext is ViewModels.MainViewModel vm)
                     {
-                        if (mainWindow.DataContext is ViewModels.MainViewModel vm)
-                        {
-                            vm.ClearAllStudents();
-                        }
+                        vm.ClearAllStudents();
                     }
-
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
-
-                    _resetService.ResetSystem();
-
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        ToastService.ShowSuccess("Sistem başarıyla sıfırlandı!");
-                        RefreshMainViewModel();
-                    });
                 }
-                catch (Exception ex)
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
+                _resetService.ResetSystem();
+
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    ToastService.ShowError($"Sistem sıfırlama hatası: {ex.Message}");
-                }
+                    ToastService.ShowSuccess("Sistem başarıyla sıfırlandı!");
+                    RefreshMainViewModel();
+                });
             }
+            catch (Exception ex)
+            {
+                ToastService.ShowError($"Sistem sıfırlama hatası: {ex.Message}");
+            }
+        }
+
+        private ConfirmDialogOverlay? GetConfirmDialog()
+        {
+            var window = Window.GetWindow(this);
+            if (window is Views.MainWindow mainWindow)
+            {
+                return mainWindow.ConfirmDialog;
+            }
+            return null;
         }
 
         #endregion
