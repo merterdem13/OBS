@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OBS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f16cfa5f8aa641067b76968c9c81bc50144dbf2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a0e27067a8bae38a8856875233a3217eeb591943")]
 [assembly: System.Reflection.AssemblyProductAttribute("OBS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OBS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
