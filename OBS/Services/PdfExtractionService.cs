@@ -148,6 +148,13 @@ namespace OBS.Services
             {
                 System.Diagnostics.Debug.WriteLine($"PDF Ayrıştırma Hatası: {ex.Message}");
             }
+            finally
+            {
+                // PDF nesneleri LOH (Large Object Heap)'ta şişkinlik yaratabiliyor.
+                // Künye okuması bittiğinde belleği zorunlu temizle.
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                GC.WaitForPendingFinalizers();
+            }
 
             return results;
         }
@@ -239,6 +246,12 @@ namespace OBS.Services
             {
                 System.Diagnostics.Debug.WriteLine($"❌ PDF Split genel hata: {ex.Message}");
             }
+            finally
+            {
+                // Parçalama işlemi(Split) bittikten sonra belleğin rahatlatılması için
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                GC.WaitForPendingFinalizers();
+            }
 
             return savedPaths;
         }
@@ -290,6 +303,11 @@ namespace OBS.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Sınıf Listesi Ayrıştırma Hatası: {ex.Message}");
+            }
+            finally
+            {
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                GC.WaitForPendingFinalizers();
             }
 
             return results;
