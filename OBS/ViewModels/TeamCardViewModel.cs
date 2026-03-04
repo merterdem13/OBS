@@ -34,6 +34,9 @@ namespace OBS.ViewModels
         [ObservableProperty]
         private bool _isRemoving;
 
+        [ObservableProperty]
+        private bool _isDeleteConfirming;
+
         public Team GetModel() => _team;
     }
 }

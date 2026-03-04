@@ -6,5 +6,13 @@ namespace OBS.Views.Components
         {
             InitializeComponent();
         }
+
+        private void OnMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (DataContext is ViewModels.TeamCardViewModel vm && vm.IsDeleteConfirming)
+            {
+                vm.IsDeleteConfirming = false;
+            }
+        }
     }
 }

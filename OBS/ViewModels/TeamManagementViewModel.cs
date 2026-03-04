@@ -83,13 +83,18 @@ namespace OBS.ViewModels
         {
             if (team is null) return;
 
-            var result = MessageBox.Show(
-                $"\"{team.TeamName}\" takımı silinecek.\n\nDevam etmek istiyor musunuz?",
-                "Takımı Sil",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+            if (!team.IsDeleteConfirming)
+            {
+                // Reset any other team currently confirming
+                foreach (var t in Teams)
+                {
+                    if (t.Id != team.Id)
+                        t.IsDeleteConfirming = false;
+                }
 
-            if (result != MessageBoxResult.Yes) return;
+                team.IsDeleteConfirming = true;
+                return;
+            }
 
             try
             {
