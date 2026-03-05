@@ -116,12 +116,15 @@
                 </ui:Button>
 
                 <ui:Button ToolTip="Takımı Sil"
+                           ClipToBounds="True"
                            Command="{Binding DataContext.DeleteTeamCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                            CommandParameter="{Binding}">
                     <ui:Button.Style>
                         <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
                             <Setter Property="Appearance" Value="Secondary"/>
-                            <Setter Property="Padding" Value="6,4"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Width" Value="32"/>
+                            <Setter Property="Height" Value="28"/>
                             <Setter Property="Content">
                                 <Setter.Value>
                                     <ui:SymbolIcon Symbol="Delete24" FontSize="16"/>
@@ -130,8 +133,29 @@
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsDeleteConfirming}" Value="True">
                                     <Setter Property="Appearance" Value="Danger"/>
-                                    <Setter Property="Padding" Value="12,4"/>
                                     <Setter Property="Content" Value="Emin misiniz?"/>
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width" From="32" To="105" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <CubicEase EasingMode="EaseOut"/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width" From="105" To="32" Duration="0:0:0.2">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <CubicEase EasingMode="EaseIn"/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

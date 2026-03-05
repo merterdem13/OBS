@@ -102,5 +102,8 @@
         <!-- Onay Diyaloğu Katmanı -->
         <components:ConfirmDialogOverlay x:Name="ConfirmDialog" Grid.RowSpan="3" Panel.ZIndex="300"/>
 
+        <!-- Güncelleme Notları Katmanı -->
+        <components:ReleaseNotesOverlay x:Name="ReleaseNotesOverlay" Grid.RowSpan="3" Panel.ZIndex="350"/>
+
     </Grid>
 </ui:FluentWindow>

@@ -3,7 +3,6 @@ C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\C
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\EmptyStateComponent.baml
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\ManagementButtonComponent.baml
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\TeamCardComponent.baml
-C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\CreateTeamWindow.baml
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\LoginWindow.baml
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\App.g.cs
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\ConfirmDialogOverlay.g.cs
@@ -15,8 +14,6 @@ C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\M
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\SearchFilterComponent.g.cs
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\StudentCardComponent.g.cs
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\TeamCardComponent.g.cs
-C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\CreateTeamWindow.g.cs
-C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\EditTeamWindow.g.cs
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\LoginWindow.g.cs
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\MainWindow.g.cs
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\TeamDetailWindow.g.cs
@@ -101,7 +98,6 @@ C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\F
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\LoadingOverlay.baml
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\SearchFilterComponent.baml
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\StudentCardComponent.baml
-C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\EditTeamWindow.baml
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\MainWindow.baml
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\TeamDetailWindow.baml
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\TeamManagementWindow.baml
@@ -117,3 +113,11 @@ C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\refint\OBS.dll
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\OBS.pdb
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\OBS.genruntimeconfig.cache
 C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\ref\OBS.dll
+c:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\EditTeamComponent.g.cs
+c:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\EditTeamComponent.baml
+c:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\CreateTeamComponent.baml
+c:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\CreateTeamComponent.g.cs
+C:\Users\mertm\source\repos\OBS\OBS\bin\Debug\net10.0-windows\ReleaseNotes.json
+C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\OBS_Content.g.cs
+C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\ReleaseNotesOverlay.baml
+C:\Users\mertm\source\repos\OBS\OBS\obj\Debug\net10.0-windows\Views\Components\ReleaseNotesOverlay.g.cs

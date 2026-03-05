@@ -1,41 +1,56 @@
-<ui:FluentWindow x:Class="OBS.Views.EditTeamWindow"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:converters="clr-namespace:OBS.Converters"
-    Title="Takım Düzenle"
-    Width="420" Height="620"
-    ResizeMode="NoResize"
-    WindowStartupLocation="CenterOwner"
-    Icon="pack://application:,,,/Assets/app.ico"
-    ExtendsContentIntoTitleBar="True"
-    Background="#F4F3F1">
+<UserControl x:Class="OBS.Views.Components.EditTeamComponent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:converters="clr-namespace:OBS.Converters"
+             Background="Transparent">
 
-    <ui:FluentWindow.Resources>
+    <UserControl.Resources>
         <converters:PathToImageConverter x:Key="PathToImage"/>
-    </ui:FluentWindow.Resources>
+    </UserControl.Resources>
 
-    <Grid Margin="20">
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/> <!-- Üst Bar (Geri + Başlık) -->
+            <RowDefinition Height="Auto"/> <!-- Takım Adı -->
+            <RowDefinition Height="Auto"/> <!-- Öğrenci Arama -->
+            <RowDefinition Height="Auto"/> <!-- Arama Sonuçları -->
+            <RowDefinition Height="Auto"/> <!-- Mevcut Üyeler Başlığı -->
+            <RowDefinition Height="*"/>    <!-- Mevcut Üyeler Listesi -->
         </Grid.RowDefinitions>
 
-        <!-- Başlık -->
-        <TextBlock Grid.Row="0"
-                   Text="Takım Düzenle"
-                   FontSize="20" FontWeight="Bold"
-                   Foreground="{StaticResource TextPrimaryBrush}"
-                   Margin="0,28,0,16"
-                   HorizontalAlignment="Center"/>
+        <!-- Üst Bar: Geri Butonu + Başlık -->
+        <Grid Grid.Row="0" Margin="12,8,12,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/> <!-- Düzenin bozulmaması için yer tutucu -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Geri Butonu -->
+            <ui:Button Grid.Column="0"
+                       Appearance="Secondary"
+                       Padding="8,6"
+                       ToolTip="Düzenlemeyi Bitir"
+                       Click="OnCloseClick">
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Symbol="ArrowLeft24"/>
+                </ui:Button.Icon>
+            </ui:Button>
+
+            <!-- Başlık -->
+            <TextBlock Grid.Column="1"
+                       Text="Takım Düzenle"
+                       FontSize="16" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimaryBrush}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            
+            <!-- Sağ Tarafı Dengelemek İçin Boşluk (Opsiyonel) -->
+            <ContentControl Grid.Column="2" Width="36"/>
+        </Grid>
 
         <!-- Takım Adı Düzenleme -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,14">
+        <StackPanel Grid.Row="1" Margin="12,12,12,14">
             <TextBlock Text="Takım Adı"
                        FontSize="12" FontWeight="SemiBold"
                        Foreground="{StaticResource TextSecondaryBrush}"
@@ -63,7 +78,7 @@
         </StackPanel>
 
         <!-- Öğrenci Arama -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,8">
+        <StackPanel Grid.Row="2" Margin="12,0,12,8">
             <TextBlock Text="Öğrenci Ekle"
                        FontSize="12" FontWeight="SemiBold"
                        Foreground="{StaticResource TextSecondaryBrush}"
@@ -101,7 +116,7 @@
                 CornerRadius="6"
                 MaxHeight="160"
                 Visibility="Collapsed"
-                Margin="0,0,0,12">
+                Margin="12,0,12,12">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="8" Opacity="0.1" Direction="270" ShadowDepth="2"/>
             </Border.Effect>
@@ -171,7 +186,7 @@
                    x:Name="MembersHeader"
                    FontSize="12" FontWeight="SemiBold"
                    Foreground="{StaticResource TextSecondaryBrush}"
-                   Margin="0,0,0,6"/>
+                   Margin="12,0,12,6"/>
 
         <!-- Mevcut Üyeler Listesi -->
         <ListBox Grid.Row="5"
@@ -180,7 +195,7 @@
                  BorderThickness="0"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  SelectionMode="Single"
-                 Padding="0">
+                 Padding="12,0,12,0">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -255,20 +270,5 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-
-        <!-- Kapat Butonu -->
-        <ui:Button Grid.Row="6"
-                   Content="Kapat"
-                   Appearance="Secondary"
-                   HorizontalAlignment="Stretch"
-                   Padding="12,10"
-                   FontSize="14"
-                   FontWeight="SemiBold"
-                   Margin="0,10,0,0"
-                   Click="OnCloseClick">
-            <ui:Button.Icon>
-                <ui:SymbolIcon Symbol="Dismiss24"/>
-            </ui:Button.Icon>
-        </ui:Button>
     </Grid>
-</ui:FluentWindow>
+</UserControl>

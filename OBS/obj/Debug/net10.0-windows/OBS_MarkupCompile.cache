@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WİNDOWS7_0_OR_GREATER
 
-161188917777
-
-56-1196775294
+17-832523274
+1-258089517
+59-86720991
 250-67949535
-App.xaml;Views\Components\ConfirmDialogOverlay.xaml;Views\Components\EmptyStateComponent.xaml;Views\Components\FavoritesPanelComponent.xaml;Views\Components\FloatingActionPanel.xaml;Views\Components\LoadingOverlay.xaml;Views\Components\ManagementButtonComponent.xaml;Views\Components\SearchFilterComponent.xaml;Views\Components\StudentCardComponent.xaml;Views\Components\TeamCardComponent.xaml;Views\CreateTeamWindow.xaml;Views\EditTeamWindow.xaml;Views\LoginWindow.xaml;Views\MainWindow.xaml;Views\TeamDetailWindow.xaml;Views\TeamManagementWindow.xaml;
+App.xaml;Views\Components\ConfirmDialogOverlay.xaml;Views\Components\CreateTeamComponent.xaml;Views\Components\EditTeamComponent.xaml;Views\Components\EmptyStateComponent.xaml;Views\Components\FavoritesPanelComponent.xaml;Views\Components\FloatingActionPanel.xaml;Views\Components\LoadingOverlay.xaml;Views\Components\ManagementButtonComponent.xaml;Views\Components\ReleaseNotesOverlay.xaml;Views\Components\SearchFilterComponent.xaml;Views\Components\StudentCardComponent.xaml;Views\Components\TeamCardComponent.xaml;Views\LoginWindow.xaml;Views\MainWindow.xaml;Views\TeamDetailWindow.xaml;Views\TeamManagementWindow.xaml;
 
 False
 

@@ -31,7 +31,7 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "OBS",
+              "Title": "OBS.csproj",
               "DocumentMoniker": "C:\\Users\\mertm\\source\\repos\\OBS\\OBS\\OBS.csproj",
               "RelativeDocumentMoniker": "OBS\\OBS.csproj",
               "ToolTip": "C:\\Users\\mertm\\source\\repos\\OBS\\OBS\\OBS.csproj",
@@ -51,8 +51,7 @@
               "RelativeToolTip": "OBS\\App.xaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-04T15:31:57.79Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-04T15:31:57.79Z"
             },
             {
               "$type": "Document",
@@ -63,12 +62,7 @@
               "ToolTip": "C:\\Users\\mertm\\source\\repos\\OBS\\OBS\\App.xaml",
               "RelativeToolTip": "OBS\\App.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-03-04T15:31:49.609Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+              "WhenOpened": "2026-03-04T15:31:49.609Z"
             }
           ]
         }

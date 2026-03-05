@@ -13,6 +13,10 @@
     ExtendsContentIntoTitleBar="True"
     Background="#F4F3F1">
 
+    <ui:FluentWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </ui:FluentWindow.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -41,7 +45,20 @@
         </ui:TitleBar>
 
         <!-- SATIR 1 — Üst Bar: Geri + Takım Oluştur -->
-        <Grid Grid.Row="1" Margin="12,8,12,6">
+        <Grid x:Name="TopBarGrid" Grid.Row="1" Margin="12,8,12,6" IsVisibleChanged="OnElementIsVisibleChanged">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEditingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsCreatingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -83,15 +100,27 @@
                 <Style TargetType="TextBlock">
                     <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Teams.Count}" Value="0">
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding Teams.Count}" Value="0"/>
+                                <Condition Binding="{Binding IsEditingTeam}" Value="False"/>
+                                <Condition Binding="{Binding IsCreatingTeam}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
                             <Setter Property="Visibility" Value="Visible"/>
+                        </MultiDataTrigger>
+                        <DataTrigger Binding="{Binding IsEditingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsCreatingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </TextBlock.Style>
         </TextBlock>
 
-        <ListBox Grid.Row="2"
+        <ListBox x:Name="TeamsListBox"
+                 Grid.Row="2"
                  ItemsSource="{Binding Teams}"
                  VirtualizingPanel.IsVirtualizing="True"
                  VirtualizingPanel.VirtualizationMode="Recycling"
@@ -103,7 +132,21 @@
                  BorderThickness="0"
                  Padding="12,4,12,4"
                  SelectionMode="Single"
-                 IsTabStop="False">
+                 IsTabStop="False"
+                 IsVisibleChanged="OnElementIsVisibleChanged">
+            <ListBox.Style>
+                <Style TargetType="ListBox">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEditingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsCreatingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListBox.Style>
             <ListBox.Resources>
                 <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
                     <Setter Property="Width" Value="6"/>
@@ -131,5 +174,18 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+
+        <components:EditTeamComponent x:Name="InlineEditComponent"
+                                      Grid.Row="1" Grid.RowSpan="2"
+                                      Visibility="{Binding IsEditingTeam, Converter={StaticResource BoolToVis}}"
+                                      DataContext="{Binding}"
+                                      EditClosed="InlineEditComponent_EditClosed"
+                                      IsVisibleChanged="OnElementIsVisibleChanged" />
+
+        <components:CreateTeamComponent x:Name="InlineCreateComponent"
+                                        Grid.Row="1" Grid.RowSpan="2"
+                                        Visibility="{Binding IsCreatingTeam, Converter={StaticResource BoolToVis}}"
+                                        CreateClosed="InlineCreateComponent_CreateClosed"
+                                        IsVisibleChanged="OnElementIsVisibleChanged" />
     </Grid>
 </ui:FluentWindow>

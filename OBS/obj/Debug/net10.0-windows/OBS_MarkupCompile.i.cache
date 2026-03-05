@@ -16,5 +16,5 @@ TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_O
 250-67949535
 App.xaml;Views\Components\ConfirmDialogOverlay.xaml;Views\Components\EmptyStateComponent.xaml;Views\Components\FavoritesPanelComponent.xaml;Views\Components\FloatingActionPanel.xaml;Views\Components\LoadingOverlay.xaml;Views\Components\ManagementButtonComponent.xaml;Views\Components\SearchFilterComponent.xaml;Views\Components\StudentCardComponent.xaml;Views\Components\TeamCardComponent.xaml;Views\CreateTeamWindow.xaml;Views\EditTeamWindow.xaml;Views\LoginWindow.xaml;Views\MainWindow.xaml;Views\TeamDetailWindow.xaml;Views\TeamManagementWindow.xaml;
 
-False
+True
 

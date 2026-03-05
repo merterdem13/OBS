@@ -21,6 +21,15 @@ namespace OBS.ViewModels
         [ObservableProperty]
         private bool _isTopmost = true;
 
+        [ObservableProperty]
+        private bool _isEditingTeam = false;
+
+        [ObservableProperty]
+        private bool _isCreatingTeam = false;
+
+        [ObservableProperty]
+        private TeamCardViewModel? _editingTeam;
+
         public TeamManagementViewModel()
         {
             _teamRepo = new TeamRepository();
@@ -33,11 +42,14 @@ namespace OBS.ViewModels
         [RelayCommand]
         private void OpenCreateTeam()
         {
-            var dialog = new Views.CreateTeamWindow();
-            dialog.Owner = Application.Current.Windows.OfType<Views.TeamManagementWindow>().FirstOrDefault();
-            var result = dialog.ShowDialog();
+            IsCreatingTeam = true;
+        }
 
-            if (result == true)
+        public void CloseCreateView(bool hasChanges)
+        {
+            IsCreatingTeam = false;
+
+            if (hasChanges)
             {
                 RefreshTeams();
             }
@@ -68,11 +80,16 @@ namespace OBS.ViewModels
         {
             if (team is null) return;
 
-            var dialog = new Views.EditTeamWindow(team.Id, team.TeamName, team.Category);
-            dialog.Owner = Application.Current.Windows.OfType<Views.TeamManagementWindow>().FirstOrDefault();
-            dialog.ShowDialog();
+            EditingTeam = team;
+            IsEditingTeam = true;
+        }
 
-            if (dialog.HasChanges)
+        public void CloseEditView(bool hasChanges)
+        {
+            IsEditingTeam = false;
+            EditingTeam = null;
+
+            if (hasChanges)
             {
                 RefreshTeams();
             }

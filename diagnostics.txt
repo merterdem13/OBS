@@ -1,0 +1,7 @@
+c:\Users\mertm\source\repos\OBS\OBS\Views\Components\CreateTeamComponent.xaml.cs(223,44): error CS1061: 'StudentRepository' does not contain a definition for 'GetByNumber' and no accessible extension method 'GetByNumber' accepting a first argument of type 'StudentRepository' could be found (are you missing a using directive or an assembly reference?) [c:\Users\mertm\source\repos\OBS\OBS\OBS_fbtuj2kw_wpftmp.csproj]
+
+Build FAILED.
+    18 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:02.91

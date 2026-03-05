@@ -105,7 +105,7 @@ namespace OBS.Views {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/OBS;component/views/editteamwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/OBS;V1.0.0.0;component/views/editteamwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Views\EditTeamWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

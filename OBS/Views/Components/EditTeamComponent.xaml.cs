@@ -9,37 +9,47 @@ using System.Windows.Input;
 using OBS.DataAccess;
 using OBS.Models;
 using OBS.Services;
+using OBS.ViewModels;
 
-namespace OBS.Views
+namespace OBS.Views.Components
 {
-    public partial class EditTeamWindow
+    public partial class EditTeamComponent : UserControl
     {
-        private readonly TeamRepository _teamRepo;
-        private readonly StudentRepository _studentRepo;
-        private readonly FavoriteRepository _favoriteRepo;
-        private readonly int _teamId;
-        private readonly string _originalName;
-        private readonly string _category;
-        private readonly string? _requiredGender;
+        private TeamRepository? _teamRepo;
+        private StudentRepository? _studentRepo;
+        private FavoriteRepository? _favoriteRepo;
+        private int _teamId;
+        private string _originalName = string.Empty;
+        private string _category = string.Empty;
+        private string? _requiredGender;
         private CancellationTokenSource? _searchCts;
         private HashSet<string> _currentMemberNumbers = new();
         private bool _isFavoritesMode;
 
+        public event EventHandler<bool>? EditClosed; // true if HasChanges
         public bool HasChanges { get; private set; }
 
-        public EditTeamWindow(int teamId, string teamName, string category)
+        public EditTeamComponent()
         {
             InitializeComponent();
+        }
 
+        public void LoadTeam(TeamCardViewModel team)
+        {
             _teamRepo = new TeamRepository();
             _studentRepo = new StudentRepository();
             _favoriteRepo = new FavoriteRepository();
-            _teamId = teamId;
-            _originalName = teamName;
-            _category = category;
-            _requiredGender = ResolveRequiredGender(category);
 
-            TeamNameBox.Text = teamName;
+            _teamId = team.Id;
+            _originalName = team.TeamName;
+            _category = team.Category;
+            _requiredGender = ResolveRequiredGender(_category);
+
+            TeamNameBox.Text = _originalName;
+            HasChanges = false;
+            _isFavoritesMode = false;
+            SearchBox.Text = string.Empty;
+            SearchResultsBorder.Visibility = Visibility.Collapsed;
 
             RefreshMembers();
         }
@@ -67,6 +77,8 @@ namespace OBS.Views
                 return;
             }
 
+            if (_teamRepo == null) return;
+
             if (newName != _originalName && _teamRepo.Exists(newName))
             {
                 ToastService.ShowError("Bu isimde bir takım zaten mevcut.");
@@ -76,6 +88,7 @@ namespace OBS.Views
             _teamRepo.UpdateName(_teamId, newName);
             HasChanges = true;
             ToastService.ShowSuccess("Takım adı güncellendi.");
+            _originalName = newName; // Update original name to prevent exist check on subsequent saves
         }
 
         private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
@@ -94,6 +107,8 @@ namespace OBS.Views
                 SearchResultsList.ItemsSource = null;
                 return;
             }
+
+            if (_studentRepo == null) return;
 
             try
             {
@@ -121,6 +136,8 @@ namespace OBS.Views
 
         private void OnShowFavoritesClick(object sender, RoutedEventArgs e)
         {
+            if (_favoriteRepo == null || _studentRepo == null) return;
+
             var favoriteNumbers = _favoriteRepo.GetAllFavoriteStudentNumbers();
             if (favoriteNumbers.Count == 0)
             {
@@ -161,6 +178,8 @@ namespace OBS.Views
         {
             if (sender is FrameworkElement element && element.Tag is string studentNumber)
             {
+                if (_teamRepo == null) return;
+
                 _teamRepo.RemoveMember(_teamId, studentNumber);
                 HasChanges = true;
                 RefreshMembers();
@@ -171,6 +190,8 @@ namespace OBS.Views
 
         private void AddStudentToTeam(string studentNumber)
         {
+            if (_teamRepo == null) return;
+
             try
             {
                 // Kural 4: Başka takımda mı kontrol et
@@ -201,6 +222,8 @@ namespace OBS.Views
         /// </summary>
         private List<Student> FilterSearchResults(IEnumerable<Student> rawResults)
         {
+            if (_teamRepo == null) return new List<Student>();
+
             return rawResults
                 .Where(s => !_currentMemberNumbers.Contains(s.StudentNumber))
                 .Where(s => _requiredGender == null || string.Equals(s.Gender, _requiredGender, StringComparison.OrdinalIgnoreCase))
@@ -211,6 +234,8 @@ namespace OBS.Views
 
         private void RefreshMembers()
         {
+            if (_teamRepo == null) return;
+
             var members = _teamRepo.GetMembers(_teamId);
             _currentMemberNumbers = new HashSet<string>(members.Select(m => m.StudentNumber));
             MembersList.ItemsSource = members;
@@ -233,6 +258,8 @@ namespace OBS.Views
                 return;
             }
 
+            if (_studentRepo == null) return;
+
             var results = FilterSearchResults(_studentRepo.Search(keyword));
 
             SearchResultsList.ItemsSource = results;
@@ -243,6 +270,8 @@ namespace OBS.Views
 
         private void RefreshFavoriteResults()
         {
+            if (_favoriteRepo == null || _studentRepo == null) return;
+
             var favoriteNumbers = _favoriteRepo.GetAllFavoriteStudentNumbers();
             var allStudents = _studentRepo.GetAll().ToDictionary(s => s.StudentNumber);
             var favoriteStudents = favoriteNumbers
@@ -264,8 +293,7 @@ namespace OBS.Views
 
         private void OnCloseClick(object sender, RoutedEventArgs e)
         {
-            DialogResult = HasChanges;
-            Close();
+            EditClosed?.Invoke(this, HasChanges);
         }
     }
 }

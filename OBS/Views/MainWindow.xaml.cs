@@ -30,7 +30,7 @@ namespace OBS.Views
                 title.Contains("Son") ? "#ef4444" : "#f97316");
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Opacity = 0;
             var sb = new Storyboard();
@@ -46,6 +46,40 @@ namespace OBS.Views
             Storyboard.SetTarget(anim, this);
             Storyboard.SetTargetProperty(anim, new PropertyPath("Opacity"));
             sb.Begin();
+
+            // Sürüm Notları (Release Notes) Kontrolü (Giriş animasyonundan hemen sonra)
+            await Task.Delay(500);
+            CheckAndShowReleaseNotes();
+        }
+
+        private async void CheckAndShowReleaseNotes()
+        {
+            try
+            {
+                var releaseNotesPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ReleaseNotes.json");
+                if (System.IO.File.Exists(releaseNotesPath))
+                {
+                    var json = System.IO.File.ReadAllText(releaseNotesPath);
+                    var viewModel = Newtonsoft.Json.JsonConvert.DeserializeObject<ViewModels.ReleaseNotesViewModel>(json);
+
+                    if (viewModel != null && !string.IsNullOrEmpty(viewModel.Version))
+                    {
+                        var lastSeenVersion = Helpers.LocalSettings.Current.LastSeenReleaseNotesVersion;
+
+                        if (string.IsNullOrEmpty(lastSeenVersion) || lastSeenVersion != viewModel.Version)
+                        {
+                            await ReleaseNotesOverlay.ShowAsync(viewModel);
+
+                            Helpers.LocalSettings.Current.LastSeenReleaseNotesVersion = viewModel.Version;
+                            Helpers.LocalSettings.Save();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Release notes gösterilirken hata oluştu: {ex.Message}");
+            }
         }
 
         private void OnStudentListScrollChanged(object sender, ScrollChangedEventArgs e)

@@ -1,0 +1,10 @@
+{
+  "Version": "2.1.0",
+  "Date": "2026-03-05",
+  "Features": [
+    "Takım ekleme ekranında öğrencileri doğrudan arayıp ekleyebilme özelliği geldi.",
+    "Takım Ekleme ve Takım Silme arayüz iyileştirmeleri yapıldı.",
+    "Takım Silme işlemi için daha güvenli satır içi (inline) onay eklendi.",
+    "Güncelleme Notları arayüzü eklendi."
+  ]
+}
