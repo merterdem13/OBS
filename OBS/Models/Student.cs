@@ -18,32 +18,32 @@ namespace OBS.Models
         /// KİTİK BİLGİ: Bu alan veritabanında UNIQUE (benzersiz) olacaktır. 
         /// Sisteme aynı numaralı bir öğrenci eklendiğinde (Merge işlemi), yeni kayıt açılmayacak, mevcut kayıt güncellenecektir.
         /// </summary>
-        public string StudentNumber { get; set; }
+        public string StudentNumber { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrencinin tam adı (Adı ve Soyadı).
         /// </summary>
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrencinin adı.
         /// </summary>
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrencinin soyadı.
         /// </summary>
-        public string LastName { get; set; }
+        public string LastName { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrencinin şube/sınıf bilgisi (Örn: "10-A", "12-C").
         /// </summary>
-        public string ClassName { get; set; }
+        public string ClassName { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrencinin sınıf seviyesi (string formatında).
         /// </summary>
-        public string Class { get; set; }
+        public string Class { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrencinin sınıf numarası.
@@ -53,7 +53,7 @@ namespace OBS.Models
         /// <summary>
         /// Öğrencinin kimlik numarası (TC No).
         /// </summary>
-        public string TcNo { get; set; }
+        public string TcNo { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrencinin doğum tarihi.
@@ -63,19 +63,19 @@ namespace OBS.Models
         /// <summary>
         /// Öğrencinin cinsiyeti.
         /// </summary>
-        public string Gender { get; set; }
+        public string Gender { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrencinin fotoğrafının fiziksel diskteki yolu.
         /// KURAL: Fotoğraflar 'AppData\Local\OBS_System\Photos' dizininde 'slugify' (temizlenmiş isim) formatıyla saklanır.
         /// </summary>
-        public string PhotoPath { get; set; }
+        public string PhotoPath { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrencinin künye PDF dosyasının fiziksel diskteki yolu.
         /// PDF'ler 'AppData\Local\OBS_System\Students' dizininde saklanır.
         /// </summary>
-        public string KunyePdfPath { get; set; }
+        public string KunyePdfPath { get; set; } = string.Empty;
 
         /// <summary>
         /// Öğrenciye ait velinin veritabanındaki kimliği (Foreign Key).
@@ -90,6 +90,6 @@ namespace OBS.Models
         /// <summary>
         /// Arayüzde veli adını doğrudan göstermek için kullanılan yardımcı alan (Veritabanında tablo kolonu değildir).
         /// </summary>
-        public string GuardianName { get; set; }
+        public string GuardianName { get; set; } = string.Empty;
     }
 }

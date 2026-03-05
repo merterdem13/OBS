@@ -16,6 +16,12 @@ namespace OBS.ViewModels
         [ObservableProperty]
         private List<string> _features = new();
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasCriticalWarning))]
+        private string? _criticalWarning;
+
+        public bool HasCriticalWarning => !string.IsNullOrWhiteSpace(CriticalWarning);
+
         public Action? CloseAction { get; set; }
 
         [RelayCommand]

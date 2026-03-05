@@ -5,6 +5,8 @@
              Visibility="Collapsed">
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        
         <Storyboard x:Key="FadeInStoryboard">
             <DoubleAnimation Storyboard.TargetName="Backdrop"
                              Storyboard.TargetProperty="Opacity"
@@ -72,6 +74,15 @@
                     <TextBlock Text=" • " FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" />
                     <TextBlock Text="{Binding Date}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" />
                 </StackPanel>
+
+                <!-- Critical Warning Section (Optional) -->
+                <Border Background="#15EF4444" BorderBrush="#EF4444" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16"
+                        Visibility="{Binding HasCriticalWarning, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Warning24" FontSize="20" Foreground="#EF4444" Margin="0,0,12,0" VerticalAlignment="Top"/>
+                        <TextBlock Text="{Binding CriticalWarning}" TextWrapping="Wrap" FontSize="13" Foreground="#EF4444" FontWeight="SemiBold" LineHeight="18" Width="270" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
 
                 <!-- Features List -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="180" Margin="0,0,0,24">

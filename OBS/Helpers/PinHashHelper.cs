@@ -1,32 +1,25 @@
 using System;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace OBS.Helpers
 {
     /// <summary>
     /// PIN hash'leme ve doğrulama için yardımcı sınıf.
     /// İSTEM METNİ GEREĞİ: PIN hash'lenerek DB'de saklanır.
-    /// SHA256 kullanarak güvenli hash oluşturur.
+    /// BCrypt.Net kullanarak güvenli hash oluşturur.
     /// </summary>
     public static class PinHashHelper
     {
         /// <summary>
-        /// PIN'i SHA256 ile hash'ler.
+        /// PIN'i BCrypt ile hash'ler.
         /// </summary>
         /// <param name="pin">4 haneli PIN</param>
-        /// <returns>Hash'lenmiş PIN (hex string)</returns>
+        /// <returns>Hash'lenmiş PIN</returns>
         public static string HashPin(string pin)
         {
             if (string.IsNullOrWhiteSpace(pin))
                 throw new ArgumentException("PIN boş olamaz", nameof(pin));
 
-            using var sha256 = SHA256.Create();
-            var bytes = Encoding.UTF8.GetBytes(pin);
-            var hash = sha256.ComputeHash(bytes);
-            
-            // Byte array'i hex string'e çevir
-            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            return BCrypt.Net.BCrypt.EnhancedHashPassword(pin, 12);
         }
 
         /// <summary>
@@ -40,8 +33,15 @@ namespace OBS.Helpers
             if (string.IsNullOrWhiteSpace(pin) || string.IsNullOrWhiteSpace(storedHash))
                 return false;
 
-            var inputHash = HashPin(pin);
-            return inputHash.Equals(storedHash, StringComparison.OrdinalIgnoreCase);
+            try
+            {
+                return BCrypt.Net.BCrypt.EnhancedVerify(pin, storedHash);
+            }
+            catch
+            {
+                // Eski veya geçersiz hash formatları hata fırlattığında false olarak döndürür
+                return false;
+            }
         }
 
         /// <summary>

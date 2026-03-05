@@ -14,21 +14,21 @@ namespace OBS.Models
         /// <summary>
         /// Velinin tam adı (Adı ve Soyadı).
         /// </summary>
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
         /// <summary>
         /// Velinin iletişim numarası.
         /// </summary>
-        public string PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; } = string.Empty;
 
         /// <summary>
         /// Velinin mesleği (İsteğe bağlı veri).
         /// </summary>
-        public string JobTitle { get; set; }
+        public string JobTitle { get; set; } = string.Empty;
 
         /// <summary>
         /// Velinin e-posta adresi (İsteğe bağlı veri).
         /// </summary>
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
     }
 }

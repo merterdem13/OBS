@@ -1,10 +1,9 @@
 {
-  "Version": "2.3.0",
+  "Version": "2.4.0",
   "Date": "05-03-2026",
+  "CriticalWarning": "DİKKAT: Veritabanı iyileştirmeleri sebebiyle ilk açılışta öğrencilerin fotoğrafları yükl-enmeyebilir. Sistemi sıfırlayıp tekrar PDF Yükleme işlemini yapınız.",
   "Features": [
-    "Takım ekleme ekranında öğrencileri doğrudan arayıp ekleyebilme özelliği geldi.",
-    "Takım Ekleme ve Takım Silme arayüz iyileştirmeleri yapıldı.",
-    "Takım Silme işlemi için daha güvenli satır içi (inline) onay eklendi.",
-    "Güncelleme Notları arayüzü eklendi."
+    "Güvenlik iyileştirmeleri yapıldı.",
+    "Veritabanı iyileştirmeleri yapıldı."
   ]
 }

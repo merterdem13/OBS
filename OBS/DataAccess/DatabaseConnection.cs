@@ -6,8 +6,8 @@ namespace OBS.DataAccess
 {
     /// <summary>
     /// SQLite veritabanı dosyasını oluşturma/açma ve gerekli PRAGMA ayarlarını sağlamaktan sorumlu.
-    /// Veritabanı dosyası admin izin sorunlarını önlemek için AppData\Local\OBS_System altına yerleştirilir.
-    /// .NET 10 ile uyumlu Microsoft.Data.Sqlite kullanır.
+    /// SQLCipher kullanarak tüm veritabanı içeriğini (Şifreli obs_secure.db) AES-256 ile korur.
+    /// Şifre, DatabaseKeyManager aracılığıyla Windows oturumuna bağlı olarak DPAPI ile korunur.
     /// </summary>
     public static class DatabaseConnection
     {
@@ -15,63 +15,123 @@ namespace OBS.DataAccess
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
             "OBS_System"
         );
-        private static readonly string _dbPath = Path.Combine(_appFolder, "obs.db");
-        private static readonly string _connectionString = $"Data Source={_dbPath}";
+        
+        // Eski güvensiz veritabanı
+        private static readonly string _oldDbPath = Path.Combine(_appFolder, "obs.db");
+        // Yeni şifrelenmiş veritabanı
+        private static readonly string _secureDbPath = Path.Combine(_appFolder, "obs_secure.db");
+        
+        // SqliteConnection için bağlantı dizesi
+        private static readonly string _connectionString = $"Data Source={_secureDbPath}";
 
-        // ── Migrasyon Sistemi ───────────────────────────────────────────────
-        // Her yeni DB değişikliğinde:
-        // 1. LatestSchemaVersion'ı artır
-        // 2. RunMigrations içine yeni case ekle
         private const int LatestSchemaVersion = 1;
 
         /// <summary>
-        /// Veritabanı dosyasının ve klasörlerin var olduğundan emin olur.
-        /// Bağlantı açıldığında dosya yoksa otomatik oluşturulur.
+        /// Sadece şifrelenmiş yeni veritabanını oluşturur ve açar.
+        /// Eğer eski şifresiz veritabanı varsa ve şifreli olan yoksa,
+        /// tüm verileri şifreli OLARAK YENİ DOSYAYA migrate eder.
         /// </summary>
         public static void EnsureDatabase()
         {
             if (!Directory.Exists(_appFolder))
                 Directory.CreateDirectory(_appFolder);
 
-            // Destekleyici klasörleri oluştur
+            // Klasörleri oluştur
             var photosFolder = GetPhotosFolder();
             var logsFolder = GetLogsFolder();
             var pdfFolder = GetPdfFolder();
-            var studentsPdfFolder = GetStudentsPdfFolder();
-            var classPdfFolder = GetClassPdfFolder();
+            var studentsFolder = GetStudentsPdfFolder();
+            var classFolder = GetClassPdfFolder();
 
             if (!Directory.Exists(photosFolder)) Directory.CreateDirectory(photosFolder);
             if (!Directory.Exists(logsFolder)) Directory.CreateDirectory(logsFolder);
             if (!Directory.Exists(pdfFolder)) Directory.CreateDirectory(pdfFolder);
-            if (!Directory.Exists(studentsPdfFolder)) Directory.CreateDirectory(studentsPdfFolder);
-            if (!Directory.Exists(classPdfFolder)) Directory.CreateDirectory(classPdfFolder);
+            // SQLCipher'ı (kriptolama motorunu) başlat
+            SQLitePCL.Batteries_V2.Init();
+            
+            bool oldDbExists = File.Exists(_oldDbPath);
+            bool secureDbExists = File.Exists(_secureDbPath);
 
-            var isNew = !File.Exists(_dbPath);
+            // GÜVENLİK/SAĞLAMLIK KONTROLÜ: Eğer migration yarım kalmışsa ve dosya hatalıysa (0 byte) dosyayı sil
+            // SQLite dosyası diske yazılamadıysa 0 byte olarak kalır. Normal bir veritabanı en azından header (genelde 4096 byte) içerir.
+            if (secureDbExists && new FileInfo(_secureDbPath).Length == 0)
+            {
+                File.Delete(_secureDbPath);
+                secureDbExists = false;
+            }
+
+            // ŞİFRESİZ -> ŞİFRELİ MİGRASYON SÜRECİ
+            if (oldDbExists && !secureDbExists)
+            {
+                MigrateToEncryptedDatabase();
+                return; // Migrasyon sonrası yeni açılış tamamlandı
+            }
+
+            // Normal Açılış
+            var isNew = !secureDbExists;
 
             using var conn = GetConnection();
             conn.Open();
 
-            // Performans PRAGMA'ları — batch import (500-600 PDF) için kritik
             ApplyPerformancePragmas(conn);
 
             if (isNew)
             {
-                // İlk çalıştırmada gerekli tabloları oluştur
                 CreateTablesIfNotExist(conn);
                 CreateIndexes(conn);
                 SetSchemaVersion(conn, LatestSchemaVersion);
             }
             else
             {
-                // Mevcut veritabanları için migrasyonları çalıştır
                 RunMigrations(conn);
             }
         }
 
         /// <summary>
-        /// Performans ve bütünlük PRAGMA'larını uygular.
-        /// WAL modu: eş zamanlı okuma/yazma desteği, batch import için ~3-5x hız artışı.
+        /// Eski 'obs.db' içindeki tüm tablo şemasını ve verileri yeni
+        /// korumalı 'obs_secure.db' dosyasına SQLite sqlcipher_export komutu
+        /// ile sorunsuz şekilde aktarır ve sonrasında eski dosyayı güvenli siler.
         /// </summary>
+        private static void MigrateToEncryptedDatabase()
+        {
+            string dbKey = DatabaseKeyManager.GetOrCreateKey();
+
+            // Sadece bir defaya mahsus eski şifresiz dosyaya bağlanıyoruz
+            using (var unencryptedConn = new SqliteConnection($"Data Source={_oldDbPath}"))
+            {
+                unencryptedConn.Open();
+                
+                // Korumalı veritabanını eski dosyanın üzerinden ATTACH edip şifre anahtarını tanımlayarak yaratacağız
+                using var cmd = unencryptedConn.CreateCommand();
+
+                // 1. Şifreli dosyayı "encrypted" adıyla (ATTACH kullanarak) sisteme tanıtıyoruz
+                cmd.CommandText = $"ATTACH DATABASE '{_secureDbPath}' AS encrypted KEY '{dbKey}';";
+                cmd.ExecuteNonQuery();
+
+                // 2. sqlcipher_export komutu eski veritabanının Tıpatıp kopyasını (şema+veri) yeni şifreli kısma aktarır
+                cmd.CommandText = "SELECT sqlcipher_export('encrypted');";
+                cmd.ExecuteNonQuery();
+
+                // 3. Dosyayı de-attach et
+                cmd.CommandText = "DETACH DATABASE encrypted;";
+                cmd.ExecuteNonQuery();
+            } // Bağlantı kapanır
+            
+            // sqlite-net / Microsoft.Data.Sqlite pool ve WAL dosyalarını serbest bırakması için biraz zaman tanı
+            SqliteConnection.ClearAllPools();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            System.Threading.Thread.Sleep(500);
+
+            // Eğer aktarım başarılı olduysa ve şifreli dosya oluştuysa, eski güvensiz dosyayı (ve WAL dosyalarını) uçur
+            if (File.Exists(_secureDbPath))
+            {
+                TryDeleteFile(_oldDbPath);
+                TryDeleteFile(_oldDbPath + "-wal");
+                TryDeleteFile(_oldDbPath + "-shm");
+            }
+        }
+
         private static void ApplyPerformancePragmas(SqliteConnection conn)
         {
             using var cmd = conn.CreateCommand();
@@ -87,15 +147,10 @@ namespace OBS.DataAccess
             cmd.ExecuteNonQuery();
         }
 
-        /// <summary>
-        /// Tüm tabloları oluşturur (ilk kurulumda).
-        /// İSTEM METNİNE GÖRE: Students, Guardians, Teams, TeamMembers, Favorites, Settings tabloları.
-        /// </summary>
         private static void CreateTablesIfNotExist(SqliteConnection conn)
         {
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                -- Veli bilgileri tablosu
                 CREATE TABLE IF NOT EXISTS Guardians (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     FullName TEXT NOT NULL,
@@ -104,8 +159,6 @@ namespace OBS.DataAccess
                     FOREIGN KEY(StudentNumber) REFERENCES Students(StudentNumber) ON DELETE CASCADE
                 );
 
-                -- Öğrenci bilgileri tablosu
-                -- StudentNumber UNIQUE index (merge ve arama için zorunlu)
                 CREATE TABLE IF NOT EXISTS Students (
                     StudentNumber TEXT PRIMARY KEY,
                     FirstName TEXT NOT NULL,
@@ -121,7 +174,6 @@ namespace OBS.DataAccess
                     FOREIGN KEY(GuardianId) REFERENCES Guardians(Id) ON DELETE CASCADE
                 );
 
-                -- Takım bilgileri tablosu (Category alanı eklendi)
                 CREATE TABLE IF NOT EXISTS Teams (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     TeamName TEXT NOT NULL UNIQUE,
@@ -130,9 +182,6 @@ namespace OBS.DataAccess
                     Description TEXT
                 );
 
-                -- Takım-Öğrenci ilişki tablosu
-                -- StudentNumber ile ilişki kurulur (StudentId değil)
-                -- Bir öğrenci birden fazla takımda olamaz (UNIQUE StudentNumber constraint)
                 CREATE TABLE IF NOT EXISTS TeamMembers (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     TeamId INTEGER NOT NULL,
@@ -144,7 +193,6 @@ namespace OBS.DataAccess
                     FOREIGN KEY(StudentNumber) REFERENCES Students(StudentNumber) ON DELETE CASCADE
                 );
 
-                -- Favori öğrenciler tablosu
                 CREATE TABLE IF NOT EXISTS Favorites (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     StudentNumber TEXT NOT NULL UNIQUE,
@@ -152,7 +200,6 @@ namespace OBS.DataAccess
                     FOREIGN KEY(StudentNumber) REFERENCES Students(StudentNumber) ON DELETE CASCADE
                 );
 
-                -- Ayarlar tablosu (PIN vb.)
                 CREATE TABLE IF NOT EXISTS Settings (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Key TEXT NOT NULL UNIQUE,
@@ -163,29 +210,16 @@ namespace OBS.DataAccess
             cmd.ExecuteNonQuery();
         }
 
-        /// <summary>
-        /// Performans için index'leri oluşturur.
-        /// İSTEM METNİ GEREĞİ ZORUNLU INDEX'LER.
-        /// </summary>
         private static void CreateIndexes(SqliteConnection conn)
         {
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                -- Students.StudentNumber → UNIQUE index (zaten PRIMARY KEY olduğu için otomatik)
-                
-                -- Students.Class → Non-unique index (sınıf filtreleme için)
                 CREATE INDEX IF NOT EXISTS idx_students_class ON Students(Class);
-
-                -- TeamMembers.TeamId → Index (takım listeleme için)
                 CREATE INDEX IF NOT EXISTS idx_teammembers_teamid ON TeamMembers(TeamId);
-
-                -- TeamMembers (TeamId + StudentNumber) → UNIQUE composite index (zaten UNIQUE constraint'te var)
             ";
 
             cmd.ExecuteNonQuery();
         }
-
-        // ── Migrasyon Altyapısı ─────────────────────────────────────────────
 
         private static int GetSchemaVersion(SqliteConnection conn)
         {
@@ -198,7 +232,6 @@ namespace OBS.DataAccess
             }
             catch
             {
-                // Settings tablosu yoksa veya SchemaVersion kaydı yoksa
                 return 0;
             }
         }
@@ -213,10 +246,6 @@ namespace OBS.DataAccess
             cmd.ExecuteNonQuery();
         }
 
-        /// <summary>
-        /// Bekleyen migrasyonları sırasıyla çalıştırır.
-        /// v0 → v1 → v2 → ... → LatestSchemaVersion
-        /// </summary>
         private static void RunMigrations(SqliteConnection conn)
         {
             var currentVersion = GetSchemaVersion(conn);
@@ -232,9 +261,6 @@ namespace OBS.DataAccess
                     switch (currentVersion)
                     {
                         case 1: Migration_1(conn); break;
-                        // ── Gelecek migrasyonlar buraya eklenir ──
-                        // case 2: Migration_2(conn); break;
-                        // case 3: Migration_3(conn); break;
                     }
 
                     SetSchemaVersion(conn, currentVersion);
@@ -248,12 +274,6 @@ namespace OBS.DataAccess
             }
         }
 
-        // ── Migrasyonlar ────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Migration 1: v1.0.0 öncesi kullanıcılar için mevcut şema güncellemelerini konsolide eder.
-        /// Gender, Category, KunyePdfPath sütunlarını ekler (yoksa).
-        /// </summary>
         private static void Migration_1(SqliteConnection conn)
         {
             AddColumnIfNotExists(conn, "Students", "Gender", "TEXT");
@@ -262,28 +282,7 @@ namespace OBS.DataAccess
             CreateIndexes(conn);
         }
 
-        // ── ÖRNEK: Gelecekte yeni tablo/sütun eklemek istediğinizde ─────────
-        //
-        // private static void Migration_2(SqliteConnection conn)
-        // {
-        //     using var cmd = conn.CreateCommand();
-        //     cmd.CommandText = @"
-        //         CREATE TABLE IF NOT EXISTS Notes (
-        //             Id INTEGER PRIMARY KEY AUTOINCREMENT,
-        //             StudentNumber TEXT NOT NULL,
-        //             Content TEXT NOT NULL,
-        //             CreatedAt TEXT NOT NULL,
-        //             FOREIGN KEY(StudentNumber) REFERENCES Students(StudentNumber) ON DELETE CASCADE
-        //         );
-        //         CREATE INDEX IF NOT EXISTS idx_notes_student ON Notes(StudentNumber);";
-        //     cmd.ExecuteNonQuery();
-        // }
-
-        /// <summary>
-        /// Tabloya sütun ekler (yoksa). Migrasyon metotlarından çağrılır.
-        /// </summary>
-        private static void AddColumnIfNotExists(
-            SqliteConnection conn, string table, string column, string definition)
+        private static void AddColumnIfNotExists(SqliteConnection conn, string table, string column, string definition)
         {
             using var cmd = conn.CreateCommand();
             cmd.CommandText = $"PRAGMA table_info({table});";
@@ -303,47 +302,33 @@ namespace OBS.DataAccess
 
         /// <summary>
         /// Repository'ler tarafından kullanılacak yeni bir SqliteConnection döndürür.
-        /// Çağıran taraf bağlantıyı Open() etmelidir.
+        /// SQLCipher kullanıldığı için bağlantı sırasında şifre de iletilir.
         /// </summary>
         public static SqliteConnection GetConnection()
         {
-            return new SqliteConnection(_connectionString);
+            var connection = new SqliteConnection(_connectionString);
+            
+            // Güvenlik Anahtarını al ve SQLite bağlantısına (SQLCipher) ata
+            string dbKey = DatabaseKeyManager.GetOrCreateKey();
+            
+            // Eğer Connection henüz Open() edilmediyse SQLiteConnection komut yürütmeye izin vermez
+            // Ancak Microsoft.Data.Sqlite, Parolayı SQLite'a doğrudan geçirmek için Password property'sini desteklemediğinde, 
+            // SqliteConnection içerisinde bir callback event tanımlayabiliriz ki Open() dediğimiz anda PRAGMA key otomatik çalışsın.
+            
+            // Yöntem (ADO.NET): SqliteConnection objesi oluşturulur, ama Password parametresi verilemezse doğrudan Exec edilemez
+            // En güvenilir yöntem connectionString'e Password eklemektir. Sqlcipher modifiye edilmiş eklentisinde Password= parametresi PRAGMA key yerine geçer:
+            
+            return new SqliteConnection(_connectionString + $";Password={dbKey}");
         }
 
-        /// <summary>
-        /// DB dosyasının yolunu döndürür (tanılama/loglama için kullanışlı).
-        /// </summary>
-        public static string GetDatabasePath() => _dbPath;
+        public static string GetDatabasePath() => _secureDbPath;
 
-        /// <summary>
-        /// Fotoğraf klasörünün yolunu döndürür.
-        /// </summary>
         public static string GetPhotosFolder() => Path.Combine(_appFolder, "Photos");
-
-        /// <summary>
-        /// Log klasörünün yolunu döndürür.
-        /// </summary>
         public static string GetLogsFolder() => Path.Combine(_appFolder, "Logs");
-
-        /// <summary>
-        /// PDF klasörünün yolunu döndürür (geçici PDF dosyaları için).
-        /// </summary>
         public static string GetPdfFolder() => Path.Combine(_appFolder, "PDFs");
-
-        /// <summary>
-        /// Öğrenci künye PDF'lerinin ve resimlerinin saklandığı klasörü döndürür.
-        /// </summary>
         public static string GetStudentsPdfFolder() => Path.Combine(_appFolder, "Students");
-
-        /// <summary>
-        /// Sınıf listesi ve resim listesi PDF'lerinin saklandığı klasörü döndürür.
-        /// </summary>
         public static string GetClassPdfFolder() => Path.Combine(_appFolder, "Class");
 
-        /// <summary>
-        /// Tüm veritabanını ve fotoğraf klasörünü siler (SİSTEMİ SIFIRLA fonksiyonu için).
-        /// PIN verisi korunur (Settings tablosundan sadece PIN silinmez).
-        /// </summary>
         public static void ResetDatabase()
         {
             try
@@ -355,13 +340,11 @@ namespace OBS.DataAccess
                 using (var conn = GetConnection())
                 {
                     conn.Open();
-
                     using var cmd = conn.CreateCommand();
 
                     cmd.CommandText = "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;";
                     cmd.ExecuteNonQuery();
 
-                    // PIN ve SchemaVersion hariç tüm verileri sil
                     cmd.CommandText = @"
                         DELETE FROM TeamMembers;
                         DELETE FROM Teams;
@@ -372,12 +355,10 @@ namespace OBS.DataAccess
                     ";
                     cmd.ExecuteNonQuery();
 
-                    // WAL checkpoint — WAL dosyasını ana DB'ye yaz ve truncate et
                     cmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
                     cmd.ExecuteNonQuery();
                 }
 
-                // VACUUM ayrı bağlantıda — dosya boyutunu küçült
                 using (var vacuumConn = GetConnection())
                 {
                     vacuumConn.Open();
@@ -388,24 +369,16 @@ namespace OBS.DataAccess
 
                 System.Threading.Thread.Sleep(100);
 
-                // Fotoğraf klasörünü temizle — tüm formatlar
                 var photosFolder = GetPhotosFolder();
                 if (Directory.Exists(photosFolder))
                 {
-                    foreach (var file in Directory.GetFiles(photosFolder))
-                    {
-                        TryDeleteFile(file);
-                    }
+                    foreach (var file in Directory.GetFiles(photosFolder)) TryDeleteFile(file);
                 }
 
-                // PDF klasörünü temizle
                 var pdfFolder = GetPdfFolder();
                 if (Directory.Exists(pdfFolder))
                 {
-                    foreach (var file in Directory.GetFiles(pdfFolder))
-                    {
-                        TryDeleteFile(file);
-                    }
+                    foreach (var file in Directory.GetFiles(pdfFolder)) TryDeleteFile(file);
                 }
             }
             catch (Exception ex)
@@ -414,9 +387,6 @@ namespace OBS.DataAccess
             }
         }
 
-        /// <summary>
-        /// Dosyayı silmeyi dener, kilitli ise birkaç deneme yapar.
-        /// </summary>
         private static void TryDeleteFile(string filePath)
         {
             for (int i = 0; i < 3; i++)
@@ -428,18 +398,13 @@ namespace OBS.DataAccess
                 }
                 catch (IOException) when (i < 2)
                 {
-                    // Kısa bir bekleme sonrası tekrar dene
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
                     System.Threading.Thread.Sleep(100);
                 }
                 catch
                 {
-                    // Son denemede de başarısız olursa sessizce devam et
-                    if (i == 2)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Dosya silinemedi: {filePath}");
-                    }
+                    if (i == 2) System.Diagnostics.Debug.WriteLine($"Dosya silinemedi: {filePath}");
                 }
             }
         }
