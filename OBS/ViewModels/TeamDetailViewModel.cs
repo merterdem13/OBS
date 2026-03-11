@@ -56,6 +56,7 @@ namespace OBS.ViewModels
                 teamWindow.Left = current.Left;
                 teamWindow.Top = current.Top;
             }
+            teamWindow.Opacity = 0;
             teamWindow.Show();
 
             current?.Close();

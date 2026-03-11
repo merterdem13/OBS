@@ -51,7 +51,7 @@ namespace OBS.Views.Components
                 return;
             }
 
-            var selectedCategory = (CategoryCombo.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Futbol";
+            var selectedCategory = (CategoryCombo.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Belirtilmemiş";
 
             if (RadioKiz.IsChecked == true)
             {
@@ -108,10 +108,12 @@ namespace OBS.Views.Components
             ErrorText.Visibility = Visibility.Collapsed;
             CategoryCombo.SelectedIndex = 0;
             RadioErkek.IsChecked = true;
+            _isFavoritesMode = false;
             SearchBox.Text = string.Empty;
             SearchResultsBorder.Visibility = Visibility.Collapsed;
             _pendingMembers.Clear();
             UpdateMembersHeader();
+            UpdateFavoriteIcon();
         }
 
         private void OnCategoryChanged(object sender, SelectionChangedEventArgs e)
@@ -153,19 +155,46 @@ namespace OBS.Views.Components
             RefreshSearchResults();
         }
 
+        private void UpdateFavoriteIcon()
+        {
+            if (FavoriteIcon != null)
+            {
+                FavoriteIcon.Filled = _isFavoritesMode;
+                if (_isFavoritesMode)
+                {
+                    FavoriteIcon.Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#F6AD55"));
+                }
+                else
+                {
+                    FavoriteIcon.SetResourceReference(Control.ForegroundProperty, "TextSecondaryBrush");
+                }
+            }
+        }
+
         private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
         {
             _searchCts?.Cancel();
             _searchCts = new CancellationTokenSource();
             var token = _searchCts.Token;
 
-            _isFavoritesMode = false;
-            var keyword = SearchBox.Text?.Trim();
+            var keyword = SearchBox.Text?.Trim() ?? string.Empty;
 
-            if (string.IsNullOrWhiteSpace(keyword) || keyword.Length < 2)
+            if (_isFavoritesMode && !string.IsNullOrWhiteSpace(keyword))
             {
-                SearchResultsBorder.Visibility = Visibility.Collapsed;
-                SearchResultsList.ItemsSource = null;
+                _isFavoritesMode = false;
+                UpdateFavoriteIcon();
+            }
+
+            bool isNumeric = keyword.All(c => char.IsDigit(c));
+            int minLength = isNumeric && keyword.Length > 0 ? 1 : 2;
+
+            if (string.IsNullOrWhiteSpace(keyword) || keyword.Length < minLength)
+            {
+                if (!_isFavoritesMode)
+                {
+                    SearchResultsBorder.Visibility = Visibility.Collapsed;
+                    SearchResultsList.ItemsSource = null;
+                }
                 return;
             }
 
@@ -192,6 +221,14 @@ namespace OBS.Views.Components
 
         private void OnShowFavoritesClick(object sender, RoutedEventArgs e)
         {
+            if (_isFavoritesMode)
+            {
+                _isFavoritesMode = false;
+                UpdateFavoriteIcon();
+                SearchBox.Text = string.Empty;
+                return;
+            }
+
             var favoriteNumbers = _favoriteRepo.GetAllFavoriteStudentNumbers();
             if (favoriteNumbers.Count == 0)
             {
@@ -208,12 +245,15 @@ namespace OBS.Views.Components
 
             SearchBox.Text = string.Empty;
             _isFavoritesMode = true;
+            UpdateFavoriteIcon();
+
             SearchResultsList.ItemsSource = results;
             SearchResultsBorder.Visibility = results.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
             if (results.Count == 0)
             {
                 _isFavoritesMode = false;
+                UpdateFavoriteIcon();
                 ToastService.ShowError("Eklenebilecek favori öğrenci bulunamadı.");
             }
         }
@@ -280,12 +320,23 @@ namespace OBS.Views.Components
 
             if (_isFavoritesMode)
             {
-                OnShowFavoritesClick(this, new RoutedEventArgs());
+                var favoriteNumbers = _favoriteRepo.GetAllFavoriteStudentNumbers();
+                var allStudents = _studentRepo.GetAll().ToDictionary(s => s.StudentNumber);
+                var favoriteStudents = favoriteNumbers
+                    .Where(sn => allStudents.ContainsKey(sn))
+                    .Select(sn => allStudents[sn]);
+
+                var results = FilterSearchResults(favoriteStudents);
+                if (SearchResultsList != null) SearchResultsList.ItemsSource = results;
+                if (SearchResultsBorder != null) SearchResultsBorder.Visibility = results.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
                 return;
             }
             
-            var keyword = SearchBox?.Text?.Trim();
-            if (!string.IsNullOrWhiteSpace(keyword) && keyword.Length >= 2)
+            var keyword = SearchBox?.Text?.Trim() ?? string.Empty;
+            bool isNumeric = keyword.All(c => char.IsDigit(c));
+            int minLength = isNumeric && keyword.Length > 0 ? 1 : 2;
+
+            if (!string.IsNullOrWhiteSpace(keyword) && keyword.Length >= minLength)
             {
                 var results = FilterSearchResults(_studentRepo.Search(keyword));
                 if (SearchResultsList != null) SearchResultsList.ItemsSource = results;

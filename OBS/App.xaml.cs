@@ -10,9 +10,24 @@ namespace OBS
         {
             base.OnStartup(e);
 
-            ApplicationThemeManager.Apply(ApplicationTheme.Light);
+            AppDomain.CurrentDomain.UnhandledException += (s, ev) => 
+            {
+                System.IO.File.WriteAllText("crash3.txt", ev.ExceptionObject.ToString());
+            };
+            
+            DispatcherUnhandledException += (s, ev) => 
+            {
+                System.IO.File.WriteAllText("crash_disp3.txt", ev.Exception.ToString());
+            };
 
-            DatabaseConnection.EnsureDatabase();
+            TaskScheduler.UnobservedTaskException += (s, ev) =>
+            {
+                System.IO.File.WriteAllText("crash_task3.txt", ev.Exception.ToString());
+            };
+
+            var settingsRepo = new SettingsRepository();
+            var savedTheme = settingsRepo.GetSetting("Theme") ?? "Light";
+            Helpers.ThemeManager.ApplyTheme(savedTheme);
 
             var loginWindow = new Views.LoginWindow();
             loginWindow.Show();

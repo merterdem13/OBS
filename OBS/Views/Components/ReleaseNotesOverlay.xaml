@@ -46,7 +46,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Width="360"
-                Background="{StaticResource BgCardBrush}"
+                Background="{DynamicResource BgCardBrush}"
                 CornerRadius="12"
                 Padding="24">
 
@@ -65,14 +65,14 @@
                 <!-- Header Icon & Title -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
                     <ui:SymbolIcon Symbol="Megaphone28" FontSize="28" Foreground="{StaticResource BtnOrangeBrush}" Margin="0,0,10,0" />
-                    <TextBlock Text="Yeni Sürümde Neler Var?" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock Text="Yeni Sürümde Neler Var?" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-                    <TextBlock Text="Versiyon " FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="Versiyon " FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <TextBlock Text="{Binding Version}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource BtnOrangeBrush}" />
-                    <TextBlock Text=" • " FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" />
-                    <TextBlock Text="{Binding Date}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text=" • " FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding Date}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
                 </StackPanel>
 
                 <!-- Critical Warning Section (Optional) -->
@@ -97,7 +97,7 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
                                     <ui:SymbolIcon Symbol="Sparkle24" FontSize="16" Foreground="{StaticResource BtnOrangeBrush}" Margin="0,2,8,0" VerticalAlignment="Top"/>
-                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="13" Width="280" LineHeight="18" Foreground="{StaticResource TextSecondaryBrush}" />
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="13" Width="280" LineHeight="18" Foreground="{DynamicResource TextSecondaryBrush}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

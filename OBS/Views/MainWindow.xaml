@@ -6,7 +6,7 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:components="clr-namespace:OBS.Views.Components"
     mc:Ignorable="d"
-    Title="OBS"
+    Title="Öğrenci Bilgi Sistemi"
     Width="400" Height="750"
     MinWidth="400" MinHeight="750"
 	MaxWidth="400" MaxHeight="750"
@@ -14,8 +14,8 @@
     WindowStartupLocation="Manual"
     Topmost="True"
     Icon="pack://application:,,,/Assets/app.ico"
-    ExtendsContentIntoTitleBar="True"
-    Background="#F4F3F1">
+    ExtendsContentIntoTitleBar="True" WindowBackdropType="None"
+    Background="{DynamicResource BgBodyBrush}">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -36,9 +36,9 @@
 							<BitmapImage UriSource="pack://application:,,,/Assets/app.ico" DecodePixelWidth="24" DecodePixelHeight="24" />
 						</Image.Source>
 					</Image>
-                    <TextBlock Text="OBS"
+                    <TextBlock Text="Öğrenci Bilgi Sistemi"
                                FontSize="14" FontWeight="Bold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
                                VerticalAlignment="Center"/>
                 </StackPanel>
             </ui:TitleBar.Header>
@@ -96,6 +96,9 @@
         <!-- Float Butonlar + Yönetim Menüsü -->
         <components:FloatingActionPanel Grid.Row="0" Grid.RowSpan="3" Panel.ZIndex="101"/>
 
+        <!-- Ayarlar Katmanı -->
+        <components:SettingsOverlay Grid.RowSpan="3" Panel.ZIndex="150" DataContext="{Binding}"/>
+
         <!-- Yükleme Katmanı -->
         <components:LoadingOverlay Grid.RowSpan="3" Panel.ZIndex="200"/>
 
@@ -104,6 +107,69 @@
 
         <!-- Güncelleme Notları Katmanı -->
         <components:ReleaseNotesOverlay x:Name="ReleaseNotesOverlay" Grid.RowSpan="3" Panel.ZIndex="350"/>
+
+        <Button x:Name="FloatingButton" 
+                Grid.Row="1" Grid.RowSpan="2"
+                HorizontalAlignment="Right" VerticalAlignment="Center"
+                Margin="0,0,-4,0"
+                Width="38" Height="48"
+                Padding="0"
+                Cursor="Hand"
+                Command="{Binding OpenTeamManagementCommand}"
+                Panel.ZIndex="100"
+                ToolTip="Takım Yönetimi"
+                PreviewMouseDown="OnFloatingButtonPreviewMouseDown"
+                PreviewMouseMove="OnFloatingButtonPreviewMouseMove"
+                PreviewMouseUp="OnFloatingButtonPreviewMouseUp">
+            <Button.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    <TranslateTransform x:Name="FloatingButtonTranslate"/>
+                </TransformGroup>
+            </Button.RenderTransform>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Opacity" Value="0.4"/>
+                    <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        CornerRadius="12,0,0,12" 
+                                        BorderBrush="{DynamicResource BorderColorBrush}"
+                                        BorderThickness="1,1,0,1">
+                                    <ui:SymbolIcon Symbol="People24" FontSize="20" 
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Margin="0,0,4,0"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="1.0"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.1" />
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.1" />
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
 
     </Grid>
 </ui:FluentWindow>

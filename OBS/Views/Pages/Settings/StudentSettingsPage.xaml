@@ -1,0 +1,12 @@
+<UserControl x:Class="OBS.Views.Pages.Settings.StudentSettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             Background="Transparent">
+    <Grid Margin="16">
+        <StackPanel>
+            <TextBlock Text="Öğrenci Bilgileri Düzenleme" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16"/>
+            <TextBlock Text="(İçerik daha sonra eklenecek)" Foreground="{DynamicResource TextSecondaryBrush}" FontStyle="Italic"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

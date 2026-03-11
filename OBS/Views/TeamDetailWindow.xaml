@@ -10,8 +10,8 @@
     WindowStartupLocation="Manual"
     Topmost="{Binding IsTopmost, Mode=TwoWay}"
     Icon="pack://application:,,,/Assets/app.ico"
-    ExtendsContentIntoTitleBar="True"
-    Background="#F4F3F1">
+    ExtendsContentIntoTitleBar="True" WindowBackdropType="None"
+    Background="{DynamicResource BgBodyBrush}">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -34,7 +34,7 @@
                     </Image>
                     <TextBlock Text="Takım Detay"
                                FontSize="14" FontWeight="Bold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
                                VerticalAlignment="Center"/>
                 </StackPanel>
             </ui:TitleBar.Header>
@@ -63,17 +63,17 @@
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
                 <TextBlock Text="{Binding TeamName}"
                            FontSize="16" FontWeight="Bold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
                 <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                     <TextBlock Text="{Binding Category}"
                                FontSize="12"
-                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <TextBlock Text="  •  "
                                FontSize="12"
-                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <TextBlock Text="{Binding MemberCountText}"
                                FontSize="12"
-                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                 </StackPanel>
             </StackPanel>
 
@@ -92,7 +92,7 @@
         <!-- SATIR 2 — Boş Durum Mesajı -->
         <TextBlock Grid.Row="2"
                    Text="Bu takımda henüz oyuncu yok."
-                   Foreground="{StaticResource TextSecondaryBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    FontSize="14" FontWeight="SemiBold"
                    HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBlock.Style>

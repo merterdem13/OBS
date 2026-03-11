@@ -44,7 +44,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Width="340"
-                Background="{StaticResource BgCardBrush}"
+                Background="{DynamicResource BgCardBrush}"
                 CornerRadius="12"
                 Padding="24">
 
@@ -73,7 +73,7 @@
                            Text="Onay"
                            FontSize="18" FontWeight="Bold"
                            HorizontalAlignment="Center"
-                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
                            Margin="0,0,0,8"/>
 
                 <!-- Mesaj -->
@@ -81,7 +81,7 @@
                            TextWrapping="Wrap"
                            FontSize="13"
                            TextAlignment="Center"
-                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
                            LineHeight="20"
                            Margin="0,0,0,20"/>
 
@@ -92,8 +92,8 @@
                     <Button x:Name="CancelButton"
                             Content="Vazgeç"
                             Style="{StaticResource ActionBtnStyle}"
-                            Background="{StaticResource BorderColorBrush}"
-                            Foreground="{StaticResource TextPrimaryBrush}"
+                            Background="{DynamicResource BorderColorBrush}"
+                            Foreground="{DynamicResource TextPrimaryBrush}"
                             Width="120" Height="38"
                             FontSize="13"
                             Margin="0,0,8,0"

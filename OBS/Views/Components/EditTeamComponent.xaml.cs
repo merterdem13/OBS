@@ -52,6 +52,7 @@ namespace OBS.Views.Components
             SearchResultsBorder.Visibility = Visibility.Collapsed;
 
             RefreshMembers();
+            UpdateFavoriteIcon();
         }
 
         /// <summary>
@@ -91,20 +92,46 @@ namespace OBS.Views.Components
             _originalName = newName; // Update original name to prevent exist check on subsequent saves
         }
 
+        private void UpdateFavoriteIcon()
+        {
+            if (FavoriteIcon != null)
+            {
+                FavoriteIcon.Filled = _isFavoritesMode;
+                if (_isFavoritesMode)
+                {
+                    FavoriteIcon.Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#F6AD55"));
+                }
+                else
+                {
+                    FavoriteIcon.SetResourceReference(Control.ForegroundProperty, "TextSecondaryBrush");
+                }
+            }
+        }
+
         private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
         {
             _searchCts?.Cancel();
             _searchCts = new CancellationTokenSource();
             var token = _searchCts.Token;
 
-            _isFavoritesMode = false;
+            var keyword = SearchBox.Text?.Trim() ?? string.Empty;
 
-            var keyword = SearchBox.Text?.Trim();
-
-            if (string.IsNullOrWhiteSpace(keyword) || keyword.Length < 2)
+            if (_isFavoritesMode && !string.IsNullOrWhiteSpace(keyword))
             {
-                SearchResultsBorder.Visibility = Visibility.Collapsed;
-                SearchResultsList.ItemsSource = null;
+                _isFavoritesMode = false;
+                UpdateFavoriteIcon();
+            }
+
+            bool isNumeric = keyword.All(c => char.IsDigit(c));
+            int minLength = isNumeric && keyword.Length > 0 ? 1 : 2;
+
+            if (string.IsNullOrWhiteSpace(keyword) || keyword.Length < minLength)
+            {
+                if (!_isFavoritesMode)
+                {
+                    SearchResultsBorder.Visibility = Visibility.Collapsed;
+                    SearchResultsList.ItemsSource = null;
+                }
                 return;
             }
 
@@ -136,6 +163,14 @@ namespace OBS.Views.Components
 
         private void OnShowFavoritesClick(object sender, RoutedEventArgs e)
         {
+            if (_isFavoritesMode)
+            {
+                _isFavoritesMode = false;
+                UpdateFavoriteIcon();
+                SearchBox.Text = string.Empty;
+                return;
+            }
+
             if (_favoriteRepo == null || _studentRepo == null) return;
 
             var favoriteNumbers = _favoriteRepo.GetAllFavoriteStudentNumbers();
@@ -154,6 +189,8 @@ namespace OBS.Views.Components
 
             SearchBox.Text = string.Empty;
             _isFavoritesMode = true;
+            UpdateFavoriteIcon();
+
             SearchResultsList.ItemsSource = results;
             SearchResultsBorder.Visibility = results.Count > 0
                 ? Visibility.Visible
@@ -162,6 +199,7 @@ namespace OBS.Views.Components
             if (results.Count == 0)
             {
                 _isFavoritesMode = false;
+                UpdateFavoriteIcon();
                 ToastService.ShowError("Eklenebilecek favori öğrenci bulunamadı.");
             }
         }
@@ -250,8 +288,11 @@ namespace OBS.Views.Components
                 return;
             }
 
-            var keyword = SearchBox.Text?.Trim();
-            if (string.IsNullOrWhiteSpace(keyword) || keyword.Length < 2)
+            var keyword = SearchBox.Text?.Trim() ?? string.Empty;
+            bool isNumeric = keyword.All(c => char.IsDigit(c));
+            int minLength = isNumeric && keyword.Length > 0 ? 1 : 2;
+
+            if (string.IsNullOrWhiteSpace(keyword) || keyword.Length < minLength)
             {
                 SearchResultsBorder.Visibility = Visibility.Collapsed;
                 SearchResultsList.ItemsSource = null;
@@ -288,6 +329,7 @@ namespace OBS.Views.Components
             if (results.Count == 0)
             {
                 _isFavoritesMode = false;
+                UpdateFavoriteIcon();
             }
         }
 

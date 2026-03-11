@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Light Theme Colors (Modern & Premium Slate Palette) -->
+    <SolidColorBrush x:Key="BgBodyBrush" Color="#F8FAFC"/> <!-- Slate 50: Temiz, ferah arka plan -->
+    <SolidColorBrush x:Key="BgCardBrush" Color="#FFFFFF"/> <!-- Saf Beyaz: Kartların öne çıkmasını sağlar -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A"/> <!-- Slate 900: Derin, okunaklı ana metin -->
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#475569"/> <!-- Slate 600: Yumuşak ikincil metin -->
+    <SolidColorBrush x:Key="BorderColorBrush" Color="#E2E8F0"/> <!-- Slate 200: Zarif ve ince kenarlıklar -->
+    <SolidColorBrush x:Key="AccentBrush" Color="#2563EB"/> <!-- Vibrant Blue: Profesyonel vurgu rengi -->
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="#F1F5F9CC"/> <!-- Slate 100 with Opacity: Saydamlaştırılmış başlık -->
+    <SolidColorBrush x:Key="ModalBgBrush" Color="#FFFFFFEE"/> <!-- White with Opacity: Temiz modal arka planı -->
+
+    <!-- Özel Butonlar (Cebit/Modern Style) -->
+    <SolidColorBrush x:Key="SpecialButtonBgBrush" Color="#2563EB"/>
+    <SolidColorBrush x:Key="SpecialButtonTextBrush" Color="#FFFFFF"/>
+</ResourceDictionary>

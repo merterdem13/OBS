@@ -184,6 +184,7 @@ namespace OBS.ViewModels
                     var mainWindow = new Views.MainWindow();
                     mainWindow.Left = left;
                     mainWindow.Top = top;
+                    mainWindow.Opacity = 0;
                     Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
                     loginWindow.Close();
@@ -198,6 +199,7 @@ namespace OBS.ViewModels
             {
                 var mainWindow = new Views.MainWindow();
                 mainWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                mainWindow.Opacity = 0;
                 Application.Current.MainWindow = mainWindow;
                 mainWindow.Show();
 

@@ -10,8 +10,8 @@
     WindowStartupLocation="Manual"
     Topmost="{Binding IsTopmost, Mode=TwoWay}"
     Icon="pack://application:,,,/Assets/app.ico"
-    ExtendsContentIntoTitleBar="True"
-    Background="#F4F3F1">
+    ExtendsContentIntoTitleBar="True" WindowBackdropType="None"
+    Background="{DynamicResource BgBodyBrush}">
 
     <ui:FluentWindow.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -38,13 +38,13 @@
                     </Image>
                     <TextBlock Text="Takım Yönetimi"
                                FontSize="14" FontWeight="Bold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
                                VerticalAlignment="Center"/>
                 </StackPanel>
             </ui:TitleBar.Header>
         </ui:TitleBar>
 
-        <!-- SATIR 1 — Üst Bar: Geri + Takım Oluştur -->
+        <!-- SATIR 1 — Üst Bar: Takım Oluştur -->
         <Grid x:Name="TopBarGrid" Grid.Row="1" Margin="12,8,12,6" IsVisibleChanged="OnElementIsVisibleChanged">
             <Grid.Style>
                 <Style TargetType="Grid">
@@ -59,28 +59,13 @@
                     </Style.Triggers>
                 </Style>
             </Grid.Style>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
 
-            <!-- Geri Butonu -->
-            <ui:Button Grid.Column="0"
-                       Appearance="Secondary"
-                       Padding="8,6"
-                       ToolTip="Ana Sayfaya Dön"
-                       Command="{Binding GoBackToMainCommand}">
-                <ui:Button.Icon>
-                    <ui:SymbolIcon Symbol="ArrowLeft24"/>
-                </ui:Button.Icon>
-            </ui:Button>
-
-            <!-- Takım Oluştur Butonu -->
-            <ui:Button Grid.Column="1"
-                       Content="Takım Oluştur"
+            <!-- Takım Oluştur Butonu (Tam Genişlik) -->
+            <ui:Button Content="Takım Oluştur"
                        Appearance="Primary"
+                       Background="{DynamicResource SpecialButtonBgBrush}"
+                       Foreground="{DynamicResource SpecialButtonTextBrush}"
                        HorizontalAlignment="Stretch"
-                       Margin="8,0,0,0"
                        Padding="12,8"
                        FontWeight="SemiBold"
                        Command="{Binding OpenCreateTeamCommand}">
@@ -93,7 +78,7 @@
         <!-- SATIR 2 — Takım Listesi -->
         <TextBlock Grid.Row="2"
                    Text="Henüz takım oluşturulmadı."
-                   Foreground="{StaticResource TextSecondaryBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    FontSize="14" FontWeight="SemiBold"
                    HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBlock.Style>
@@ -187,5 +172,75 @@
                                         Visibility="{Binding IsCreatingTeam, Converter={StaticResource BoolToVis}}"
                                         CreateClosed="InlineCreateComponent_CreateClosed"
                                         IsVisibleChanged="OnElementIsVisibleChanged" />
+
+        <Button x:Name="HomeButton" 
+                Grid.Row="1" Grid.RowSpan="2"
+                HorizontalAlignment="Left" VerticalAlignment="Center"
+                Margin="-4,0,0,0"
+                Width="38" Height="48"
+                Padding="0"
+                Cursor="Hand"
+                Command="{Binding GoBackToMainCommand}"
+                Panel.ZIndex="100"
+                ToolTip="Ana Sayfaya Dön"
+                PreviewMouseDown="OnHomeButtonPreviewMouseDown"
+                PreviewMouseMove="OnHomeButtonPreviewMouseMove"
+                PreviewMouseUp="OnHomeButtonPreviewMouseUp">
+            <Button.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    <TranslateTransform x:Name="HomeButtonTranslate"/>
+                </TransformGroup>
+            </Button.RenderTransform>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Opacity" Value="0.4"/>
+                    <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        CornerRadius="0,12,12,0" 
+                                        BorderBrush="{DynamicResource BorderColorBrush}"
+                                        BorderThickness="0,1,1,1">
+                                    <ui:SymbolIcon Symbol="Home24" FontSize="20" 
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Margin="4,0,0,0"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEditingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsCreatingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="1.0"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.1" />
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.1" />
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
     </Grid>
 </ui:FluentWindow>

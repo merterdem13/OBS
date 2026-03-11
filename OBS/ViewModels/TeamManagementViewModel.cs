@@ -70,6 +70,7 @@ namespace OBS.ViewModels
                 detailWindow.Left = currentWindow.Left;
                 detailWindow.Top = currentWindow.Top;
             }
+            detailWindow.Opacity = 0;
             detailWindow.Show();
 
             currentWindow?.Close();
@@ -138,6 +139,7 @@ namespace OBS.ViewModels
                 mainWindow.Left = currentWindow.Left;
                 mainWindow.Top = currentWindow.Top;
             }
+            mainWindow.Opacity = 0;
             mainWindow.Show();
 
             currentWindow?.Close();

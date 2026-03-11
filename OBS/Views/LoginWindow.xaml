@@ -12,8 +12,8 @@
     WindowStartupLocation="CenterScreen"
     Topmost="True"
     Icon="pack://application:,,,/Assets/app.ico"
-    ExtendsContentIntoTitleBar="True"
-    Background="#F4F3F1">
+    ExtendsContentIntoTitleBar="True" WindowBackdropType="None"
+    Background="{DynamicResource BgBodyBrush}">
 
     
 	
@@ -73,11 +73,11 @@
                        Stretch="Uniform"/>
 
                 <!-- App Name -->
-                <TextBlock Text="OBS"
+                <TextBlock Text="Öğrenci Bilgi Sistemi"
                            FontSize="20" FontWeight="Bold"
                            HorizontalAlignment="Center"
                            TextAlignment="Center"
-                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
                            Margin="0,0,0,8"/>
 
                 <!-- Mode Title (Optional, keep if using bindings like 'Enter PIN') -->
@@ -85,7 +85,7 @@
                            FontSize="14" FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            TextAlignment="Center"
-                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
                            Margin="0,0,0,16"/>
 
                 <!-- PIN Input Box -->
@@ -105,7 +105,7 @@
                                       HorizontalAlignment="Right" VerticalAlignment="Center"
                                       Background="Transparent" BorderThickness="0"
                                       ToolTip="Tuş Takımını Göster/Gizle">
-                            <ui:SymbolIcon Symbol="Keyboard24" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <ui:SymbolIcon Symbol="Keyboard24" FontSize="20" Foreground="{DynamicResource TextPrimaryBrush}"/>
                         </ToggleButton>
                     </Grid>
                 </Border>

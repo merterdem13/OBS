@@ -8,17 +8,10 @@
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Light"/>
                 <ui:ControlsDictionary/>
+                <ResourceDictionary Source="pack://application:,,,/Themes/LightColors.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-        <!-- Global Colors -->
-        <SolidColorBrush x:Key="BgBodyBrush" Color="#f1f5f9"/>
-        <SolidColorBrush x:Key="BgCardBrush" Color="#ffffff"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1e293b"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#64748b"/>
-        <SolidColorBrush x:Key="BorderColorBrush" Color="#e2e8f0"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#2563eb"/>
-        <SolidColorBrush x:Key="HeaderBgBrush" Color="#e6ffffff"/> <!-- rgba(255, 255, 255, 0.9) -->
-        <SolidColorBrush x:Key="ModalBgBrush" Color="#ffffff"/>
+        <!-- Global Colors extracted to Themes -->
         
         <!-- Button Colors -->
         <SolidColorBrush x:Key="BtnBlueBrush" Color="#3b82f6"/>
@@ -87,7 +80,7 @@
             <Setter Property="FontSize" Value="24"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="5"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -108,9 +101,9 @@
         <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
             <Setter Property="Padding" Value="10"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderColorBrush}"/>
-            <Setter Property="Background" Value="{StaticResource BgCardBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColorBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -123,7 +116,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                                 <!-- Not: box-shadow wpf'te DropShadowEffect ile tam benzemez, border kalınlığını artırmak veya arka plana grid koymak daha etkilidir -->
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -150,13 +143,13 @@
                                     <Thumb>
                                         <Thumb.Template>
                                             <ControlTemplate TargetType="Thumb">
-                                                <Border x:Name="ThumbBorder" CornerRadius="3" Background="{StaticResource ScrollBarThumbBrush}"/>
+                                                <Border x:Name="ThumbBorder" CornerRadius="3" Background="{DynamicResource ScrollBarThumbBrush}"/>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="ThumbBorder" Property="Background" Value="{StaticResource ScrollBarThumbHoverBrush}"/>
+                                                        <Setter TargetName="ThumbBorder" Property="Background" Value="{DynamicResource ScrollBarThumbHoverBrush}"/>
                                                     </Trigger>
                                                     <Trigger Property="IsDragging" Value="True">
-                                                        <Setter TargetName="ThumbBorder" Property="Background" Value="{StaticResource ScrollBarThumbHoverBrush}"/>
+                                                        <Setter TargetName="ThumbBorder" Property="Background" Value="{DynamicResource ScrollBarThumbHoverBrush}"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
@@ -187,10 +180,10 @@
                                             <Thumb>
                                                 <Thumb.Template>
                                                     <ControlTemplate TargetType="Thumb">
-                                                        <Border x:Name="ThumbBorder" CornerRadius="3" Background="{StaticResource ScrollBarThumbBrush}"/>
+                                                        <Border x:Name="ThumbBorder" CornerRadius="3" Background="{DynamicResource ScrollBarThumbBrush}"/>
                                                         <ControlTemplate.Triggers>
                                                             <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter TargetName="ThumbBorder" Property="Background" Value="{StaticResource ScrollBarThumbHoverBrush}"/>
+                                                                <Setter TargetName="ThumbBorder" Property="Background" Value="{DynamicResource ScrollBarThumbHoverBrush}"/>
                                                             </Trigger>
                                                         </ControlTemplate.Triggers>
                                                     </ControlTemplate>

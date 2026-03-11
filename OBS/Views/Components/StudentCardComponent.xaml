@@ -8,8 +8,8 @@
         <converters:PathToImageConverter x:Key="PathToImage"/>
     </UserControl.Resources>
 
-    <Border Background="#F4F3F1"
-            BorderBrush="{StaticResource BorderColorBrush}"
+    <Border Background="{DynamicResource BgCardBrush}"
+            BorderBrush="{DynamicResource BorderColorBrush}"
             BorderThickness="1"
             CornerRadius="10"
             Margin="0,0,0,8"
@@ -36,7 +36,7 @@
             <Style TargetType="Border">
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                     </Trigger>
                     <DataTrigger Binding="{Binding IsRemoving}" Value="True">
                         <DataTrigger.EnterActions>
@@ -66,7 +66,7 @@
             <Border Grid.Column="0"
                     CornerRadius="10,0,0,10"
                     ClipToBounds="True"
-                    Background="#EDF2F7"
+                    Background="{DynamicResource BgBodyBrush}"
                     ToolTip="Fotoğrafı indirmek için sağ tıklayın"
                     Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
                 <Border.ContextMenu>
@@ -90,11 +90,11 @@
                         <Setter Property="Padding" Value="0"/>
                         <Setter Property="IsHitTestVisible" Value="True"/>
                         <Setter Property="FontSize" Value="12"/>
-                        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                         <Setter Property="VerticalAlignment" Value="Center"/>
                     </Style>
                     <Style x:Key="LabelText" TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                         <Setter Property="FontSize" Value="12"/>
                         <Setter Property="VerticalAlignment" Value="Center"/>
                         <Setter Property="Margin" Value="0,0,4,0"/>
@@ -147,11 +147,11 @@
                                 <Style TargetType="ui:SymbolIcon">
                                     <Setter Property="Symbol" Value="Star24"/>
                                     <Setter Property="Filled" Value="False"/>
-                                    <Setter Property="Foreground" Value="#CBD5E0"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                                             <Setter Property="Filled" Value="True"/>
-                                            <Setter Property="Foreground" Value="#F6AD55"/>
+                                            <Setter Property="Foreground" Value="#F59E0B"/>
                                             <DataTrigger.EnterActions>
                                                 <BeginStoryboard>
                                                     <Storyboard>

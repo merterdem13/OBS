@@ -7,6 +7,7 @@ namespace OBS.Helpers
     public class SettingsData
     {
         public string? LastSeenReleaseNotesVersion { get; set; }
+        public double FloatingButtonVerticalOffset { get; set; } = 0;
     }
 
     public static class LocalSettings

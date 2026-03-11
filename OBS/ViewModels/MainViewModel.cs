@@ -36,9 +36,14 @@ namespace OBS.ViewModels
 
         [ObservableProperty]
         private bool _isClassSelected = false;
+        [ObservableProperty]
+        private bool _isClassFilterMode = false;
 
         [ObservableProperty]
-        private bool _isSettingsPanelVisible = false;
+        private bool _isSettingsOverlayVisible = false;
+
+        [ObservableProperty]
+        private int _selectedSettingsIndex = 0;
 
         [ObservableProperty]
         private bool _isLoading = false;
@@ -48,6 +53,10 @@ namespace OBS.ViewModels
 
         [ObservableProperty]
         private string _loadingProgressText = "%0";
+
+        // ── Tema ────────────────────────────────────────────────────────────
+        [ObservableProperty]
+        private string _currentTheme = "Light";
 
         // ── Arama & Filtre ──────────────────────────────────────────────────
         [ObservableProperty]
@@ -110,6 +119,9 @@ namespace OBS.ViewModels
             _pdfExportService = new PdfExportService();
             _updateService = new UpdateService();
 
+            var settingsRepo = new SettingsRepository();
+            CurrentTheme = settingsRepo.GetSetting("Theme") ?? "Light";
+
             LoadClassList();
             UpdateFavoriteState();
             _ = CheckForUpdateSilentlyAsync();
@@ -117,69 +129,104 @@ namespace OBS.ViewModels
 
         // ── Partial Callbacks ───────────────────────────────────────────────
         // Kardeş property'leri değiştirirken backing field'a doğrudan yazılır.
-        // Böylece karşılıklı callback zinciri (re-entrant loop) oluşmaz,
-        // her kullanıcı aksiyonu tam olarak BİR RefreshStudents() tetikler.
+        // _isUpdatingFilters bayrağı, WPF UI TextBox'ın OnPropertyChanged
+        // sonrası geri-bildirim yaparak OnSearchTextChanged'ı yeniden
+        // tetiklemesini engeller. Böylece her kullanıcı aksiyonu tam olarak
+        // BİR RefreshStudents() tetikler.
+
+        private bool _isUpdatingFilters;
 
         partial void OnSelectedClassChanged(string? value)
         {
-            IsClassSelected = !string.IsNullOrEmpty(value);
-
-            if (_isFavoriteMode && !string.IsNullOrEmpty(value))
+            Debug.WriteLine($"[FILTER] OnSelectedClassChanged: value='{value}', _searchText='{_searchText}', _isUpdatingFilters={_isUpdatingFilters}");
+            if (_isUpdatingFilters) return;
+            _isUpdatingFilters = true;
+            try
             {
-                _isFavoriteMode = false;
-                OnPropertyChanged(nameof(IsFavoriteMode));
-                Students.Clear();
-            }
+                IsClassSelected = !string.IsNullOrEmpty(value);
 
-            if (!string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(_searchText))
+                if (_isFavoriteMode && !string.IsNullOrEmpty(value))
+                {
+                    _isFavoriteMode = false;
+                    OnPropertyChanged(nameof(IsFavoriteMode));
+                    Students.Clear();
+                }
+
+                if (!string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(_searchText))
+                {
+                    Debug.WriteLine($"[FILTER] Clearing searchText from '{_searchText}'");
+                    _searchDebounceCts?.Cancel();
+                    _searchText = string.Empty;
+                    OnPropertyChanged(nameof(SearchText));
+                }
+
+                Debug.WriteLine($"[FILTER] About to call RefreshStudents from OnSelectedClassChanged");
+                RefreshStudents();
+            }
+            finally
             {
-                _searchText = string.Empty;
-                OnPropertyChanged(nameof(SearchText));
+                _isUpdatingFilters = false;
             }
-
-            RefreshStudents();
         }
 
         partial void OnSearchTextChanged(string value)
         {
-            if (_isFavoriteMode && !string.IsNullOrWhiteSpace(value))
+            Debug.WriteLine($"[FILTER] OnSearchTextChanged: value='{value}', _selectedClass='{_selectedClass}', _isUpdatingFilters={_isUpdatingFilters}");
+            if (_isUpdatingFilters) return;
+            _isUpdatingFilters = true;
+            try
             {
-                _isFavoriteMode = false;
-                OnPropertyChanged(nameof(IsFavoriteMode));
-                Students.Clear();
-            }
+                if (_isFavoriteMode && !string.IsNullOrWhiteSpace(value))
+                {
+                    _isFavoriteMode = false;
+                    OnPropertyChanged(nameof(IsFavoriteMode));
+                    Students.Clear();
+                }
 
-            if (!string.IsNullOrWhiteSpace(value) && _selectedClass != null)
+                if (!string.IsNullOrWhiteSpace(value) && _selectedClass != null)
+                {
+                    _selectedClass = null;
+                    IsClassSelected = false;
+                    OnPropertyChanged(nameof(SelectedClass));
+                }
+
+                // Boş girdi → listeyi sıfırla.
+                var trimmed = value?.Trim() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(trimmed))
+                {
+                    _searchDebounceCts?.Cancel();
+
+                    // Sınıf seçiliyken arama kutusu programatik olarak temizlendiyse
+                    // (OnSelectedClassChanged tarafından), RefreshStudents zaten
+                    // sınıf filtresi üzerinden tetiklendi — tekrar çağırmaya gerek yok.
+                    // Tekrar çağrılırsa _staggerCts iptal edilir ve ilk sonuç kaybolur.
+                    if (_selectedClass != null)
+                        return;
+
+                    RefreshStudents();
+                    return;
+                }
+
+                // Minimum karakter kontrolü:
+                //   • Sayısal girdi (numara araması) → 1 karakter yeterli (tek haneli numaralar mevcut).
+                //   • Alfabetik girdi (ad/soyad araması) → 2 karakter gerekli.
+                bool isNumeric = trimmed.All(char.IsDigit);
+                int minLength = isNumeric ? 1 : 2;
+
+                if (trimmed.Length < minLength)
+                {
+                    _searchDebounceCts?.Cancel();
+                    return;
+                }
+
+                // Debounce: Her tuşa basmada DB sorgusu yerine 300ms bekle.
+                // Kullanıcı yazmayı bitirince tek sorgu gider.
+                DebouncedRefreshStudents();
+            }
+            finally
             {
-                _selectedClass = null;
-                IsClassSelected = false;
-                OnPropertyChanged(nameof(SelectedClass));
+                _isUpdatingFilters = false;
             }
-
-            // Boş girdi → listeyi sıfırla.
-            var trimmed = value.Trim();
-            if (string.IsNullOrWhiteSpace(trimmed))
-            {
-                _searchDebounceCts?.Cancel();
-                RefreshStudents();
-                return;
-            }
-
-            // Minimum karakter kontrolü:
-            //   • Sayısal girdi (numara araması) → 1 karakter yeterli (tek haneli numaralar mevcut).
-            //   • Alfabetik girdi (ad/soyad araması) → 2 karakter gerekli.
-            bool isNumeric = trimmed.All(char.IsDigit);
-            int minLength = isNumeric ? 1 : 2;
-
-            if (trimmed.Length < minLength)
-            {
-                _searchDebounceCts?.Cancel();
-                return;
-            }
-
-            // Debounce: Her tuşa basmada DB sorgusu yerine 300ms bekle.
-            // Kullanıcı yazmayı bitirince tek sorgu gider.
-            DebouncedRefreshStudents();
         }
 
         private async void DebouncedRefreshStudents()
@@ -196,22 +243,32 @@ namespace OBS.ViewModels
 
         partial void OnIsFavoriteModeChanged(bool value)
         {
-            if (value)
+            if (_isUpdatingFilters) return;
+            _isUpdatingFilters = true;
+            try
             {
-                if (_selectedClass != null)
+                if (value)
                 {
-                    _selectedClass = null;
-                    IsClassSelected = false;
-                    OnPropertyChanged(nameof(SelectedClass));
+                    if (_selectedClass != null)
+                    {
+                        _selectedClass = null;
+                        IsClassSelected = false;
+                        OnPropertyChanged(nameof(SelectedClass));
+                    }
+                    if (!string.IsNullOrEmpty(_searchText))
+                    {
+                        _searchDebounceCts?.Cancel();
+                        _searchText = string.Empty;
+                        OnPropertyChanged(nameof(SearchText));
+                    }
                 }
-                if (!string.IsNullOrEmpty(_searchText))
-                {
-                    _searchText = string.Empty;
-                    OnPropertyChanged(nameof(SearchText));
-                }
-            }
 
-            RefreshStudents();
+                RefreshStudents();
+            }
+            finally
+            {
+                _isUpdatingFilters = false;
+            }
         }
 
         // ── Komutlar — Toggle / Panel ───────────────────────────────────────
@@ -226,15 +283,21 @@ namespace OBS.ViewModels
         }
 
         [RelayCommand]
-        private void ToggleSettings() => IsSettingsPanelVisible = !IsSettingsPanelVisible;
+        private void OpenSettingsOverlay()
+        {
+            SelectedSettingsIndex = 0;
+            IsSettingsOverlayVisible = true;
+        }
 
         [RelayCommand]
-        private void CloseSettingsPanel() => IsSettingsPanelVisible = false;
+        private void CloseSettingsOverlay()
+        {
+            IsSettingsOverlayVisible = false;
+        }
 
         [RelayCommand]
         private void OpenTeamManagement()
         {
-            IsSettingsPanelVisible = false;
 
             var currentWindow = Application.Current.Windows.OfType<Views.MainWindow>().FirstOrDefault();
 
@@ -244,6 +307,7 @@ namespace OBS.ViewModels
                 teamWindow.Left = currentWindow.Left;
                 teamWindow.Top = currentWindow.Top;
             }
+            teamWindow.Opacity = 0;
             teamWindow.Show();
 
             currentWindow?.Close();
@@ -254,6 +318,61 @@ namespace OBS.ViewModels
 
         [RelayCommand]
         private void ClearClassFilter() => SelectedClass = null;
+
+        [RelayCommand]
+        private void ToggleFilterMode()
+        {
+            IsClassFilterMode = !IsClassFilterMode;
+
+            // Search moduna dönünce sınıf filtresi seçiliyse temizle,
+            // böylece liste hemen güncellenir.
+            if (!IsClassFilterMode && SelectedClass != null)
+            {
+                SelectedClass = null;
+            }
+
+            // Sınıf moduna geçince arama metni varsa temizle,
+            // böylece liste hemen güncellenir.
+            if (IsClassFilterMode && !string.IsNullOrEmpty(SearchText))
+            {
+                SearchText = string.Empty;
+            }
+        }
+
+        // ── Komutlar — Tema Değiştirme ──────────────────────────────────────
+
+        [RelayCommand]
+        private void ChangeTheme(string themeString)
+        {
+            if (CurrentTheme == themeString) return;
+
+            CurrentTheme = themeString;
+            
+            var settingsRepo = new SettingsRepository();
+            settingsRepo.SetSetting("Theme", themeString);
+            
+            Helpers.ThemeManager.ApplyTheme(themeString);
+
+            // Hard Reset!
+            var currentWindow = Application.Current.MainWindow as Views.MainWindow;
+            if (currentWindow != null)
+            {
+                var newWindow = new Views.MainWindow();
+                newWindow.Left = currentWindow.Left;
+                newWindow.Top = currentWindow.Top;
+
+                if (newWindow.DataContext is MainViewModel newVm)
+                {
+                    newVm.IsSettingsOverlayVisible = true;
+                    newVm.SelectedSettingsIndex = 2; // 2 = DisplaySettingsPage
+                }
+
+                Application.Current.MainWindow = newWindow;
+                newWindow.Opacity = 0;
+                newWindow.Show();
+                currentWindow.Close();
+            }
+        }
 
         // ── Komutlar — Güncelleme ───────────────────────────────────────────
 
@@ -278,7 +397,6 @@ namespace OBS.ViewModels
         [RelayCommand]
         private async Task CheckForUpdateAsync()
         {
-            IsSettingsPanelVisible = false;
 
             try
             {
@@ -401,7 +519,6 @@ namespace OBS.ViewModels
         [RelayCommand]
         private async Task ImportKunyePdfAsync()
         {
-            IsSettingsPanelVisible = false;
 
             var dialog = new OpenFileDialog
             {
@@ -615,7 +732,6 @@ namespace OBS.ViewModels
         [RelayCommand]
         private async Task ResetSystemAsync()
         {
-            IsSettingsPanelVisible = false;
 
             if (ConfirmAsync != null)
             {
@@ -819,6 +935,10 @@ namespace OBS.ViewModels
 
         public async void RefreshStudents()
         {
+            Debug.WriteLine($"[REFRESH] RefreshStudents called. SearchText='{SearchText}', SelectedClass='{SelectedClass}', IsFavoriteMode={IsFavoriteMode}, Students.Count={Students.Count}");
+            // Bekleyen debounce aramasını da iptal et — yarış durumunu önler.
+            _searchDebounceCts?.Cancel();
+
             _staggerCts?.Cancel();
             _staggerCts = new CancellationTokenSource();
             var token = _staggerCts.Token;
@@ -829,20 +949,24 @@ namespace OBS.ViewModels
 
             if (IsFavoriteMode)
             {
+                Debug.WriteLine($"[REFRESH] Branch: FavoriteMode");
                 rawStudents = favoriteNumbersList
                     .Select(sn => _studentRepo.GetByStudentNumber(sn))
                     .Where(s => s != null)!;
             }
             else if (!string.IsNullOrWhiteSpace(SearchText))
             {
+                Debug.WriteLine($"[REFRESH] Branch: Search '{SearchText}'");
                 rawStudents = _studentRepo.Search(SearchText);
             }
             else if (!string.IsNullOrEmpty(SelectedClass))
             {
+                Debug.WriteLine($"[REFRESH] Branch: Class '{SelectedClass}'");
                 rawStudents = _studentRepo.GetByClass(SelectedClass);
             }
             else
             {
+                Debug.WriteLine($"[REFRESH] Branch: CLEAR ALL");
                 _allViewModels.Clear();
                 _loadedCount = 0;
                 HasMoreStudents = false;
@@ -855,7 +979,7 @@ namespace OBS.ViewModels
                         await Task.Delay(200, token);
                         Students.Clear();
                     }
-                    catch (OperationCanceledException) { }
+                    catch (OperationCanceledException) { Debug.WriteLine($"[REFRESH] CLEAR ALL cancelled"); }
                 }
                 return;
             }
@@ -864,6 +988,7 @@ namespace OBS.ViewModels
                 .Select(s => new StudentViewModel(s, favoriteNumbers.Contains(s.StudentNumber)))
                 .ToList();
             _loadedCount = 0;
+            Debug.WriteLine($"[REFRESH] _allViewModels.Count={_allViewModels.Count}, Students.Count={Students.Count}");
 
             try
             {
@@ -871,15 +996,18 @@ namespace OBS.ViewModels
                 {
                     foreach (var s in Students) s.IsRemoving = true;
                     int fadeDelay = string.IsNullOrWhiteSpace(SearchText) ? 150 : 50;
+                    Debug.WriteLine($"[REFRESH] Awaiting fadeDelay={fadeDelay}ms");
                     await Task.Delay(fadeDelay, token);
+                    Debug.WriteLine($"[REFRESH] fadeDelay completed");
                 }
 
                 Students.Clear();
                 LoadNextPage();
+                Debug.WriteLine($"[REFRESH] LoadNextPage done, Students.Count={Students.Count}");
             }
             catch (OperationCanceledException)
             {
-                // Ignored
+                Debug.WriteLine($"[REFRESH] *** CANCELLED during fade! Students NOT loaded. ***");
             }
         }
 

@@ -10,12 +10,19 @@ namespace OBS.Views
     {
         public TeamManagementWindow()
         {
+            Opacity = 0;
             InitializeComponent();
             var vm = new TeamManagementViewModel();
             DataContext = vm;
             vm.PropertyChanged += Vm_PropertyChanged;
 
             Loaded += TeamManagementWindow_Loaded;
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            Helpers.WindowFlashFixer.Apply(this);
         }
 
         private void Vm_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -61,6 +68,9 @@ namespace OBS.Views
             Storyboard.SetTarget(anim, this);
             Storyboard.SetTargetProperty(anim, new PropertyPath("Opacity"));
             sb.Begin();
+
+            // Yüzer buton konumunu hatırla
+            HomeButtonTranslate.Y = Helpers.LocalSettings.Current.FloatingButtonVerticalOffset;
         }
 
         private void OnElementIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -90,6 +100,76 @@ namespace OBS.Views
                 sb.Children.Add(opacityAnim);
                 sb.Children.Add(translateAnim);
                 sb.Begin();
+            }
+        }
+
+        // ── Sürükleme Mantığı — Home Buton ──────────────────────────────────
+        private bool _isDragging = false;
+        private Point _clickPosition;
+        private double _initialTranslateY;
+
+        private void OnHomeButtonPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                _isDragging = false;
+                _clickPosition = e.GetPosition(this);
+                _initialTranslateY = HomeButtonTranslate.Y;
+                HomeButton.CaptureMouse();
+            }
+        }
+
+        private void OnHomeButtonPreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (HomeButton.IsMouseCaptured)
+            {
+                Point currentPosition = e.GetPosition(this);
+                double deltaY = currentPosition.Y - _clickPosition.Y;
+
+                if (!_isDragging && Math.Abs(deltaY) > 5)
+                {
+                    _isDragging = true;
+                }
+
+                if (_isDragging)
+                {
+                    double newTranslateY = _initialTranslateY + deltaY;
+
+                    // Alt sınırı — 30px mesafe bıraktık
+                    double maxMove = (this.ActualHeight / 2) - (HomeButton.ActualHeight / 2) - 30;
+                    double minMove = -(this.ActualHeight / 2) + (HomeButton.ActualHeight / 2) + 60;
+
+                    if (newTranslateY > maxMove) newTranslateY = maxMove;
+                    if (newTranslateY < minMove) newTranslateY = minMove;
+
+                    HomeButtonTranslate.Y = newTranslateY;
+                    Helpers.LocalSettings.Current.FloatingButtonVerticalOffset = newTranslateY;
+                }
+            }
+        }
+
+        private void OnHomeButtonPreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (HomeButton.IsMouseCaptured)
+            {
+                HomeButton.ReleaseMouseCapture();
+
+                if (!_isDragging)
+                {
+                    // Manuel click tetikleme
+                    if (HomeButton.Command != null && HomeButton.Command.CanExecute(HomeButton.CommandParameter))
+                    {
+                        HomeButton.Command.Execute(HomeButton.CommandParameter);
+                    }
+                }
+                else
+                {
+                    // Sürükleme bittiğinde konumu kalıcı olarak kaydet
+                    Helpers.LocalSettings.Save();
+                }
+                
+                e.Handled = true;
+                _isDragging = false;
             }
         }
     }

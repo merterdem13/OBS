@@ -39,7 +39,7 @@
         <Button x:Name="SettingsButton"
                 Width="56"
                 Height="56"
-                Background="#137fec"
+                Background="{DynamicResource AccentBrush}"
                 BorderThickness="0"
                 Cursor="Hand"
                 Click="SettingsButton_Click"
@@ -89,8 +89,8 @@
 
         <!-- Popup Menu -->
         <Border x:Name="MenuPopup"
-                Background="#F4F3F1"
-                BorderBrush="#d1d5db"
+                Background="{DynamicResource BgCardBrush}"
+                BorderBrush="{DynamicResource BorderColorBrush}"
                 BorderThickness="1"
                 CornerRadius="8"
                 Padding="12"
@@ -117,13 +117,13 @@
                     <TextBlock Text="VERİ YÜKLEME" 
                              FontSize="10" 
                              FontWeight="Bold" 
-                             Foreground="#64748b"
+                             Foreground="{DynamicResource TextSecondaryBrush}"
                              Margin="8,8,0,6"/>
 
                     <Button Content="📄 PDF Yükle"
                             Height="36"
                             Background="Transparent"
-                            Foreground="#334155"
+                            Foreground="{DynamicResource TextPrimaryBrush}"
                             BorderThickness="0"
                             HorizontalContentAlignment="Left"
                             Padding="12,8"
@@ -144,13 +144,13 @@
                     </Button>
 
                     <!-- Separator -->
-                    <Separator Margin="5,8" Background="#d1d5db"/>
+                    <Separator Margin="5,8" Background="{DynamicResource BorderColorBrush}"/>
 
                     <!-- SYSTEM SECTION -->
                     <TextBlock Text="SİSTEM" 
                              FontSize="10" 
                              FontWeight="Bold" 
-                             Foreground="#64748b"
+                             Foreground="{DynamicResource TextSecondaryBrush}"
                              Margin="8,8,0,6"/>
 
                     <Button Content="🔄 Sistemi Sıfırla"

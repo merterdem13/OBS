@@ -42,7 +42,7 @@
             <TextBlock Grid.Column="1"
                        Text="Takım Düzenle"
                        FontSize="16" FontWeight="SemiBold"
-                       Foreground="{StaticResource TextPrimaryBrush}"
+                       Foreground="{DynamicResource TextPrimaryBrush}"
                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
             
             <!-- Sağ Tarafı Dengelemek İçin Boşluk (Opsiyonel) -->
@@ -53,7 +53,7 @@
         <StackPanel Grid.Row="1" Margin="12,12,12,14">
             <TextBlock Text="Takım Adı"
                        FontSize="12" FontWeight="SemiBold"
-                       Foreground="{StaticResource TextSecondaryBrush}"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
                        Margin="0,0,0,6"/>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -68,6 +68,8 @@
                 <ui:Button Grid.Column="2"
                            Content="Kaydet"
                            Appearance="Primary"
+                           Background="{DynamicResource SpecialButtonBgBrush}"
+                           Foreground="{DynamicResource SpecialButtonTextBrush}"
                            Padding="10,6"
                            Click="OnSaveNameClick">
                     <ui:Button.Icon>
@@ -81,7 +83,7 @@
         <StackPanel Grid.Row="2" Margin="12,0,12,8">
             <TextBlock Text="Öğrenci Ekle"
                        FontSize="12" FontWeight="SemiBold"
-                       Foreground="{StaticResource TextSecondaryBrush}"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
                        Margin="0,0,0,6"/>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -91,27 +93,67 @@
                 </Grid.ColumnDefinitions>
                 <ui:TextBox x:Name="SearchBox"
                             Grid.Column="0"
-                            PlaceholderText="Ad, soyad veya okul no ile ara..."
+                            PlaceholderText="Öğrenci Ara (Ad, No)..."
                             TextChanged="OnSearchTextChanged">
                     <ui:TextBox.Icon>
                         <ui:SymbolIcon Symbol="Search24"/>
                     </ui:TextBox.Icon>
                 </ui:TextBox>
-                <ui:Button Grid.Column="2"
-                           Appearance="Secondary"
-                           Padding="8,6"
-                           ToolTip="Favorilerden Ekle"
-                           Click="OnShowFavoritesClick">
-                    <ui:SymbolIcon Symbol="Star24" FontSize="16" Foreground="#F6AD55"/>
-                </ui:Button>
+
+                <!-- Favoriler Butonu -->
+                <Button Grid.Column="2"
+                        Width="32" Height="32"
+                        BorderThickness="0"
+                        Background="Transparent"
+                        Cursor="Hand"
+                        ToolTip="Favorilerden Ekle"
+                        Click="OnShowFavoritesClick"
+                        RenderTransformOrigin="0.5,0.5">
+                    <Button.RenderTransform>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    </Button.RenderTransform>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="16">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <ui:SymbolIcon x:Name="FavoriteIcon" FontSize="20" Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Symbol="Star24" Filled="False" />
+                </Button>
             </Grid>
         </StackPanel>
 
         <!-- Arama Sonuçları -->
         <Border Grid.Row="3"
                 x:Name="SearchResultsBorder"
-                Background="White"
-                BorderBrush="{StaticResource BorderColorBrush}"
+                Background="{DynamicResource BgCardBrush}"
+                BorderBrush="{DynamicResource BorderColorBrush}"
                 BorderThickness="1"
                 CornerRadius="6"
                 MaxHeight="160"
@@ -139,7 +181,7 @@
                                     Width="28" Height="28"
                                     CornerRadius="14"
                                     ClipToBounds="True"
-                                    Background="{StaticResource BgBodyBrush}"
+                                    Background="{DynamicResource BgBodyBrush}"
                                     Margin="0,0,8,0">
                                 <Image Source="{Binding PhotoPath, Converter={StaticResource PathToImage}}"
                                        Stretch="UniformToFill"/>
@@ -147,7 +189,7 @@
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock FontSize="12" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}">
+                                           Foreground="{DynamicResource TextPrimaryBrush}">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}{0} {1}">
                                             <Binding Path="FirstName"/>
@@ -156,7 +198,7 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                                 <TextBlock FontSize="11"
-                                           Foreground="{StaticResource TextSecondaryBrush}">
+                                           Foreground="{DynamicResource TextSecondaryBrush}">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}No: {0}  •  {1}">
                                             <Binding Path="StudentNumber"/>
@@ -168,6 +210,8 @@
 
                             <ui:Button Grid.Column="2"
                                        Appearance="Primary"
+                                       Background="{DynamicResource SpecialButtonBgBrush}"
+                                       Foreground="{DynamicResource SpecialButtonTextBrush}"
                                        Padding="4,2"
                                        VerticalAlignment="Center"
                                        ToolTip="Takıma Ekle"
@@ -185,7 +229,7 @@
         <TextBlock Grid.Row="4"
                    x:Name="MembersHeader"
                    FontSize="12" FontWeight="SemiBold"
-                   Foreground="{StaticResource TextSecondaryBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    Margin="12,0,12,6"/>
 
         <!-- Mevcut Üyeler Listesi -->
@@ -213,8 +257,8 @@
             </ListBox.ItemContainerStyle>
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border Background="White"
-                            BorderBrush="{StaticResource BorderColorBrush}"
+                    <Border Background="{DynamicResource BgCardBrush}"
+                            BorderBrush="{DynamicResource BorderColorBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
                             Padding="8,6">
@@ -229,7 +273,7 @@
                                     Width="32" Height="32"
                                     CornerRadius="16"
                                     ClipToBounds="True"
-                                    Background="{StaticResource BgBodyBrush}"
+                                    Background="{DynamicResource BgBodyBrush}"
                                     Margin="0,0,10,0">
                                 <Image Source="{Binding PhotoPath, Converter={StaticResource PathToImage}}"
                                        Stretch="UniformToFill"/>
@@ -237,7 +281,7 @@
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock FontSize="13" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}">
+                                           Foreground="{DynamicResource TextPrimaryBrush}">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}{0} {1}">
                                             <Binding Path="FirstName"/>
@@ -246,7 +290,7 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                                 <TextBlock FontSize="11"
-                                           Foreground="{StaticResource TextSecondaryBrush}">
+                                           Foreground="{DynamicResource TextSecondaryBrush}">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}No: {0}  •  {1}">
                                             <Binding Path="StudentNumber"/>

@@ -1,0 +1,55 @@
+<UserControl x:Class="OBS.Views.Pages.Settings.AboutAppPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             Background="Transparent">
+
+    <Grid Margin="16,16,16,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Uygulama Hakkında" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="0,0,0,16">
+                <!-- App Icon & Name -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                    <Image Width="48" Height="48" Margin="0,0,16,0"
+                           VerticalAlignment="Center" Stretch="Uniform"
+                           SnapsToDevicePixels="True" UseLayoutRounding="True"
+                           RenderOptions.BitmapScalingMode="Fant">
+                        <Image.Source>
+                            <BitmapImage UriSource="pack://application:,,,/Assets/app.ico" DecodePixelWidth="48" DecodePixelHeight="48" />
+                        </Image.Source>
+                    </Image>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Öğrenci Bilgi Sistemi" FontSize="18" FontWeight="Bold"/>
+                        <TextBlock Text="v2.4.1" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Description -->
+                <TextBlock Text="Bu uygulama, öğretmenlerin ve antrenörlerin öğrencilerini veya takım oyuncularını çok daha kolay ve düzenli bir şekilde yönetebilmesi amacıyla geliştirilmiştir."
+                           TextWrapping="Wrap" 
+                           LineHeight="22"
+                           FontSize="14"
+                           Margin="0,0,0,16"/>
+
+                <TextBlock Text="Öğrencilerinizin künye pdf'lerini sisteme kolayca yükleyebilir, tek bir çatı altında takım gruplarınızı oluşturabilir ve bu grupları Excel veya PDF olarak dışarı aktarabilirsiniz."
+                           TextWrapping="Wrap" 
+                           LineHeight="22"
+                           FontSize="14"
+                           Margin="0,0,0,16"/>
+
+                <TextBlock Text="Geliştirici Notu:" FontWeight="SemiBold" FontSize="15" Margin="0,8,0,4"/>
+                <TextBlock Text="Sistemin her zaman güncel ve hatasız çalışması için 'Sistem Ayarları' sekmesinden düzenli olarak güncellemeleri kontrol etmeyi unutmayın. Geri bildirimleriniz uygulamanın daha da gelişmesine yardımcı olacaktır."
+                           TextWrapping="Wrap" 
+                           LineHeight="20"
+                           FontSize="13"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

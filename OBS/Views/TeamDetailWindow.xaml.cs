@@ -9,15 +9,21 @@ namespace OBS.Views
     {
         public TeamDetailWindow(int teamId, string teamName, string category)
         {
+            Opacity = 0;
             InitializeComponent();
             DataContext = new TeamDetailViewModel(teamId, teamName, category);
 
             Loaded += TeamDetailWindow_Loaded;
         }
 
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            Helpers.WindowFlashFixer.Apply(this);
+        }
+
         private void TeamDetailWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            Opacity = 0;
             var sb = new Storyboard();
             var anim = new DoubleAnimation
             {

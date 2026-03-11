@@ -52,7 +52,7 @@
     <Grid>
         <!-- Ana Container (Animasyonlu) -->
         <Border x:Name="FavoritesPanelBorder"
-                Background="White"
+                Background="{DynamicResource BgCardBrush}"
                 BorderBrush="#F39C12"
                 BorderThickness="2"
                 CornerRadius="8"
@@ -102,9 +102,9 @@
                         <TextBlock Text="FAVORİLERİM" 
                                  FontWeight="Bold" 
                                  FontSize="14"
-                                 Foreground="#2C3E50"/>
+                                 Foreground="{DynamicResource TextPrimaryBrush}"/>
                         <TextBlock FontSize="10" 
-                                 Foreground="#7F8C8D"
+                                 Foreground="{DynamicResource TextSecondaryBrush}"
                                  Margin="0,2,0,0">
                             <Run Text="{Binding FavoriteCount, Mode=OneWay}"/>
                             <Run Text=" öğrenci"/>
@@ -119,7 +119,7 @@
                             Background="Transparent"
                             BorderThickness="0"
                             FontSize="16"
-                            Foreground="#7F8C8D"
+                            Foreground="{DynamicResource TextSecondaryBrush}"
                             Cursor="Hand"
                             Click="CloseButton_Click"
                             ToolTip="Kapat">
@@ -145,8 +145,8 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <!-- Mini Öğrenci Kartı -->
-                                <Border Background="#F8F9FA"
-                                      BorderBrush="#BDC3C7"
+                                <Border Background="{DynamicResource BgBodyBrush}"
+                                      BorderBrush="{DynamicResource BorderColorBrush}"
                                       BorderThickness="1"
                                       CornerRadius="4"
                                       Margin="0,0,0,5"
@@ -163,7 +163,7 @@
                                               Width="40"
                                               Height="50"
                                               CornerRadius="3"
-                                              Background="#ECF0F1"
+                                              Background="{DynamicResource BgCardBrush}"
                                               Margin="0,0,8,0">
                                             <Image Source="{Binding PhotoPath}" 
                                                  Stretch="UniformToFill"/>
@@ -174,9 +174,9 @@
                                             <TextBlock Text="{Binding FullName}" 
                                                      FontWeight="Bold" 
                                                      FontSize="11"
-                                                     Foreground="#2C3E50"
+                                                     Foreground="{DynamicResource TextPrimaryBrush}"
                                                      TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock FontSize="9" Foreground="#7F8C8D" Margin="0,2,0,0">
+                                            <TextBlock FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0">
                                                 <Run Text="{Binding Class}"/>
                                                 <Run Text=" - "/>
                                                 <Run Text="{Binding StudentNumber}"/>

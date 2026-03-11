@@ -12,6 +12,7 @@ namespace OBS.Views
     {
         public MainWindow()
         {
+            Opacity = 0;
             InitializeComponent();
 
             var vm = new MainViewModel();
@@ -19,6 +20,12 @@ namespace OBS.Views
             DataContext = vm;
 
             Loaded += MainWindow_Loaded;
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            Helpers.WindowFlashFixer.Apply(this);
         }
 
         private async Task<bool> ShowConfirmDialogAsync(
@@ -50,6 +57,9 @@ namespace OBS.Views
             // Sürüm Notları (Release Notes) Kontrolü (Giriş animasyonundan hemen sonra)
             await Task.Delay(500);
             CheckAndShowReleaseNotes();
+
+            // Yüzer buton konumunu hatırla
+            FloatingButtonTranslate.Y = Helpers.LocalSettings.Current.FloatingButtonVerticalOffset;
         }
 
         private async void CheckAndShowReleaseNotes()
@@ -88,6 +98,83 @@ namespace OBS.Views
             {
                 if (DataContext is MainViewModel vm)
                     vm.LoadMoreStudentsCommand.Execute(null);
+            }
+        }
+
+        // ── Sürükleme Mantığı — Floating Buton ──────────────────────────────
+        private bool _isDragging = false;
+        private Point _clickPosition;
+        private double _initialTranslateY;
+
+        private void OnFloatingButtonPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                _isDragging = false;
+                _clickPosition = e.GetPosition(this);
+                _initialTranslateY = FloatingButtonTranslate.Y;
+                FloatingButton.CaptureMouse();
+            }
+        }
+
+        private void OnFloatingButtonPreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (FloatingButton.IsMouseCaptured)
+            {
+                Point currentPosition = e.GetPosition(this);
+                double deltaY = currentPosition.Y - _clickPosition.Y;
+
+                // Tıklama ile sürüklemeyi ayırt etmek için küçük bir eşik (threshold)
+                if (!_isDragging && Math.Abs(deltaY) > 5)
+                {
+                    _isDragging = true;
+                }
+
+                if (_isDragging)
+                {
+                    double newTranslateY = _initialTranslateY + deltaY;
+
+                    // Pencere sınırları kontrolü
+                    var parentGrid = FloatingButton.Parent as Grid;
+                    if (parentGrid != null)
+                    {
+                        // Alt sınırı (maxMove) — 30px mesafe bıraktık
+                        double maxMove = (this.ActualHeight / 2) - (FloatingButton.ActualHeight / 2) - 30;
+                        double minMove = -(this.ActualHeight / 2) + (FloatingButton.ActualHeight / 2) + 60;
+
+                        if (newTranslateY > maxMove) newTranslateY = maxMove;
+                        if (newTranslateY < minMove) newTranslateY = minMove;
+                    }
+
+                    FloatingButtonTranslate.Y = newTranslateY;
+                    Helpers.LocalSettings.Current.FloatingButtonVerticalOffset = newTranslateY;
+                }
+            }
+        }
+
+        private void OnFloatingButtonPreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (FloatingButton.IsMouseCaptured)
+            {
+                FloatingButton.ReleaseMouseCapture();
+
+                if (!_isDragging)
+                {
+                    // Eğer sürükleme yapılmadıysa butona tıklanmış demektir.
+                    // Click olayını veya Command'i manuel tetikleyelim çünkü CaptureMouse click'i bozabiliyor.
+                    if (FloatingButton.Command != null && FloatingButton.Command.CanExecute(FloatingButton.CommandParameter))
+                    {
+                        FloatingButton.Command.Execute(FloatingButton.CommandParameter);
+                    }
+                }
+                else
+                {
+                    // Sürükleme bittiğinde konumu kalıcı olarak kaydet
+                    Helpers.LocalSettings.Save();
+                }
+                
+                e.Handled = true; // Sürükleme veya manuel click işlendi, event'i durdur.
+                _isDragging = false;
             }
         }
     }

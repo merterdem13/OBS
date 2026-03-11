@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Alternative Theme Colors (Nord / Deep Slate) -->
+    <!-- Arkaplan -->
+    <SolidColorBrush x:Key="BgBodyBrush" Color="#2E3440"/> <!-- Nord Polar Night Base -->
+    <SolidColorBrush x:Key="BgCardBrush" Color="#3B4252"/> <!-- Nord polar Night Lighter -->
+    <!-- Metinler -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#ECEFF4"/> <!-- Nord Snow Storm -->
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#D8DEE9"/> <!-- Nord Snow Storm Darker -->
+    <!-- Tasarım Elemanları -->
+    <SolidColorBrush x:Key="BorderColorBrush" Color="#434C5E"/> <!-- Nord polar Night Accent -->
+    <SolidColorBrush x:Key="AccentBrush" Color="#88C0D0"/> <!-- Nord Frost Blue -->
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="#e62E3440"/>
+    <SolidColorBrush x:Key="ModalBgBrush" Color="#3B4252"/>
+</ResourceDictionary>
