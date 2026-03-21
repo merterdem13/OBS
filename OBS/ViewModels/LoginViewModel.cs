@@ -159,52 +159,17 @@ namespace OBS.ViewModels
 
         private void OpenMainWindow(string? toastMessage = null)
         {
-            var loginWindow = Application.Current.Windows.OfType<Views.LoginWindow>().FirstOrDefault();
+            OBS.App.NavigationService.NavigateTo<MainViewModel>();
 
-            if (loginWindow != null)
+            var mainWindow = Application.Current.MainWindow as OBS.Views.MainWindow;
+            if (mainWindow != null)
             {
-                var sb = new System.Windows.Media.Animation.Storyboard();
-                var anim = new System.Windows.Media.Animation.DoubleAnimation
-                {
-                    From = 1.0,
-                    To = 0.0,
-                    Duration = new System.Windows.Duration(System.TimeSpan.FromMilliseconds(400)),
-                    EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut }
-                };
-
-                sb.Children.Add(anim);
-                System.Windows.Media.Animation.Storyboard.SetTarget(anim, loginWindow);
-                System.Windows.Media.Animation.Storyboard.SetTargetProperty(anim, new PropertyPath("Opacity"));
-
-                var left = loginWindow.Left;
-                var top = loginWindow.Top;
-
-                sb.Completed += (s, e) =>
-                {
-                    var mainWindow = new Views.MainWindow();
-                    mainWindow.Left = left;
-                    mainWindow.Top = top;
-                    mainWindow.Opacity = 0;
-                    Application.Current.MainWindow = mainWindow;
-                    mainWindow.Show();
-                    loginWindow.Close();
-
-                    if (!string.IsNullOrEmpty(toastMessage))
-                        ToastService.ShowSuccess(toastMessage, mainWindow);
-                };
-
-                sb.Begin();
-            }
-            else
-            {
-                var mainWindow = new Views.MainWindow();
-                mainWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                mainWindow.Opacity = 0;
-                Application.Current.MainWindow = mainWindow;
-                mainWindow.Show();
+                mainWindow.CheckAndShowReleaseNotes();
 
                 if (!string.IsNullOrEmpty(toastMessage))
+                {
                     ToastService.ShowSuccess(toastMessage, mainWindow);
+                }
             }
         }
     }

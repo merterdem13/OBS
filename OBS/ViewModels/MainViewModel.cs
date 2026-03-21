@@ -39,24 +39,37 @@ namespace OBS.ViewModels
         [ObservableProperty]
         private bool _isClassFilterMode = false;
 
-        [ObservableProperty]
-        private bool _isSettingsOverlayVisible = false;
+        public bool IsSettingsOverlayVisible
+        {
+            get => GlobalState.Instance.IsSettingsOverlayVisible;
+            set => GlobalState.Instance.IsSettingsOverlayVisible = value;
+        }
 
-        [ObservableProperty]
-        private int _selectedSettingsIndex = 0;
+        public int SelectedSettingsIndex
+        {
+            get => GlobalState.Instance.SelectedSettingsIndex;
+            set => GlobalState.Instance.SelectedSettingsIndex = value;
+        }
 
-        [ObservableProperty]
-        private bool _isLoading = false;
+        public bool IsLoading
+        {
+            get => GlobalState.Instance.IsLoading;
+            set => GlobalState.Instance.IsLoading = value;
+        }
 
-        [ObservableProperty]
-        private double _loadingProgress = 0;
+        public double LoadingProgress
+        {
+            get => GlobalState.Instance.LoadingProgress;
+            set => GlobalState.Instance.LoadingProgress = value;
+        }
 
-        [ObservableProperty]
-        private string _loadingProgressText = "%0";
+        public string LoadingProgressText
+        {
+            get => GlobalState.Instance.LoadingProgressText;
+            set => GlobalState.Instance.LoadingProgressText = value;
+        }
 
-        // ── Tema ────────────────────────────────────────────────────────────
-        [ObservableProperty]
-        private string _currentTheme = "Light";
+
 
         // ── Arama & Filtre ──────────────────────────────────────────────────
         [ObservableProperty]
@@ -85,18 +98,29 @@ namespace OBS.ViewModels
         [ObservableProperty]
         private bool _hasMoreStudents = false;
 
-        // ── Güncelleme Durumu ────────────────────────────────────────────
-        [ObservableProperty]
-        private bool _isUpdateAvailable = false;
+        public bool IsUpdateAvailable
+        {
+            get => GlobalState.Instance.IsUpdateAvailable;
+            set => GlobalState.Instance.IsUpdateAvailable = value;
+        }
 
-        [ObservableProperty]
-        private string _updateVersion = string.Empty;
+        public string UpdateVersion
+        {
+            get => GlobalState.Instance.UpdateVersion;
+            set => GlobalState.Instance.UpdateVersion = value;
+        }
 
-        [ObservableProperty]
-        private bool _isUpdateDownloading = false;
+        public bool IsUpdateDownloading
+        {
+            get => GlobalState.Instance.IsUpdateDownloading;
+            set => GlobalState.Instance.IsUpdateDownloading = value;
+        }
 
-        [ObservableProperty]
-        private int _updateDownloadProgress = 0;
+        public int UpdateDownloadProgress
+        {
+            get => GlobalState.Instance.UpdateDownloadProgress;
+            set => GlobalState.Instance.UpdateDownloadProgress = value;
+        }
 
         // ── Sayfalama (Infinite Scroll)
         private const int PageSize = 6;
@@ -105,7 +129,6 @@ namespace OBS.ViewModels
         private CancellationTokenSource? _searchDebounceCts;
 
         // ── Onay Diyaloğu Delegate ──────────────────────────────────────────
-        public Func<string, string, string, string, Task<bool>>? ConfirmAsync { get; set; }
 
         // ── Constructor ─────────────────────────────────────────────────────
 
@@ -119,11 +142,13 @@ namespace OBS.ViewModels
             _pdfExportService = new PdfExportService();
             _updateService = new UpdateService();
 
-            var settingsRepo = new SettingsRepository();
-            CurrentTheme = settingsRepo.GetSetting("Theme") ?? "Light";
-
             LoadClassList();
             UpdateFavoriteState();
+            _ = CheckForUpdateSilentlyAsync();
+
+            GlobalState.Instance.OnCheckForUpdateAction = CheckForUpdateAsync;
+            GlobalState.Instance.OnResetSystemAction = ResetSystemAsync;
+            GlobalState.Instance.OnImportKunyePdfAction = ImportKunyePdfAsync;
             _ = CheckForUpdateSilentlyAsync();
         }
 
@@ -298,19 +323,7 @@ namespace OBS.ViewModels
         [RelayCommand]
         private void OpenTeamManagement()
         {
-
-            var currentWindow = Application.Current.Windows.OfType<Views.MainWindow>().FirstOrDefault();
-
-            var teamWindow = new Views.TeamManagementWindow();
-            if (currentWindow != null)
-            {
-                teamWindow.Left = currentWindow.Left;
-                teamWindow.Top = currentWindow.Top;
-            }
-            teamWindow.Opacity = 0;
-            teamWindow.Show();
-
-            currentWindow?.Close();
+            OBS.App.NavigationService.NavigateTo<TeamManagementViewModel>();
         }
 
         [RelayCommand]
@@ -339,40 +352,7 @@ namespace OBS.ViewModels
             }
         }
 
-        // ── Komutlar — Tema Değiştirme ──────────────────────────────────────
 
-        [RelayCommand]
-        private void ChangeTheme(string themeString)
-        {
-            if (CurrentTheme == themeString) return;
-
-            CurrentTheme = themeString;
-            
-            var settingsRepo = new SettingsRepository();
-            settingsRepo.SetSetting("Theme", themeString);
-            
-            Helpers.ThemeManager.ApplyTheme(themeString);
-
-            // Hard Reset!
-            var currentWindow = Application.Current.MainWindow as Views.MainWindow;
-            if (currentWindow != null)
-            {
-                var newWindow = new Views.MainWindow();
-                newWindow.Left = currentWindow.Left;
-                newWindow.Top = currentWindow.Top;
-
-                if (newWindow.DataContext is MainViewModel newVm)
-                {
-                    newVm.IsSettingsOverlayVisible = true;
-                    newVm.SelectedSettingsIndex = 2; // 2 = DisplaySettingsPage
-                }
-
-                Application.Current.MainWindow = newWindow;
-                newWindow.Opacity = 0;
-                newWindow.Show();
-                currentWindow.Close();
-            }
-        }
 
         // ── Komutlar — Güncelleme ───────────────────────────────────────────
 
@@ -394,7 +374,6 @@ namespace OBS.ViewModels
             }
         }
 
-        [RelayCommand]
         private async Task CheckForUpdateAsync()
         {
 
@@ -487,7 +466,7 @@ namespace OBS.ViewModels
             if (IsFavoriteMode && !student.IsFavorite)
             {
                 student.IsRemoving = true;
-                await Task.Delay(300); // 300ms animation duration
+                await Task.Delay(500); // 500ms animation duration
                 if (Students.Contains(student))
                     Students.Remove(student);
             }
@@ -506,7 +485,7 @@ namespace OBS.ViewModels
                 foreach (var student in Students)
                     student.IsRemoving = true;
 
-                await Task.Delay(300);
+                await Task.Delay(500);
                 Students.Clear();
             }
 
@@ -516,7 +495,6 @@ namespace OBS.ViewModels
 
         // ── Komutlar — PDF Yükleme ──────────────────────────────────────────
 
-        [RelayCommand]
         private async Task ImportKunyePdfAsync()
         {
 
@@ -628,6 +606,9 @@ namespace OBS.ViewModels
                     ToastService.ShowSuccess($"{successCount} PDF başarıyla işlendi.");
                 else
                     ToastService.ShowInfo($"{successCount} başarılı, {failCount} tanınamadı/hatalı.");
+
+                // Arka planda silinen/taşınan dosyalar için çöp toplayıcıyı çalıştır
+                _ = new GarbageCollectorService().RunAsync();
             }
             catch (Exception ex)
             {
@@ -729,13 +710,12 @@ namespace OBS.ViewModels
 
         // ── Komutlar — Sistem Sıfırlama ─────────────────────────────────────
 
-        [RelayCommand]
         private async Task ResetSystemAsync()
         {
 
-            if (ConfirmAsync != null)
+            if (GlobalState.Instance.ConfirmAsync != null)
             {
-                var firstConfirm = await ConfirmAsync(
+                var firstConfirm = await GlobalState.Instance.ConfirmAsync(
                     "Sistemi Sıfırla",
                     "Sistemi sıfırlamak istediğinizden emin misiniz?\n\n" +
                     "• Tüm öğrenci verileri\n" +
@@ -748,7 +728,7 @@ namespace OBS.ViewModels
 
                 if (!firstConfirm) return;
 
-                var secondConfirm = await ConfirmAsync(
+                var secondConfirm = await GlobalState.Instance.ConfirmAsync(
                     "Son Uyarı",
                     "Bu işlem GERİ ALINAMAZ!\n\nDevam etmek istediğinizden emin misiniz?",
                     "Evet, Sıfırla",
@@ -976,7 +956,8 @@ namespace OBS.ViewModels
                     try
                     {
                         foreach (var s in Students) s.IsRemoving = true;
-                        await Task.Delay(200, token);
+                        // Öğrencilerin aşağı doğru kaybolma animasyonu (0.5 sn) = 500 ms
+                        await Task.Delay(500, token);
                         Students.Clear();
                     }
                     catch (OperationCanceledException) { Debug.WriteLine($"[REFRESH] CLEAR ALL cancelled"); }
@@ -995,7 +976,10 @@ namespace OBS.ViewModels
                 if (Students.Count > 0)
                 {
                     foreach (var s in Students) s.IsRemoving = true;
-                    int fadeDelay = string.IsNullOrWhiteSpace(SearchText) ? 150 : 50;
+                    // Eğer arama yapılıyorsa veya sınıf değiştiriliyorsa da kaybolma animasyonu için bekleyiş ekleyebiliriz
+                    // Eskiden 150 veya 50 idi. Bunu da çok bekletmemek adına 300ms falan yapabiliriz ama kullanıcı animasyon süresini
+                    // üstteki gibi aynı (500ms) tutalım dediği için bunu da 500ms yapıyoruz.
+                    int fadeDelay = 500; 
                     Debug.WriteLine($"[REFRESH] Awaiting fadeDelay={fadeDelay}ms");
                     await Task.Delay(fadeDelay, token);
                     Debug.WriteLine($"[REFRESH] fadeDelay completed");
@@ -1024,21 +1008,30 @@ namespace OBS.ViewModels
 
         private void LoadNextPage()
         {
-            var nextBatch = _allViewModels.Skip(_loadedCount).Take(PageSize);
+            var nextBatch = _allViewModels.Skip(_loadedCount).Take(PageSize).ToList();
+            int delay = 0;
             foreach (var vm in nextBatch)
             {
+                vm.StaggerDelay = delay;
+                delay += 50; // Her kart 50ms sonrasında görünsün (Şelale effekti)
                 Students.Add(vm);
                 _loadedCount++;
             }
             HasMoreStudents = _loadedCount < _allViewModels.Count;
         }
 
-        private void LoadClassList()
+        public void LoadClassList()
         {
             var classes = _studentRepo.GetDistinctClasses();
             ClassList = new ObservableCollection<string>(classes);
             TotalClassCount = classes.Count;
             TotalStudentCount = _studentRepo.GetCount();
+        }
+
+        public void RefreshDashboard()
+        {
+            LoadClassList();
+            RefreshStudents();
         }
 
         private void UpdateFavoriteState()

@@ -1,16 +1,18 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Light Theme Colors (Modern & Premium Slate Palette) -->
-    <SolidColorBrush x:Key="BgBodyBrush" Color="#F8FAFC"/> <!-- Slate 50: Temiz, ferah arka plan -->
-    <SolidColorBrush x:Key="BgCardBrush" Color="#FFFFFF"/> <!-- Saf Beyaz: Kartların öne çıkmasını sağlar -->
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A"/> <!-- Slate 900: Derin, okunaklı ana metin -->
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#475569"/> <!-- Slate 600: Yumuşak ikincil metin -->
-    <SolidColorBrush x:Key="BorderColorBrush" Color="#E2E8F0"/> <!-- Slate 200: Zarif ve ince kenarlıklar -->
-    <SolidColorBrush x:Key="AccentBrush" Color="#2563EB"/> <!-- Vibrant Blue: Profesyonel vurgu rengi -->
-    <SolidColorBrush x:Key="HeaderBgBrush" Color="#F1F5F9CC"/> <!-- Slate 100 with Opacity: Saydamlaştırılmış başlık -->
-    <SolidColorBrush x:Key="ModalBgBrush" Color="#FFFFFFEE"/> <!-- White with Opacity: Temiz modal arka planı -->
+    <!-- Light Theme Colors (Modern & Premium Desert Sand Palette) -->
+    <SolidColorBrush x:Key="BgBodyBrush" Color="#F5F5F4"/> <!-- Stone 50: Sıcak, doğal ve ferah arka plan -->
+    <SolidColorBrush x:Key="BgCardBrush" Color="#F5F5F4"/> <!-- Stone 50: Arka plan ile bütünleşik kart yapısı -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#44403C"/> <!-- Stone 800: Yumuşak ama okunaklı ana metin -->
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#78716C"/> <!-- Stone 600: Zarif ikincil metin -->
+    <SolidColorBrush x:Key="BorderColorBrush" Color="#E7E5E4"/> <!-- Stone 200: Hafif ve doğal kenarlıklar -->
+    <SolidColorBrush x:Key="AccentBrush" Color="#D97706"/> <!-- Amber: Güçlü, asil ve modern vurgu rengi -->
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="#E7E5E4CC"/> <!-- Stone 200 with Opacity: Saydamlaştırılmış şık başlık -->
+    <SolidColorBrush x:Key="ModalBgBrush" Color="#F5F5F4EE"/> <!-- Stone 50 with Opacity: Temiz modal arka planı -->
 
-    <!-- Özel Butonlar (Cebit/Modern Style) -->
-    <SolidColorBrush x:Key="SpecialButtonBgBrush" Color="#2563EB"/>
+    <!-- Özel Butonlar (Desert Sand Style) -->
+    <SolidColorBrush x:Key="NoteIndicatorBrush" Color="#D97706"/> <!-- Light Mode Not Vurgusu (Accent) -->
+    <SolidColorBrush x:Key="SpecialButtonBgBrush" Color="#D97706"/>
+    <SolidColorBrush x:Key="SpecialButtonHoverBrush" Color="#B45309"/>
     <SolidColorBrush x:Key="SpecialButtonTextBrush" Color="#FFFFFF"/>
 </ResourceDictionary>

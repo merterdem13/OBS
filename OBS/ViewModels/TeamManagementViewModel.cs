@@ -60,20 +60,7 @@ namespace OBS.ViewModels
         {
             if (team is null) return;
 
-            var currentWindow = Application.Current.Windows
-                .OfType<Views.TeamManagementWindow>()
-                .FirstOrDefault();
-
-            var detailWindow = new Views.TeamDetailWindow(team.Id, team.TeamName, team.Category);
-            if (currentWindow != null)
-            {
-                detailWindow.Left = currentWindow.Left;
-                detailWindow.Top = currentWindow.Top;
-            }
-            detailWindow.Opacity = 0;
-            detailWindow.Show();
-
-            currentWindow?.Close();
+            OBS.App.NavigationService.NavigateTo(new TeamDetailViewModel(team.Id, team.TeamName, team.Category));
         }
 
         [RelayCommand]
@@ -131,18 +118,7 @@ namespace OBS.ViewModels
         [RelayCommand]
         private void GoBackToMain()
         {
-            var currentWindow = Application.Current.Windows.OfType<Views.TeamManagementWindow>().FirstOrDefault();
-
-            var mainWindow = new Views.MainWindow();
-            if (currentWindow != null)
-            {
-                mainWindow.Left = currentWindow.Left;
-                mainWindow.Top = currentWindow.Top;
-            }
-            mainWindow.Opacity = 0;
-            mainWindow.Show();
-
-            currentWindow?.Close();
+            OBS.App.NavigationService.GoBack();
         }
 
         [RelayCommand]

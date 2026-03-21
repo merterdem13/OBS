@@ -156,6 +156,9 @@ namespace OBS.Views.Components
                         }
                     }
                 });
+
+                // Arka planda silinen/taşınan dosyalar için çöp toplayıcıyı çalıştır
+                _ = new GarbageCollectorService().RunAsync();
             }
             catch (Exception ex)
             {
@@ -303,7 +306,7 @@ namespace OBS.Views.Components
             {
                 if (mainWindow.DataContext is ViewModels.MainViewModel vm)
                 {
-                    vm.RefreshStudents();
+                    vm.RefreshDashboard();
                 }
             }
         }

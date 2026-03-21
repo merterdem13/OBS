@@ -1,27 +1,19 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Animation;
-using OBS.ViewModels;
 
 namespace OBS.Views
 {
-    public partial class LoginWindow
+    public partial class TeamDetailView : UserControl
     {
-        public LoginWindow()
+        public TeamDetailView()
         {
-            Opacity = 0;
             InitializeComponent();
-            DataContext = new LoginViewModel();
-            Loaded += LoginWindow_Loaded;
+            Loaded += TeamDetailView_Loaded;
         }
 
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
-            Helpers.WindowFlashFixer.Apply(this);
-        }
-
-        private void LoginWindow_Loaded(object sender, RoutedEventArgs e)
+        private void TeamDetailView_Loaded(object sender, RoutedEventArgs e)
         {
             var sb = new Storyboard();
             var anim = new DoubleAnimation

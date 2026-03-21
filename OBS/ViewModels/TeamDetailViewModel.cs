@@ -46,20 +46,7 @@ namespace OBS.ViewModels
         [RelayCommand]
         private void GoBackToTeams()
         {
-            var current = Application.Current.Windows
-                .OfType<Views.TeamDetailWindow>()
-                .FirstOrDefault();
-
-            var teamWindow = new Views.TeamManagementWindow();
-            if (current != null)
-            {
-                teamWindow.Left = current.Left;
-                teamWindow.Top = current.Top;
-            }
-            teamWindow.Opacity = 0;
-            teamWindow.Show();
-
-            current?.Close();
+            OBS.App.NavigationService.GoBack();
         }
 
         [RelayCommand]

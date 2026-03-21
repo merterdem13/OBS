@@ -44,7 +44,7 @@
                            Margin="0,0,0,16"/>
 
                 <TextBlock Text="Geliştirici Notu:" FontWeight="SemiBold" FontSize="15" Margin="0,8,0,4"/>
-                <TextBlock Text="Sistemin her zaman güncel ve hatasız çalışması için 'Sistem Ayarları' sekmesinden düzenli olarak güncellemeleri kontrol etmeyi unutmayın. Geri bildirimleriniz uygulamanın daha da gelişmesine yardımcı olacaktır."
+                <TextBlock Text="Sistemin her zaman güncel ve hatasız çalışması için 'Sistem Ayarları' sekmesinden düzenli olarak güncellemeleri kontrol etmeyi unutmayın."
                            TextWrapping="Wrap" 
                            LineHeight="20"
                            FontSize="13"

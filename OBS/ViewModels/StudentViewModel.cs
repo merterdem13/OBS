@@ -35,6 +35,28 @@ namespace OBS.ViewModels
         public int? GuardianId => _student.GuardianId;
 
         /// <summary>
+        /// Öğrenciye özel eklenen not (Düzenlenebilir).
+        /// </summary>
+        public string SpecialNote
+        {
+            get => _student.SpecialNote;
+            set
+            {
+                if (_student.SpecialNote != value)
+                {
+                    _student.SpecialNote = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(HasNote));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Öğrencinin özel notu olup olmadığını kontrol eder.
+        /// </summary>
+        public bool HasNote => !string.IsNullOrWhiteSpace(_student.SpecialNote);
+
+        /// <summary>
         /// Doğum tarihini string formatında döndürür.
         /// İSTEM METNİ GEREĞİ: StudentCardComponent'te gösterilmek için.
         /// </summary>
@@ -78,6 +100,20 @@ namespace OBS.ViewModels
                 if (_isRemoving != value)
                 {
                     _isRemoving = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private int _staggerDelay;
+        public int StaggerDelay
+        {
+            get => _staggerDelay;
+            set
+            {
+                if (_staggerDelay != value)
+                {
+                    _staggerDelay = value;
                     OnPropertyChanged();
                 }
             }

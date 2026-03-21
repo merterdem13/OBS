@@ -2,7 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:local="clr-namespace:OBS">
+             xmlns:local="clr-namespace:OBS"
+             xmlns:viewmodels="clr-namespace:OBS.ViewModels"
+             xmlns:views="clr-namespace:OBS.Views">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -10,6 +12,19 @@
                 <ui:ControlsDictionary/>
                 <ResourceDictionary Source="pack://application:,,,/Themes/LightColors.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate DataType="{x:Type viewmodels:MainViewModel}">
+                <views:HomeView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodels:TeamManagementViewModel}">
+                <views:TeamManagementView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodels:TeamDetailViewModel}">
+                <views:TeamDetailView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodels:LoginViewModel}">
+                <views:LoginView />
+            </DataTemplate>
 
         <!-- Global Colors extracted to Themes -->
         
@@ -21,10 +36,12 @@
         <SolidColorBrush x:Key="BtnGreenBrush" Color="#10b981"/>
 
         <!-- Generic Fonts -->
-        <FontFamily x:Key="MainFont">Segoe UI, sans-serif</FontFamily>
+        <FontFamily x:Key="MainFont">Inter, sans-serif</FontFamily>
 
         <!-- Base Button Style -->
         <Style x:Key="ActionBtnStyle" TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource MainFont}"/>
+    
             <Setter Property="Padding" Value="15"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="White"/>

@@ -26,7 +26,7 @@ namespace OBS.DataAccess
             using var conn = DatabaseConnection.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath FROM Students;";
+            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath, SpecialNote FROM Students;";
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -77,7 +77,8 @@ namespace OBS.DataAccess
                 PhotoPath = getString(r, "PhotoPath"),
                 Gender = getString(r, "Gender"),
                 GuardianId = r.IsDBNull(r.GetOrdinal("GuardianId")) ? (int?)null : r.GetInt32(r.GetOrdinal("GuardianId")),
-                KunyePdfPath = getString(r, "KunyePdfPath")
+                KunyePdfPath = getString(r, "KunyePdfPath"),
+                SpecialNote = getString(r, "SpecialNote")
             };
         }
 
@@ -95,8 +96,8 @@ namespace OBS.DataAccess
             if (transaction != null) cmd.Transaction = transaction;
 
             cmd.CommandText = @"
-                INSERT INTO Students (StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath)
-                VALUES (@StudentNumber, @FirstName, @LastName, @Class, @ClassNo, @TcNo, @BirthDate, @PhotoPath, @Gender, @GuardianId, @KunyePdfPath)
+                INSERT INTO Students (StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath, SpecialNote)
+                VALUES (@StudentNumber, @FirstName, @LastName, @Class, @ClassNo, @TcNo, @BirthDate, @PhotoPath, @Gender, @GuardianId, @KunyePdfPath, @SpecialNote)
                 ON CONFLICT(StudentNumber) DO UPDATE SET
                     FirstName  = COALESCE(NULLIF(excluded.FirstName, ''),  Students.FirstName),
                     LastName   = COALESCE(NULLIF(excluded.LastName, ''),   Students.LastName),
@@ -107,7 +108,8 @@ namespace OBS.DataAccess
                     PhotoPath  = COALESCE(NULLIF(excluded.PhotoPath, ''),  Students.PhotoPath),
                     Gender     = COALESCE(NULLIF(excluded.Gender, ''),     Students.Gender),
                     GuardianId = COALESCE(excluded.GuardianId,             Students.GuardianId),
-                    KunyePdfPath = COALESCE(NULLIF(excluded.KunyePdfPath, ''), Students.KunyePdfPath);
+                    KunyePdfPath = COALESCE(NULLIF(excluded.KunyePdfPath, ''), Students.KunyePdfPath),
+                    SpecialNote  = COALESCE(excluded.SpecialNote, Students.SpecialNote);
             ";
 
             cmd.Parameters.AddWithValue("@StudentNumber", s.StudentNumber ?? string.Empty);
@@ -121,6 +123,7 @@ namespace OBS.DataAccess
             cmd.Parameters.AddWithValue("@Gender", s.Gender ?? string.Empty);
             cmd.Parameters.AddWithValue("@GuardianId", s.GuardianId.HasValue ? (object)s.GuardianId.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@KunyePdfPath", s.KunyePdfPath ?? string.Empty);
+            cmd.Parameters.AddWithValue("@SpecialNote", s.SpecialNote ?? string.Empty);
 
             cmd.ExecuteNonQuery();
         }
@@ -184,7 +187,7 @@ namespace OBS.DataAccess
             using var conn = DatabaseConnection.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath FROM Students WHERE Class = @Class ORDER BY CAST(StudentNumber AS INTEGER), StudentNumber;";
+            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath, SpecialNote FROM Students WHERE Class = @Class ORDER BY CAST(StudentNumber AS INTEGER), StudentNumber;";
             cmd.Parameters.AddWithValue("@Class", className ?? string.Empty);
 
             using var reader = cmd.ExecuteReader();
@@ -246,7 +249,7 @@ namespace OBS.DataAccess
                 if (exactNumeric)
                 {
                     cmd.CommandText = @"
-                        SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath 
+                        SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath, SpecialNote 
                         FROM Students
                         WHERE StudentNumber = @kwExact
                         ORDER BY 
@@ -258,7 +261,7 @@ namespace OBS.DataAccess
                 else
                 {
                     cmd.CommandText = @"
-                        SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath 
+                        SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath, SpecialNote 
                         FROM Students
                         WHERE StudentNumber LIKE @kwPrefix
                         ORDER BY 
@@ -288,7 +291,7 @@ namespace OBS.DataAccess
                 }
 
                 cmd.CommandText = $@"
-                    SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath 
+                    SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath, SpecialNote 
                     FROM Students
                     WHERE {string.Join(" AND ", conditions)}
                     ORDER BY 
@@ -371,7 +374,7 @@ namespace OBS.DataAccess
             using var conn = DatabaseConnection.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath FROM Students WHERE StudentNumber = @sn LIMIT 1;";
+            cmd.CommandText = "SELECT StudentNumber, FirstName, LastName, Class, ClassNo, TcNo, BirthDate, PhotoPath, Gender, GuardianId, KunyePdfPath, SpecialNote FROM Students WHERE StudentNumber = @sn LIMIT 1;";
             cmd.Parameters.AddWithValue("@sn", studentNumber ?? string.Empty);
 
             using var reader = cmd.ExecuteReader();
@@ -434,6 +437,53 @@ namespace OBS.DataAccess
             deleteCmd.ExecuteNonQuery();
 
             return photoPath;
+        }
+
+        /// <summary>
+        /// Sınıf güncellemeleri sırasında "5 Ortak Öğrenci Kuralı" ile ayrıldığı / nakil gittiği tespit edilen 
+        /// çoklu öğrencileri silmek için kullanılır.
+        /// </summary>
+        public void DeleteMultiple(List<string> studentNumbers)
+        {
+            if (studentNumbers == null || studentNumbers.Count == 0) return;
+
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var tx = conn.BeginTransaction();
+            try
+            {
+                foreach (var sn in studentNumbers)
+                {
+                    using var deleteCmd = conn.CreateCommand();
+                    deleteCmd.Transaction = tx;
+                    deleteCmd.CommandText = "DELETE FROM Students WHERE StudentNumber = @sn;";
+                    deleteCmd.Parameters.AddWithValue("@sn", sn ?? string.Empty);
+                    deleteCmd.ExecuteNonQuery();
+                }
+
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Sadece öğrencinin KunyePdfPath bilgisini günceller (Klasör taşıma işlemleri için)
+        /// </summary>
+        public void UpdateKunyePdfPath(string studentNumber, string newPath)
+        {
+            if (string.IsNullOrWhiteSpace(studentNumber)) return;
+
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "UPDATE Students SET KunyePdfPath = @path WHERE StudentNumber = @sn;";
+            cmd.Parameters.AddWithValue("@path", newPath ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@sn", studentNumber);
+            cmd.ExecuteNonQuery();
         }
 
         /// <summary>

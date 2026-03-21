@@ -14,6 +14,8 @@
     <SolidColorBrush x:Key="ModalBgBrush" Color="#1e1e1e"/> <!-- Kartlarla aynı gri -->
     
     <!-- Özel Butonlar (Zıtlık için) -->
+    <SolidColorBrush x:Key="NoteIndicatorBrush" Color="#3B82F6"/> <!-- Dark Mode Not Vurgusu (Canlı Mavi) -->
     <SolidColorBrush x:Key="SpecialButtonBgBrush" Color="#444444"/> <!-- Biraz daha koyu beyaz (Slate 200) -->
+    <SolidColorBrush x:Key="SpecialButtonHoverBrush" Color="#5A5A5A"/> <!-- Hover için biraz daha açık gri -->
     <SolidColorBrush x:Key="SpecialButtonTextBrush" Color="#EDEDED"/>
 </ResourceDictionary>

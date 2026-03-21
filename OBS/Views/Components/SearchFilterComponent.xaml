@@ -17,114 +17,142 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Search Bar (IsClassFilterMode = false iken görünür) -->
-            <ui:TextBox Grid.Column="0"
-                        PlaceholderText="Öğrenci Ara (Ad, No)..."
-                        Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                        Height="32"
-                        MinHeight="32"
-                        Padding="6,4"
-                        VerticalContentAlignment="Center"
-                        Visibility="{Binding IsClassFilterMode, Converter={StaticResource InverseBoolToVisibility}}">
-                <ui:TextBox.Icon>
-                    <ui:SymbolIcon Symbol="Search24"/>
-                </ui:TextBox.Icon>
-            </ui:TextBox>
+            <!-- Arama / Sınıf Seçme Barı Konteyneri -->
+            <Border Grid.Column="0"
+                    Background="{DynamicResource BgCardBrush}"
+                    CornerRadius="20"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource BorderColorBrush}"
+                    Height="40"
+                    VerticalAlignment="Center"
+                    Padding="12,0,4,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-            <!-- Sınıf Dropdown (IsClassFilterMode = true iken görünür) -->
-            <Grid Grid.Column="0"
-                  Visibility="{Binding IsClassFilterMode, Converter={StaticResource BoolToVisibility}}">
-                <ComboBox ItemsSource="{Binding ClassList}"
-                          SelectedItem="{Binding SelectedClass}"
-                          Height="32"
-                          VerticalContentAlignment="Center"/>
+                    <!-- Arama Modu (IsClassFilterMode = false iken görünür) -->
+                    <ui:TextBox Grid.Column="0"
+                                PlaceholderText="Öğrenci Ara (Ad, No)..."
+                                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Padding="0"
+                                Margin="0,0,8,0"
+                                VerticalContentAlignment="Center"
+                                Visibility="{Binding IsClassFilterMode, Converter={StaticResource InverseBoolToVisibility}}">
+                        <ui:TextBox.Resources>
+                            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlFillColorSecondaryBrush" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlFillColorTertiaryBrush" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlFillColorTransparentBrush" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+                        </ui:TextBox.Resources>
+                    </ui:TextBox>
 
-                <TextBlock Text="Sınıf Seçiniz"
-                           Foreground="{DynamicResource TextSecondaryBrush}"
-                           VerticalAlignment="Center"
-                           Margin="12,0,0,0"
-                           IsHitTestVisible="False">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedClass}" Value="{x:Null}">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-            </Grid>
+                    <!-- Sınıf Dropdown (IsClassFilterMode = true iken görünür) -->
+                    <Grid Grid.Column="0" Margin="0,0,8,0"
+                          Visibility="{Binding IsClassFilterMode, Converter={StaticResource BoolToVisibility}}">
+                        <ComboBox ItemsSource="{Binding ClassList}"
+                                  SelectedItem="{Binding SelectedClass}"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  VerticalContentAlignment="Center"/>
 
-            <!-- Değiştirme Butonu -->
-            <Button Grid.Column="1"
-                    Width="32" Height="32"
-                    Margin="6,0,0,0"
-                    BorderThickness="0"
-                    Background="Transparent"
-                    Cursor="Hand"
-                    Command="{Binding ToggleFilterModeCommand}"
-                    ToolTip="Arama / Sınıf Filtresi"
-                    RenderTransformOrigin="0.5,0.5">
-                <Button.RenderTransform>
-                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                </Button.RenderTransform>
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.15"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.15"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.ExitActions>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="16">
-                            <ui:SymbolIcon FontSize="18"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <ui:SymbolIcon.Style>
-                                    <Style TargetType="ui:SymbolIcon">
-                                        <Setter Property="Symbol" Value="Filter24"/>
-                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsClassFilterMode}" Value="True">
-                                                <Setter Property="Symbol" Value="Search24"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ui:SymbolIcon.Style>
-                            </ui:SymbolIcon>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
+                        <TextBlock Text="Sınıf Seçiniz"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0"
+                                   IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedClass}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Değiştirme Butonu -->
+                    <Button Grid.Column="1"
+                            Width="32" Height="32"
+                            BorderThickness="0"
+                            Background="{DynamicResource SpecialButtonBgBrush}"
+                            Foreground="White"
+                            Cursor="Hand"
+                            Command="{Binding ToggleFilterModeCommand}"
+                            ToolTip="Arama / Sınıf Filtresi"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Button.RenderTransform>
+                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        </Button.RenderTransform>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource SpecialButtonHoverBrush}"/>
+                                        <Trigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.05" Duration="0:0:0.15"/>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.05" Duration="0:0:0.15"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.EnterActions>
+                                        <Trigger.ExitActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.15"/>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.15"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.ExitActions>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="16">
+                                    <ui:SymbolIcon FontSize="18"
+                                                   Foreground="{TemplateBinding Foreground}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <ui:SymbolIcon.Style>
+                                            <Style TargetType="ui:SymbolIcon">
+                                                <Setter Property="Symbol" Value="Filter24"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsClassFilterMode}" Value="True">
+                                                        <Setter Property="Symbol" Value="Search24"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ui:SymbolIcon.Style>
+                                    </ui:SymbolIcon>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
 
             <!-- Favoriler Butonu -->
-            <Button Grid.Column="2"
-                    Width="32" Height="32"
-                    Margin="6,0,0,0"
-                    BorderThickness="0"
-                    Background="Transparent"
+            <Button Grid.Column="1"
+                    Width="40" Height="40"
+                    VerticalAlignment="Center"
+                    Margin="12,0,0,0"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource BorderColorBrush}"
+                    Background="{DynamicResource BgCardBrush}"
                     Cursor="Hand"
                     Command="{Binding ToggleFavoriteCommand}"
                     Visibility="{Binding HasFavorites, Converter={StaticResource BoolToVisibility}, FallbackValue=Visible}"
@@ -139,8 +167,8 @@
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.05" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.05" Duration="0:0:0.15"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
@@ -158,8 +186,8 @@
                 </Button.Style>
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="16">
-                            <ui:SymbolIcon FontSize="20"
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="20">
+                            <ui:SymbolIcon FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <ui:SymbolIcon.Style>
                                     <Style TargetType="ui:SymbolIcon">
@@ -181,11 +209,13 @@
             </Button>
 
             <!-- Ayarlar Butonu -->
-            <Button Grid.Column="3"
-                    Width="32" Height="32"
-                    Margin="6,0,0,0"
-                    BorderThickness="0"
-                    Background="Transparent"
+            <Button Grid.Column="2"
+                    Width="40" Height="40"
+                    VerticalAlignment="Center"
+                    Margin="8,0,0,0"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource BorderColorBrush}"
+                    Background="{DynamicResource BgCardBrush}"
                     Cursor="Hand"
                     Command="{Binding OpenSettingsOverlayCommand}"
                     RenderTransformOrigin="0.5,0.5">
@@ -199,8 +229,8 @@
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.05" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.05" Duration="0:0:0.15"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
@@ -218,69 +248,27 @@
                 </Button.Style>
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="16">
-                            <TextBlock Text="☰" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="20">
+                            <ui:SymbolIcon Symbol="Settings24" FontSize="18"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
                 </Button.Template>
             </Button>
         </Grid>
 
-        <!-- Filtre Satırı (favoriler, ayarlar) -->
+        <!-- Filtre Satırı (Boş bırakıldı çünkü favori temizle butonu HomeView'e float olarak taşındı) -->
         <Grid Margin="0,0,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
-            <ui:Button Grid.Column="0"
-                       Appearance="Danger"
-                       Padding="8,4" Margin="6,0,0,0"
-                       ToolTip="Favorileri Temizle"
-                       Command="{Binding ClearAllFavoritesCommand}">
-                <ui:Button.Style>
-                    <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Setter Property="Opacity" Value="0"/>
-                        <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding IsFavoriteMode}" Value="True"/>
-                                    <Condition Binding="{Binding HasFavorites}" Value="True"/>
-                                </MultiDataTrigger.Conditions>
-                                <MultiDataTrigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Duration="0:0:0">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </MultiDataTrigger.EnterActions>
-                                <MultiDataTrigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Duration="0:0:0.2">
-                                                <DiscreteObjectKeyFrame KeyTime="0:0:0.2" Value="{x:Static Visibility.Collapsed}"/>
-                                            </ObjectAnimationUsingKeyFrames>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </MultiDataTrigger.ExitActions>
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ui:Button.Style>
-                <ui:SymbolIcon Symbol="Delete24" FontSize="16"/>
-            </ui:Button>
-
         </Grid>
 
         <!-- Sınıf Eylemleri (sınıf seçilince görünür) -->
-        <Grid Margin="0,8,0,0">
+        <Grid Margin="0,4,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10*"/>
                 <ColumnDefinition Width="11*"/>
@@ -298,16 +286,24 @@
                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Duration="0:0:0">
                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
                                         </ObjectAnimationUsingKeyFrames>
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </DataTrigger.EnterActions>
                             <DataTrigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Duration="0:0:0.2">
-                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.2" Value="{x:Static Visibility.Collapsed}"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.5">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseIn"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Duration="0:0:0.5">
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.5" Value="{x:Static Visibility.Collapsed}"/>
                                         </ObjectAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </BeginStoryboard>
@@ -318,6 +314,7 @@
             </Grid.Style>
             <ui:Button Grid.Column="0" Content="Sınıf Listesi"
                        Appearance="Primary"
+                       MouseOverBackground="{DynamicResource SpecialButtonHoverBrush}"
                        Background="{DynamicResource SpecialButtonBgBrush}"
                        Foreground="{DynamicResource SpecialButtonTextBrush}"
                        Margin="0,0,3,0" Padding="4,6"
@@ -330,6 +327,7 @@
             </ui:Button>
             <ui:Button Grid.Column="1" Content="Fotoğraf Listesi"
                        Appearance="Primary"
+                       MouseOverBackground="{DynamicResource SpecialButtonHoverBrush}"
                        Background="{DynamicResource SpecialButtonBgBrush}"
                        Foreground="{DynamicResource SpecialButtonTextBrush}"
                        Margin="3,0,3,0" Padding="4,6"
@@ -342,6 +340,7 @@
             </ui:Button>
             <ui:Button Grid.Column="2" Content="Excel"
                        Appearance="Primary"
+                       MouseOverBackground="{DynamicResource SpecialButtonHoverBrush}"
                        Background="{DynamicResource SpecialButtonBgBrush}"
                        Foreground="{DynamicResource SpecialButtonTextBrush}"
                        Margin="3,0,0,0" Padding="4,6"

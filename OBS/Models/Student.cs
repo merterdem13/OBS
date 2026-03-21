@@ -83,6 +83,11 @@ namespace OBS.Models
         /// </summary>
         public int? GuardianId { get; set; }
 
+        /// <summary>
+        /// Öğrenciye özel eklenen not.
+        /// </summary>
+        public string SpecialNote { get; set; } = string.Empty;
+
         // --- UI (Arayüz) İçin Yardımcı Özellikler ---
         // Not: Bu alan veritabanında bir kolon olarak tutulmaz. INNER JOIN sorgusu ile doldurulur.
         // StudentCardComponent.xaml içerisindeki Veli ismi gösterimini kolaylaştırmak için eklenmiştir.

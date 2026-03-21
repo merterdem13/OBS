@@ -2,9 +2,11 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:converters="clr-namespace:OBS.Converters">
+             xmlns:converters="clr-namespace:OBS.Converters"
+             xmlns:helpers="clr-namespace:OBS.Helpers">
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <converters:PathToImageConverter x:Key="PathToImage"/>
     </UserControl.Resources>
 
@@ -14,49 +16,21 @@
             CornerRadius="10"
             Margin="0,0,0,8"
             Cursor="Hand"
-            Opacity="0">
-        <Border.RenderTransform>
-            <TranslateTransform Y="20"/>
-        </Border.RenderTransform>
-        <Border.Triggers>
-            <EventTrigger RoutedEvent="Loaded">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
-                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="20" To="0" Duration="0:0:0.3">
-                            <DoubleAnimation.EasingFunction>
-                                <CubicEase EasingMode="EaseOut"/>
-                            </DoubleAnimation.EasingFunction>
-                        </DoubleAnimation>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-        </Border.Triggers>
+            helpers:AnimationHelper.IsSlideUpEnabled="True"
+            helpers:AnimationHelper.StaggerDelay="{Binding StaggerDelay}"
+            helpers:AnimationHelper.IsRemoving="{Binding IsRemoving}">
         <Border.Style>
             <Style TargetType="Border">
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
                         <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                     </Trigger>
-                    <DataTrigger Binding="{Binding IsRemoving}" Value="True">
-                        <DataTrigger.EnterActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3"/>
-                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="-50" Duration="0:0:0.3">
-                                        <DoubleAnimation.EasingFunction>
-                                            <CubicEase EasingMode="EaseIn"/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.EnterActions>
-                    </DataTrigger>
                 </Style.Triggers>
             </Style>
         </Border.Style>
 
-        <Grid Margin="4,2,4,2">
+        <StackPanel>
+            <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="95"/>
                 <ColumnDefinition Width="*"/>
@@ -81,7 +55,7 @@
             </Border>
 
             <!-- Bilgiler -->
-            <Grid Grid.Column="1" Margin="10,6,6,6">
+            <Grid Grid.Column="1" Margin="12,8,8,8" Grid.IsSharedSizeScope="True">
                 <Grid.Resources>
                     <Style x:Key="SelectValue" TargetType="TextBox">
                         <Setter Property="IsReadOnly" Value="True"/>
@@ -122,69 +96,113 @@
                              FontSize="14"
                              Style="{StaticResource SelectValue}"/>
 
-                    <Button Grid.Column="1"
-                            Padding="2" Width="24" Height="24"
-                            ToolTip="{Binding FavoriteTooltip}"
-                            Command="{Binding DataContext.ToggleFavoriteItemCommand,
-                                RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                            CommandParameter="{Binding}"
-                            Cursor="Hand"
-                            Background="Transparent"
-                            BorderThickness="0">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="Transparent">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                        <ui:SymbolIcon FontSize="15" RenderTransformOrigin="0.5,0.5">
-                            <ui:SymbolIcon.RenderTransform>
-                                <ScaleTransform ScaleX="1" ScaleY="1"/>
-                            </ui:SymbolIcon.RenderTransform>
-                            <!-- ORGANİK GÖRÜNÜM: Eski Star24'e dönüş -->
-                            <ui:SymbolIcon.Style>
-                                <Style TargetType="ui:SymbolIcon">
-                                    <Setter Property="Symbol" Value="Star24"/>
-                                    <Setter Property="Filled" Value="False"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                                            <Setter Property="Filled" Value="True"/>
-                                            <Setter Property="Foreground" Value="#F59E0B"/>
-                                            <DataTrigger.EnterActions>
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="1" To="1.3" Duration="0:0:0.15" AutoReverse="True"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="1" To="1.3" Duration="0:0:0.15" AutoReverse="True"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </DataTrigger.EnterActions>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ui:SymbolIcon.Style>
-                        </ui:SymbolIcon>
-                    </Button>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <!-- Not Butonu -->
+                        <ToggleButton x:Name="btnNote"
+                                      Padding="2" Width="24" Height="24" Margin="0,0,4,0"
+                                      ToolTip="Öğrenci Notu"
+                                      Cursor="Hand"
+                                      Background="Transparent"
+                                      BorderThickness="0">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="Transparent">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                            <ui:SymbolIcon FontSize="15" RenderTransformOrigin="0.5,0.5">
+                                <ui:SymbolIcon.Style>
+                                    <Style TargetType="ui:SymbolIcon">
+                                        <Setter Property="Symbol" Value="DocumentEdit24"/>
+                                        <Setter Property="Filled" Value="False"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasNote}" Value="True">
+                                                <Setter Property="Filled" Value="True"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource NoteIndicatorBrush}"/> 
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:SymbolIcon.Style>
+                            </ui:SymbolIcon>
+                        </ToggleButton>
+
+                        <!-- Yıldız Butonu -->
+                        <Button Padding="2" Width="24" Height="24"
+                                ToolTip="{Binding FavoriteTooltip}"
+                                Command="{Binding DataContext.ToggleFavoriteItemCommand,
+                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}"
+                                Cursor="Hand"
+                                Background="Transparent"
+                                BorderThickness="0">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <ui:SymbolIcon FontSize="15" RenderTransformOrigin="0.5,0.5">
+                                <ui:SymbolIcon.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                </ui:SymbolIcon.RenderTransform>
+                                <ui:SymbolIcon.Style>
+                                    <Style TargetType="ui:SymbolIcon">
+                                        <Setter Property="Symbol" Value="Star24"/>
+                                        <Setter Property="Filled" Value="False"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                <Setter Property="Filled" Value="True"/>
+                                                <Setter Property="Foreground" Value="#F59E0B"/>
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="1" To="1.3" Duration="0:0:0.15" AutoReverse="True"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="1" To="1.3" Duration="0:0:0.15" AutoReverse="True"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:SymbolIcon.Style>
+                            </ui:SymbolIcon>
+                        </Button>
+                    </StackPanel>
                 </Grid>
 
                 <!-- Sınıf -->
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,2">
-                    <TextBlock Text="Sınıf:" Style="{StaticResource LabelText}"/>
-                    <TextBox Text="{Binding Class, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
-                </StackPanel>
+                <Grid Grid.Row="1" Margin="0,0,0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelCol" Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Sınıf:" Style="{StaticResource LabelText}"/>
+                    <TextBox Grid.Column="1" Text="{Binding Class, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
+                </Grid>
 
                 <!-- No -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,2">
-                    <TextBlock Text="NO:" Style="{StaticResource LabelText}"/>
-                    <TextBox Text="{Binding StudentNumber, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
-                </StackPanel>
+                <Grid Grid.Row="2" Margin="0,0,0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelCol" Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="NO:" Style="{StaticResource LabelText}"/>
+                    <TextBox Grid.Column="1" Text="{Binding StudentNumber, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
+                </Grid>
 
                 <!-- TC -->
-                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,2">
-                    <TextBlock Text="TC:" Style="{StaticResource LabelText}"/>
-                    <TextBox Text="{Binding TcNo, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
-                </StackPanel>
+                <Grid Grid.Row="3" Margin="0,0,0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelCol" Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="TC:" Style="{StaticResource LabelText}"/>
+                    <TextBox Grid.Column="1" Text="{Binding TcNo, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
+                </Grid>
 
                 <Grid Grid.Row="4" Margin="0,0,0,2">
                     <Grid.ColumnDefinitions>
@@ -194,16 +212,24 @@
 
                     <StackPanel Grid.Column="0">
                         <!-- Doğum Tarihi -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                            <TextBlock Text="Doğum T:" Style="{StaticResource LabelText}"/>
-                            <TextBox Text="{Binding BirthDateString, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
-                        </StackPanel>
+                        <Grid Margin="0,0,0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelCol" Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Doğum T:" Style="{StaticResource LabelText}"/>
+                            <TextBox Grid.Column="1" Text="{Binding BirthDateString, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
+                        </Grid>
 
                         <!-- Veli NO -->
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Veli NO:" Style="{StaticResource LabelText}"/>
-                            <TextBox Text="{Binding GuardianPhone, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelCol" Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Veli NO:" Style="{StaticResource LabelText}"/>
+                            <TextBox Grid.Column="1" Text="{Binding GuardianPhone, Mode=OneWay}" Style="{StaticResource SelectValue}"/>
+                        </Grid>
                     </StackPanel>
 
                     <!-- PDF Butonu (Künye) -->
@@ -226,5 +252,37 @@
                 </Grid>
             </Grid>
         </Grid>
+
+        <!-- Expanded Note Section -->
+            <Border Visibility="{Binding IsChecked, ElementName=btnNote, Converter={StaticResource BoolToVis}}"
+                    Background="{DynamicResource BgCardBrush}"
+                    BorderBrush="{DynamicResource BorderColorBrush}"
+                    BorderThickness="0,1,0,0"
+                    CornerRadius="0,0,9,9"
+                    Padding="8"
+                    Margin="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <ui:TextBox Grid.Column="0" Text="{Binding SpecialNote, UpdateSourceTrigger=PropertyChanged}" 
+                                TextWrapping="Wrap" AcceptsReturn="True" MinHeight="38" Padding="10,8"
+                                VerticalContentAlignment="Top" VerticalAlignment="Stretch"
+                                Background="Transparent" BorderThickness="0"
+                                PlaceholderText="Öğrenciye özel ek bir not..."/>
+                    
+                    <ui:Button Grid.Column="1" Click="BtnSaveNote_Click" 
+                               MouseOverBackground="{DynamicResource SpecialButtonHoverBrush}"
+                               Background="{DynamicResource SpecialButtonBgBrush}" 
+                               Foreground="{DynamicResource SpecialButtonTextBrush}" 
+                               Margin="6,0,0,0" Width="38" Height="38" Padding="0" 
+                               VerticalAlignment="Top" BorderThickness="0" ToolTip="Notu Kaydet">
+                        <ui:SymbolIcon Symbol="Save24" Foreground="{DynamicResource SpecialButtonTextBrush}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </ui:Button>
+                </Grid>
+            </Border>
+        </StackPanel>
     </Border>
 </UserControl>

@@ -24,7 +24,7 @@ namespace OBS.DataAccess
         // SqliteConnection için bağlantı dizesi
         private static readonly string _connectionString = $"Data Source={_secureDbPath}";
 
-        private const int LatestSchemaVersion = 1;
+        private const int LatestSchemaVersion = 2;
 
         /// <summary>
         /// Sadece şifrelenmiş yeni veritabanını oluşturur ve açar.
@@ -171,6 +171,7 @@ namespace OBS.DataAccess
                     Gender TEXT,
                     GuardianId INTEGER,
                     KunyePdfPath TEXT,
+                    SpecialNote TEXT,
                     FOREIGN KEY(GuardianId) REFERENCES Guardians(Id) ON DELETE CASCADE
                 );
 
@@ -261,6 +262,7 @@ namespace OBS.DataAccess
                     switch (currentVersion)
                     {
                         case 1: Migration_1(conn); break;
+                        case 2: Migration_2(conn); break;
                     }
 
                     SetSchemaVersion(conn, currentVersion);
@@ -280,6 +282,11 @@ namespace OBS.DataAccess
             AddColumnIfNotExists(conn, "Teams", "Category", "TEXT NOT NULL DEFAULT 'Futbol'");
             AddColumnIfNotExists(conn, "Students", "KunyePdfPath", "TEXT");
             CreateIndexes(conn);
+        }
+
+        private static void Migration_2(SqliteConnection conn)
+        {
+            AddColumnIfNotExists(conn, "Students", "SpecialNote", "TEXT");
         }
 
         private static void AddColumnIfNotExists(SqliteConnection conn, string table, string column, string definition)

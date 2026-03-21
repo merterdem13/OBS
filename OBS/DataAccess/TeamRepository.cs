@@ -15,12 +15,14 @@ namespace OBS.DataAccess
             cmd.CommandText = @"
                 INSERT INTO Teams (TeamName, Category, MatchDate, Description)
                 VALUES (@teamName, @category, @matchDate, @description);
+                SELECT last_insert_rowid();
             ";
             cmd.Parameters.AddWithValue("@teamName", team.TeamName);
             cmd.Parameters.AddWithValue("@category", team.Category);
             cmd.Parameters.AddWithValue("@matchDate", (object?)team.MatchDate ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@description", (object?)team.Description ?? DBNull.Value);
-            cmd.ExecuteNonQuery();
+            
+            team.Id = Convert.ToInt32(cmd.ExecuteScalar());
         }
 
         public void UpdateName(int teamId, string newName)

@@ -37,10 +37,11 @@
                         <RadioButton Content="Karanlık" 
                                      GroupName="ThemeGroup" 
                                      Margin="0,0,16,12"
-                                     IsEnabled="False"
-                                     Foreground="{DynamicResource TextSecondaryBrush}"
+                                     Cursor="Hand"
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
                                      IsChecked="{Binding CurrentTheme, Converter={StaticResource StringMatchToBool}, ConverterParameter=Dark, Mode=OneWay}"
-                                     ToolTip="Karanlık mod şu an kullanılamıyor"/>
+                                     Command="{Binding ChangeThemeCommand}" 
+                                     CommandParameter="Dark"/>
                     </WrapPanel>
                 </StackPanel>
             </Border>

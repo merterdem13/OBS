@@ -6,6 +6,8 @@ namespace OBS
 {
     public partial class App : Application
     {
+        public static Services.INavigationService NavigationService { get; } = new Services.NavigationService();
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -29,8 +31,10 @@ namespace OBS
             var savedTheme = settingsRepo.GetSetting("Theme") ?? "Light";
             Helpers.ThemeManager.ApplyTheme(savedTheme);
 
-            var loginWindow = new Views.LoginWindow();
-            loginWindow.Show();
+            var mainWindow = new Views.MainWindow();
+            Application.Current.MainWindow = mainWindow;
+            NavigationService.NavigateTo<ViewModels.LoginViewModel>();
+            mainWindow.Show();
         }
     }
 }

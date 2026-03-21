@@ -15,8 +15,8 @@ namespace OBS.Views
             Opacity = 0;
             InitializeComponent();
 
-            var vm = new MainViewModel();
-            vm.ConfirmAsync = ShowConfirmDialogAsync;
+            var vm = new ShellViewModel();
+            GlobalState.Instance.ConfirmAsync = ShowConfirmDialogAsync;
             DataContext = vm;
 
             Loaded += MainWindow_Loaded;
@@ -54,16 +54,13 @@ namespace OBS.Views
             Storyboard.SetTargetProperty(anim, new PropertyPath("Opacity"));
             sb.Begin();
 
-            // Sürüm Notları (Release Notes) Kontrolü (Giriş animasyonundan hemen sonra)
-            await Task.Delay(500);
-            CheckAndShowReleaseNotes();
-
-            // Yüzer buton konumunu hatırla
-            FloatingButtonTranslate.Y = Helpers.LocalSettings.Current.FloatingButtonVerticalOffset;
+            // Çöp Toplayıcı ve Klasör Düzenleyicisini Uygulama Açılışında Çalıştır
+            _ = new OBS.Services.GarbageCollectorService().RunAsync();
         }
 
-        private async void CheckAndShowReleaseNotes()
+        public async void CheckAndShowReleaseNotes()
         {
+            await Task.Delay(500); // Giriş animasyonundan biraz sonra çıkması için
             try
             {
                 var releaseNotesPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ReleaseNotes.json");
@@ -89,92 +86,6 @@ namespace OBS.Views
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Release notes gösterilirken hata oluştu: {ex.Message}");
-            }
-        }
-
-        private void OnStudentListScrollChanged(object sender, ScrollChangedEventArgs e)
-        {
-            if (e.VerticalOffset + e.ViewportHeight >= e.ExtentHeight - 100)
-            {
-                if (DataContext is MainViewModel vm)
-                    vm.LoadMoreStudentsCommand.Execute(null);
-            }
-        }
-
-        // ── Sürükleme Mantığı — Floating Buton ──────────────────────────────
-        private bool _isDragging = false;
-        private Point _clickPosition;
-        private double _initialTranslateY;
-
-        private void OnFloatingButtonPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
-            {
-                _isDragging = false;
-                _clickPosition = e.GetPosition(this);
-                _initialTranslateY = FloatingButtonTranslate.Y;
-                FloatingButton.CaptureMouse();
-            }
-        }
-
-        private void OnFloatingButtonPreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (FloatingButton.IsMouseCaptured)
-            {
-                Point currentPosition = e.GetPosition(this);
-                double deltaY = currentPosition.Y - _clickPosition.Y;
-
-                // Tıklama ile sürüklemeyi ayırt etmek için küçük bir eşik (threshold)
-                if (!_isDragging && Math.Abs(deltaY) > 5)
-                {
-                    _isDragging = true;
-                }
-
-                if (_isDragging)
-                {
-                    double newTranslateY = _initialTranslateY + deltaY;
-
-                    // Pencere sınırları kontrolü
-                    var parentGrid = FloatingButton.Parent as Grid;
-                    if (parentGrid != null)
-                    {
-                        // Alt sınırı (maxMove) — 30px mesafe bıraktık
-                        double maxMove = (this.ActualHeight / 2) - (FloatingButton.ActualHeight / 2) - 30;
-                        double minMove = -(this.ActualHeight / 2) + (FloatingButton.ActualHeight / 2) + 60;
-
-                        if (newTranslateY > maxMove) newTranslateY = maxMove;
-                        if (newTranslateY < minMove) newTranslateY = minMove;
-                    }
-
-                    FloatingButtonTranslate.Y = newTranslateY;
-                    Helpers.LocalSettings.Current.FloatingButtonVerticalOffset = newTranslateY;
-                }
-            }
-        }
-
-        private void OnFloatingButtonPreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (FloatingButton.IsMouseCaptured)
-            {
-                FloatingButton.ReleaseMouseCapture();
-
-                if (!_isDragging)
-                {
-                    // Eğer sürükleme yapılmadıysa butona tıklanmış demektir.
-                    // Click olayını veya Command'i manuel tetikleyelim çünkü CaptureMouse click'i bozabiliyor.
-                    if (FloatingButton.Command != null && FloatingButton.Command.CanExecute(FloatingButton.CommandParameter))
-                    {
-                        FloatingButton.Command.Execute(FloatingButton.CommandParameter);
-                    }
-                }
-                else
-                {
-                    // Sürükleme bittiğinde konumu kalıcı olarak kaydet
-                    Helpers.LocalSettings.Save();
-                }
-                
-                e.Handled = true; // Sürükleme veya manuel click işlendi, event'i durdur.
-                _isDragging = false;
             }
         }
     }

@@ -27,11 +27,13 @@ namespace OBS.Services
     public class MergeService : IMergeService
     {
         private readonly StudentRepository _repo;
+        private readonly SyncService _syncService;
         private static readonly object _logLock = new object(); // Çoklu thread (loglama) çakışmasını önlemek için
 
         public MergeService()
         {
             _repo = new StudentRepository();
+            _syncService = new SyncService();
         }
 
         /// <summary>
@@ -48,6 +50,26 @@ namespace OBS.Services
 
             // Fiziksel dosya rollback yönetimi için liste
             var copiedFilesDuringTransaction = new List<string>();
+
+            // SyncService - 5 Ortak Öğrenci Kuralı ve Nakillerin Silinmesi (Künye PDF'leri için)
+            var studentNumbersList = importedStudents.Select(s => s.StudentNumber).ToList();
+            var syncResult = _syncService.AnalyzeClassSync(studentNumbersList, string.Empty);
+
+            if (syncResult.IsUpdate)
+            {
+                if (syncResult.StudentsToDelete.Any())
+                {
+                    _repo.DeleteMultiple(syncResult.StudentsToDelete);
+                    LogToFile(logFile, $"SYNC (Künye): {syncResult.OldClassName} sınıfı toplu Künye PDF'i ile güncellendi. {syncResult.StudentsToDelete.Count} adet öğrenci nakil/ayrılmış sayılarak silindi.");
+                }
+
+                // Ekranda okunup belleğe alınan geçici öğrencilerin (importedStudents) hepsine 
+                // bu tespit edilen eski sınıfın adını ata. Böylece veritabanına bu isimle kaydedilirler.
+                foreach (var s in importedStudents)
+                {
+                    s.Class = syncResult.NewClassName;
+                }
+            }
 
             using var conn = DatabaseConnection.GetConnection();
             conn.Open();
@@ -98,10 +120,62 @@ namespace OBS.Services
                         ApplyFallbackAvatar(imported, photosFolder);
                     }
 
-                    // İş kuralı 4: Künye PDF yolu ataması
-                    if (kunyePdfMap != null && kunyePdfMap.TryGetValue(imported.StudentNumber, out var pdfPath))
+                    // İş kuralı 4: Künye PDF yolu ataması ve fiziksel klasör taşıma
+                    if (kunyePdfMap != null && kunyePdfMap.TryGetValue(imported.StudentNumber, out var initialPdfPath))
                     {
-                        imported.KunyePdfPath = pdfPath;
+                        var studentsPdfFolder = DatabaseConnection.GetStudentsPdfFolder();
+                        var tempFolder = Path.Combine(studentsPdfFolder, ".temp");
+                        
+                        // Öğrencinin sınıf bilgisi varsa (SyncService'den veya eski DB kaydından)
+                        var dbClassFormat = imported.Class?.Replace("/", "-");
+                        if (!string.IsNullOrWhiteSpace(dbClassFormat))
+                        {
+                            var classFolder = Path.Combine(studentsPdfFolder, dbClassFormat);
+                            if (!Directory.Exists(classFolder)) Directory.CreateDirectory(classFolder);
+
+                            var fileName = Path.GetFileName(initialPdfPath);
+                            var newFilePath = Path.Combine(classFolder, fileName);
+
+                            // Dosya halen ana Students klasöründeyse veya başka bir yerde ise class klasörüne taşı
+                            if (!string.Equals(Path.GetDirectoryName(initialPdfPath), classFolder, StringComparison.OrdinalIgnoreCase))
+                            {
+                                try
+                                {
+                                    if (!Directory.Exists(tempFolder)) Directory.CreateDirectory(tempFolder);
+                                    var tempFilePath = Path.Combine(tempFolder, fileName);
+                                    
+                                    // Temp üzerine güvenli kopyalama
+                                    File.Copy(initialPdfPath, tempFilePath, overwrite: true);
+                                    
+                                    // Sınıf klasörüne taşıma (ezerek)
+                                    File.Copy(tempFilePath, newFilePath, overwrite: true);
+                                    
+                                    // Orijinal yeri (genelde doğrudan Students klasörü) sil
+                                    if (File.Exists(initialPdfPath)) File.Delete(initialPdfPath);
+
+                                    // Yolu yeni yer olarak güncelle
+                                    imported.KunyePdfPath = newFilePath;
+                                    copiedFilesDuringTransaction.Add(newFilePath);
+                                    
+                                    if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogToFile(logFile, $"HATA: Künye PDF dosyası sınıf klasörüne taşınamadı ({fileName}): {ex.Message}");
+                                    // Hata olsa dahi eski dosya yolunu veritabanına yazalım ki kaybolmasın
+                                    imported.KunyePdfPath = initialPdfPath;
+                                }
+                            }
+                            else
+                            {
+                                imported.KunyePdfPath = initialPdfPath;
+                            }
+                        }
+                        else
+                        {
+                            // Sınıfı henüz belli değilse, olduğu yerde (genelde Students kök dizini) bırak
+                            imported.KunyePdfPath = initialPdfPath;
+                        }
                     }
 
                     // İş kuralı 3: Repository üzerinden UPSERT işlemini Transaction'a dahil et
@@ -137,12 +211,32 @@ namespace OBS.Services
             if (classListData == null || !classListData.Any()) return;
 
             var logFile = Path.Combine(DatabaseConnection.GetLogsFolder(), "app_log.txt");
+            var classGroups = classListData.Where(c => !string.IsNullOrWhiteSpace(c.Class)).GroupBy(c => c.Class).ToList();
 
             using var conn = DatabaseConnection.GetConnection();
             conn.Open();
             using var tx = conn.BeginTransaction();
             try
             {
+                // SyncService - 5 Ortak Öğrenci Kuralı ve Nakillerin Silinmesi
+                foreach (var group in classGroups)
+                {
+                    var studentNumbersInClass = group.Select(g => g.StudentNumber).ToList();
+                    var syncResult = _syncService.AnalyzeClassSync(studentNumbersInClass, group.Key);
+
+                    if (syncResult.IsUpdate && syncResult.StudentsToDelete.Any())
+                    {
+                        var dbClassFormatSync = group.Key.Replace("/", "-");
+                        _repo.DeleteMultiple(syncResult.StudentsToDelete);
+                        LogToFile(logFile, $"SYNC: {syncResult.OldClassName} sınıfı {dbClassFormatSync} olarak güncellendi. {syncResult.StudentsToDelete.Count} adet öğrenci nakil/ayrılmış sayılarak silindi.");
+                    }
+                }
+
+                // Sınıf bilgilerinin ve fiziksel dosyaların güncellenmesi
+                var studentsPdfFolder = DatabaseConnection.GetStudentsPdfFolder();
+                var tempFolder = Path.Combine(studentsPdfFolder, ".temp");
+                if (!Directory.Exists(tempFolder)) Directory.CreateDirectory(tempFolder);
+
                 foreach (var (studentNumber, classInfo, gender) in classListData)
                 {
                     if (string.IsNullOrWhiteSpace(studentNumber)) continue;
@@ -151,6 +245,8 @@ namespace OBS.Services
 
                     // İş Kuralı: "7/F" formatını "7-F" formatına çevir
                     var dbClassFormat = classInfo?.Replace("/", "-") ?? string.Empty;
+
+                    var studentInDb = _repo.GetByStudentNumber(normalizedSn);
 
                     var student = new Student
                     {
@@ -161,9 +257,63 @@ namespace OBS.Services
 
                     // UpdateClass işlemi (Kayıt yoksa Repository içerisinden DB yerine Log dosyasına yazılacak)
                     _repo.UpsertClass(student, conn, tx);
+
+                    // Fiziksel Dosya Taşıma
+                    if (studentInDb != null && !string.IsNullOrWhiteSpace(studentInDb.KunyePdfPath) && File.Exists(studentInDb.KunyePdfPath))
+                    {
+                        var classFolder = Path.Combine(studentsPdfFolder, dbClassFormat);
+                        if (!Directory.Exists(classFolder)) Directory.CreateDirectory(classFolder);
+
+                        var currentPdfDir = Path.GetDirectoryName(studentInDb.KunyePdfPath);
+
+                        // Eğer dosya henüz bu sınıfın klasöründe değilse
+                        if (!string.Equals(currentPdfDir, classFolder, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var fileName = Path.GetFileName(studentInDb.KunyePdfPath);
+                            var tempFilePath = Path.Combine(tempFolder, fileName);
+                            var newFilePath = Path.Combine(classFolder, fileName);
+
+                            try
+                            {
+                                // Önce temp klasörüne kopyala
+                                File.Copy(studentInDb.KunyePdfPath, tempFilePath, overwrite: true);
+
+                                // Sonra hedefe taşı (ezerek)
+                                File.Copy(tempFilePath, newFilePath, overwrite: true);
+
+                                // Eski dosyayı sil
+                                File.Delete(studentInDb.KunyePdfPath);
+
+                                // Veritabanındaki KunyePdfPath bilgisini güncelle
+                                using var updateCmd = conn.CreateCommand();
+                                updateCmd.Transaction = tx;
+                                updateCmd.CommandText = "UPDATE Students SET KunyePdfPath = @kpp WHERE StudentNumber = @sn;";
+                                updateCmd.Parameters.AddWithValue("@kpp", newFilePath);
+                                updateCmd.Parameters.AddWithValue("@sn", normalizedSn);
+                                updateCmd.ExecuteNonQuery();
+                            }
+                            catch (Exception ex)
+                            {
+                                LogToFile(logFile, $"HATA: {studentNumber} numaralı öğrencinin PDF dosyası taşınamadı. ({ex.Message})");
+                            }
+                            finally
+                            {
+                                if (File.Exists(tempFilePath))
+                                {
+                                    try { File.Delete(tempFilePath); } catch { }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 tx.Commit();
+                
+                // Temp klasörünü temizle
+                if (Directory.Exists(tempFolder) && !Directory.EnumerateFileSystemEntries(tempFolder).Any())
+                {
+                    try { Directory.Delete(tempFolder); } catch { }
+                }
             }
             catch (Exception ex)
             {

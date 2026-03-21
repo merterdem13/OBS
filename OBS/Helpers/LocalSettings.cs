@@ -8,6 +8,7 @@ namespace OBS.Helpers
     {
         public string? LastSeenReleaseNotesVersion { get; set; }
         public double FloatingButtonVerticalOffset { get; set; } = 0;
+        public double ClearFavoritesButtonVerticalOffset { get; set; } = -9999;
     }
 
     public static class LocalSettings
