@@ -73,6 +73,7 @@
                     Margin="0,0,12,0">
                 <TextBlock Text="{Binding CategoryIcon}"
                            FontSize="24"
+                           Foreground="{DynamicResource TeamLogoBrush}"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
             </Border>

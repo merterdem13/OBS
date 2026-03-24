@@ -12,4 +12,5 @@
     <SolidColorBrush x:Key="AccentBrush" Color="#88C0D0"/> <!-- Nord Frost Blue -->
     <SolidColorBrush x:Key="HeaderBgBrush" Color="#e62E3440"/>
     <SolidColorBrush x:Key="ModalBgBrush" Color="#3B4252"/>
+    <SolidColorBrush x:Key="TeamLogoBrush" Color="#ffffffff"/>
 </ResourceDictionary>

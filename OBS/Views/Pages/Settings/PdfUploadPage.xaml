@@ -16,7 +16,9 @@
             <StackPanel>
                 
                 <!-- PDF Yükleme Kartı -->
-                <Border Background="{DynamicResource BgBodyBrush}" 
+                <Border Background="{DynamicResource BgCardBrush}" 
+                        BorderBrush="{DynamicResource BorderColorBrush}"
+                        BorderThickness="1"
                         CornerRadius="12"
                         Padding="20"
                         Margin="0,0,0,12">

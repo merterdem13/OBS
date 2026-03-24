@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Light Theme Colors (Modern & Premium Desert Sand Palette) -->
     <SolidColorBrush x:Key="BgBodyBrush" Color="#F5F5F4"/> <!-- Stone 50: Sıcak, doğal ve ferah arka plan -->
-    <SolidColorBrush x:Key="BgCardBrush" Color="#F5F5F4"/> <!-- Stone 50: Arka plan ile bütünleşik kart yapısı -->
+    <SolidColorBrush x:Key="BgCardBrush" Color="#FFFFFF"/> <!-- Beyaz: Kartların arka plandan ayrılması için -->
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="#44403C"/> <!-- Stone 800: Yumuşak ama okunaklı ana metin -->
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="#78716C"/> <!-- Stone 600: Zarif ikincil metin -->
     <SolidColorBrush x:Key="BorderColorBrush" Color="#E7E5E4"/> <!-- Stone 200: Hafif ve doğal kenarlıklar -->
@@ -15,4 +15,5 @@
     <SolidColorBrush x:Key="SpecialButtonBgBrush" Color="#D97706"/>
     <SolidColorBrush x:Key="SpecialButtonHoverBrush" Color="#B45309"/>
     <SolidColorBrush x:Key="SpecialButtonTextBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="TeamLogoBrush" Color="#44403C"/>
 </ResourceDictionary>

@@ -41,6 +41,11 @@ namespace OBS.Views
         {
             if ((bool)e.NewValue)
             {
+                if (sender == InlineEditComponent && DataContext is TeamManagementViewModel vm && vm.EditingTeam != null)
+                {
+                    InlineEditComponent.LoadTeam(vm.EditingTeam);
+                }
+
                 var sb = new Storyboard();
                 var anim = new DoubleAnimation
                 {

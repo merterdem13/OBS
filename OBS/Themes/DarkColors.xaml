@@ -18,4 +18,5 @@
     <SolidColorBrush x:Key="SpecialButtonBgBrush" Color="#444444"/> <!-- Biraz daha koyu beyaz (Slate 200) -->
     <SolidColorBrush x:Key="SpecialButtonHoverBrush" Color="#5A5A5A"/> <!-- Hover için biraz daha açık gri -->
     <SolidColorBrush x:Key="SpecialButtonTextBrush" Color="#EDEDED"/>
+    <SolidColorBrush x:Key="TeamLogoBrush" Color="#ffffffff"/>
 </ResourceDictionary>
