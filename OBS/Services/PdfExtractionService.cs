@@ -25,6 +25,7 @@ namespace OBS.Services
         string? ExtractClassHeader(string pdfPath);
         IEnumerable<Student> ExtractStudentsFromKunyePdf(string pdfPath);
         IEnumerable<(string StudentNumber, string Class, string Gender)> ExtractClassList(string pdfPath);
+        IEnumerable<string> SplitAndSaveClassListPdf(string pdfPath, string outputFolder, bool isImageList = false);
         IEnumerable<string> SplitAndSaveStudentPdfs(string pdfPath, string outputFolder);
         void CleanupTempFiles();
     }
@@ -256,6 +257,66 @@ namespace OBS.Services
             return savedPaths;
         }
 
+        public IEnumerable<string> SplitAndSaveClassListPdf(string pdfPath, string outputFolder, bool isImageList = false)
+        {
+            var savedPaths = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
+                return savedPaths;
+
+            if (!Directory.Exists(outputFolder))
+                Directory.CreateDirectory(outputFolder);
+
+            try
+            {
+                using var sharedReader = new PdfReader(pdfPath);
+                using var sharedSourceDoc = new PdfDocument(sharedReader);
+                int totalPages = sharedSourceDoc.GetNumberOfPages();
+
+                for (int i = 1; i <= totalPages; i++)
+                {
+                    try
+                    {
+                        var text = ExtractTextFromPage(sharedSourceDoc.GetPage(i));
+                        if (string.IsNullOrWhiteSpace(text)) continue;
+
+                        var classHeader = ExtractClassFromHeader(text);
+                        if (string.IsNullOrEmpty(classHeader)) continue;
+
+                        var fileName = FileNameHelper.BuildClassListFileName(classHeader, isImageList: isImageList) + ".pdf";
+                        var outputPath = Path.Combine(outputFolder, fileName);
+
+                        using (var writer = new PdfWriter(outputPath))
+                        {
+                            writer.SetCloseStream(true);
+                            using var targetDoc = new PdfDocument(writer);
+                            sharedSourceDoc.CopyPagesTo(i, i, targetDoc);
+                        }
+
+                        if (File.Exists(outputPath))
+                        {
+                            savedPaths.Add(outputPath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Sınıf listesi sayfa {i} parçalama hatası: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Sınıf Listesi Split genel hata: {ex.Message}");
+            }
+            finally
+            {
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                GC.WaitForPendingFinalizers();
+            }
+
+            return savedPaths;
+        }
+
         public IEnumerable<(string StudentNumber, string Class, string Gender)> ExtractClassList(string pdfPath)
         {
             var results = new List<(string, string, string)>();
@@ -278,6 +339,7 @@ namespace OBS.Services
                         if (string.IsNullOrWhiteSpace(text)) continue;
 
                         var classInfo = ExtractClassFromHeader(text);
+
                         if (string.IsNullOrEmpty(classInfo)) continue;
 
                         var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
@@ -288,6 +350,7 @@ namespace OBS.Services
                             if (IsClassListHeaderLine(line)) continue;
 
                             var sn = FindStudentNumberFromClassListLine(line);
+
                             if (!string.IsNullOrEmpty(sn))
                             {
                                 var gender = ExtractGenderFromClassListLine(line);
@@ -528,19 +591,58 @@ namespace OBS.Services
 
         private static string? ExtractClassFromHeader(string text)
         {
-            var m = Regex.Match(text, @"(\d+)\.\s*(?:Sınıf|Sinif)\s*(?:/\s*)?([A-Za-z])\s*(?:Şubesi|Subesi)?", RegexOptions.IgnoreCase);
-            if (m.Success)
+            // Yalnızca sayfanın başlık bölgesini (ilk 8 dolu satır) tara.
+            // Sayfa gövdesindeki başka sınıf isimleri, dipnotlar veya referanslar
+            // yanlış eşleşmeye yol açmasın.
+            var allLines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var headerLines = allLines
+                .Select(l => l.Trim())
+                .Where(l => l.Length > 0)
+                .Take(4);
+            var header = string.Join("\n", headerLines);
+
+            // ── KURAL 1: Ana Sınıfı Koruması ──
+            var rule1 = Regex.Match(header, @"Ana\s*[Ss][ıiİI]n[ıiİI]f[ıiİI]", RegexOptions.IgnoreCase);
+            if (rule1.Success)
+                return "Ana Sınıfı";
+
+            // ── KURAL 2: Özel Eğitim Sınıfı Koruması ──
+            // Rakamla başlayıp taksim öncesinde Zihinsel/Engelli/Otizm/Hafif içeriyorsa
+            // şubeyi kaldır, sınıf adını koru.
+            var rule2 = Regex.Match(header,
+                @"(\d+\.\s*(?:Sınıf|Sinif)[\s\-]*(?:[^\r\n/]*?(?:Zihinsel|Engelli|Otizm|Hafif)[^\r\n/]*))\s*/\s*[A-Za-z]\b",
+                RegexOptions.IgnoreCase);
+            if (rule2.Success)
+                return rule2.Groups[1].Value.Trim();
+
+            // ── KURAL 3: İsimlendirilmiş "Normal" Sınıf Koruması ──
+            // Sınıf rakamı ile "/" arasında uzun metin var, özel eğitim kelimesi yok
+            // → ismi atla, sadece "Rakam/Şube" dön.
+            var rule3 = Regex.Match(header,
+                @"(\d+)\.\s*(?:Sınıf|Sinif)[\s\-]+(?:(?!Zihinsel|Engelli|Otizm|Hafif)[^\r\n/])+/\s*([A-Za-z])\b",
+                RegexOptions.IgnoreCase);
+            if (rule3.Success)
             {
-                var classNum = m.Groups[1].Value.Trim();
-                var section = m.Groups[2].Value.Trim().ToUpperInvariant();
+                var classNum = rule3.Groups[1].Value.Trim();
+                var section = rule3.Groups[2].Value.Trim().ToUpperInvariant();
                 return $"{classNum}/{section}";
             }
 
-            m = Regex.Match(text, @"(\d+)\.\s*(?:Sınıf|Sinif)", RegexOptions.IgnoreCase);
-            if (m.Success)
+            // ── KURAL 4: Standart Sınıflar (Varsayılan) ──
+            var rule4 = Regex.Match(header,
+                @"(\d+)\.\s*(?:Sınıf|Sinif)\s*/\s*([A-Za-z])\s*(?:Şubesi|Subesi|Şube)?",
+                RegexOptions.IgnoreCase);
+            if (rule4.Success)
             {
-                return m.Groups[1].Value.Trim();
+                var classNum = rule4.Groups[1].Value.Trim();
+                var section = rule4.Groups[2].Value.Trim().ToUpperInvariant();
+                return $"{classNum}/{section}";
             }
+
+            // Şubesiz sınıf eşleşmesi (fallback)
+            var fallback = Regex.Match(header, @"(\d+)\.\s*(?:Sınıf|Sinif)", RegexOptions.IgnoreCase);
+            if (fallback.Success)
+                return fallback.Groups[1].Value.Trim();
 
             return null;
         }
@@ -558,8 +660,16 @@ namespace OBS.Services
             // Çok kısa satırlar (sayfa no, sıra no gibi)
             if (trimmed.Length < 5) return true;
 
-            // Başlık anahtar kelimeleri
-            if (Regex.IsMatch(trimmed, @"(Sınıf\s*(Listesi)?|Şubesi|Okul\s*No|Öğrenci\s*No|Adı|Soyadı|Cinsiyet|Sıra)", RegexOptions.IgnoreCase))
+            // Başlık anahtar kelimeleri (kelime sınırı \b ile — kısmi isim eşleşmesini önler)
+            if (Regex.IsMatch(trimmed, @"\b(Sınıf|Listesi|Şubesi|Subesi|Okul|Öğrenci|Adı|Soyadı|Cinsiyet|Sıra)\b", RegexOptions.IgnoreCase))
+                return true;
+
+            // Özet/sayım satırları: "Öğrenci Sayısı", "Toplam" içeren footer satırları
+            if (Regex.IsMatch(trimmed, @"(Öğrenci\s*Sayısı|Ogrenci\s*Sayisi|Toplam)", RegexOptions.IgnoreCase))
+                return true;
+
+            // Tarih/saat satırları: "23/03/2026 14:44:19" gibi footer damgaları
+            if (Regex.IsMatch(trimmed, @"\d{2}/\d{2}/\d{4}"))
                 return true;
 
             // Sadece rakam ve boşluk içeren satırlar (sayfa numarası vb.)
@@ -573,27 +683,30 @@ namespace OBS.Services
         {
             if (string.IsNullOrWhiteSpace(line)) return null;
 
-            // Boşluksuz ardışık rakam gruplarını yakala.
-            // Eski regex (\d[\d\s\.,]*\d) satır numarasını öğrenci numarasıyla
-            // birleştiriyordu: "1  567" → "1567" (yanlış eşleşme).
+            // Satırdaki tüm ardışık rakam gruplarını sırayla yakala.
             var matches = Regex.Matches(line, @"\d[\d,\.]*\d|\d");
             if (matches.Count == 0) return null;
 
-            string? best = null;
+            // Normalize edilmiş adayları sıraya koy; TC no (>7 hane) olanları at.
+            var candidates = new List<string>();
             foreach (Match match in matches)
             {
                 var normalized = FileNameHelper.NormalizeStudentNumber(match.Value);
                 if (string.IsNullOrEmpty(normalized)) continue;
-
-                // Sıra numarası (1, 2, 3...) ve TC no (11 hane) filtreleme:
-                // Öğrenci numaraları genelde 2-7 haneli olur.
-                if (normalized.Length < 2 || normalized.Length > 7) continue;
-
-                if (best == null || normalized.Length > best.Length)
-                    best = normalized;
+                if (normalized.Length > 7) continue;
+                candidates.Add(normalized);
             }
 
-            return best;
+            if (candidates.Count == 0) return null;
+
+            // Satır formatı: [sıra_no] [okul_no] [ad soyad] [cinsiyet]
+            // candidates[0] her zaman sıra numarasıdır → koşulsuz atla.
+            // candidates[1] her zaman okul numarasıdır → dön.
+            if (candidates.Count >= 2)
+                return candidates[1];
+
+            // Tek aday kaldıysa (sıra no yoksa) onu döndür.
+            return candidates[0];
         }
 
         /// <summary>

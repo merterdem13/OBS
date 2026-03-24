@@ -670,14 +670,11 @@ namespace OBS.ViewModels
                 return;
             }
 
-            // Sınıf listesi PDF'ini Class klasörüne kopyala
+            // Sınıf listesi PDF'ini (veya çok sayfalı toplu listeyi) Class klasörüne parçalayarak kaydet
             await Task.Run(() =>
             {
-                var classHeader = _pdfService.ExtractClassHeader(pdfPath);
                 var classFolder = DatabaseConnection.GetClassPdfFolder();
-                var fileName = FileNameHelper.BuildClassListFileName(classHeader ?? "Bilinmeyen", isImageList: false) + ".pdf";
-                var destPath = Path.Combine(classFolder, fileName);
-                File.Copy(pdfPath, destPath, overwrite: true);
+                _pdfService.SplitAndSaveClassListPdf(pdfPath, classFolder, isImageList: false);
             });
 
             await Task.Run(() => _mergeService.MergeClassList(classList));
@@ -692,14 +689,11 @@ namespace OBS.ViewModels
 
         private async Task ImportResimListesi(string pdfPath, bool silent = false)
         {
-            // Resim listesi PDF'ini Class klasörüne kopyala
+            // Resim listesi PDF'ini (veya sayfalarını) Class klasörüne parçalayarak kaydet
             await Task.Run(() =>
             {
-                var classHeader = _pdfService.ExtractClassHeader(pdfPath);
                 var classFolder = DatabaseConnection.GetClassPdfFolder();
-                var fileName = FileNameHelper.BuildClassListFileName(classHeader ?? "Bilinmeyen", isImageList: true) + ".pdf";
-                var destPath = Path.Combine(classFolder, fileName);
-                File.Copy(pdfPath, destPath, overwrite: true);
+                _pdfService.SplitAndSaveClassListPdf(pdfPath, classFolder, isImageList: true);
             });
 
             if (!silent)
