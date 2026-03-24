@@ -1,15 +1,9 @@
 {
-  "Version": "2.4.1",
-  "Date": "21-03-2026",
+  "Version": "2.4.2",
+  "Date": "24-03-2026",
   "CriticalWarning": "DİKKAT: Veritabanı iyileştirmeleri sebebiyle ilk açılışta öğrencilerin fotoğrafları yükl-enmeyebilir. Sistemi sıfırlayıp tekrar PDF Yükleme işlemini yapınız.",
   "Features": [
-    "Güvenlik iyileştirmeleri yapıldı.",
-    "Veritabanı iyileştirmeleri yapıldı.",
-    "Karanlık tema modu eklendi.",
-    "Takım Paneline geçişler ile ilgili iyileştirmeler yapıldı.",
-    "Yönetim Paneli değiştirildi. Artık daha modern ve kullanışlı.",
-    "PDF Yükle, veritabanı sıfırla gibi kritik işlemler ayarlar menüsüne taşındı.",
-    "Öğrencilere not ekleme özelliği eklendi.",
-    "Arayüz iyileştirmeleri yapıldı."
+    "Takım Düzenleme hataları düzenlendi",
+    "Ayarlar menüsü iyileştirildi."
   ]
 }
