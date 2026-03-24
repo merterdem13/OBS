@@ -40,7 +40,7 @@ if "%msg%"=="" set msg=Oto-Guncelleme - %date% %time%
 git commit -m "%msg%"
 echo.
 echo Sunucuya gönderiliyor: %branch%...
-git push origin %branch%
+git push origin master --force %branch%
 echo.
 echo İşlem başarıyla tamamlandı!
 pause
