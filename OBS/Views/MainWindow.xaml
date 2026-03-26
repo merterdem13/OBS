@@ -74,5 +74,8 @@
         <!-- Geliştirici PIN Katmanı -->
         <components:DeveloperPinOverlay Grid.RowSpan="3" Panel.ZIndex="400" DataContext="{x:Static local:GlobalState.Instance}"/>
 
+        <!-- Zorunlu Güncelleme Katmanı — en üstte, kapatılamaz -->
+        <components:ForceUpdateOverlay Grid.RowSpan="3" Panel.ZIndex="500"/>
+
     </Grid>
 </ui:FluentWindow>

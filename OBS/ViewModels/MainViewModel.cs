@@ -149,6 +149,45 @@ namespace OBS.ViewModels
             }
         }
 
+        public bool IsForceUpdateRequired
+        {
+            get => GlobalState.Instance.IsForceUpdateRequired;
+            set
+            {
+                if (GlobalState.Instance.IsForceUpdateRequired != value)
+                {
+                    GlobalState.Instance.IsForceUpdateRequired = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string ForceUpdateMessage
+        {
+            get => GlobalState.Instance.ForceUpdateMessage;
+            set
+            {
+                if (GlobalState.Instance.ForceUpdateMessage != value)
+                {
+                    GlobalState.Instance.ForceUpdateMessage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int ForceUpdateProgress
+        {
+            get => GlobalState.Instance.ForceUpdateProgress;
+            set
+            {
+                if (GlobalState.Instance.ForceUpdateProgress != value)
+                {
+                    GlobalState.Instance.ForceUpdateProgress = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         // ── Sayfalama (Infinite Scroll)
         private const int PageSize = 6;
         private List<StudentViewModel> _allViewModels = new();
@@ -388,7 +427,47 @@ namespace OBS.ViewModels
             try
             {
                 await Task.Delay(2000); // Uygulama açılışını yavaşlatma
-                var hasUpdate = await _updateService.CheckForUpdateAsync();
+
+                // 1. Uzak config'i ve Velopack güncelleme kontrolünü paralel çalıştır
+                var configTask = _updateService.FetchRemoteConfigAsync();
+                var hasUpdateTask = _updateService.CheckForUpdateAsync();
+                await Task.WhenAll(configTask, hasUpdateTask);
+
+                var remoteConfig = configTask.Result;
+                var hasUpdate = hasUpdateTask.Result;
+
+                // 2. Force update kontrolü
+                if (remoteConfig is { ForceUpdate: true } && hasUpdate)
+                {
+                    var currentVer = _updateService.GetCurrentVersion() ?? "0.0.0";
+                    var minVer = remoteConfig.MinRequiredVersion;
+
+                    bool isOutdated = !string.IsNullOrEmpty(minVer)
+                        && System.Version.TryParse(currentVer, out var cv)
+                        && System.Version.TryParse(minVer, out var mv)
+                        && cv < mv;
+
+                    if (isOutdated)
+                    {
+                        ForceUpdateMessage = string.IsNullOrWhiteSpace(remoteConfig.ForceUpdateMessage)
+                            ? "Bu güncelleme zorunludur. Lütfen bekleyin..."
+                            : remoteConfig.ForceUpdateMessage;
+                        IsForceUpdateRequired = true;
+
+                        // Arka planda indir
+                        await _updateService.DownloadUpdateAsync(progress =>
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                                GlobalState.Instance.ForceUpdateProgress = progress);
+                        });
+
+                        // İndirme tamam — yeniden başlat
+                        _updateService.ApplyUpdateAndRestart();
+                        return;
+                    }
+                }
+
+                // 3. Normal (isteğe bağlı) güncelleme
                 if (hasUpdate)
                 {
                     IsUpdateAvailable = true;

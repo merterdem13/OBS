@@ -112,7 +112,55 @@
                                     <ui:SymbolIcon Symbol="CloudSync24"/>
                                 </ui:Button.Icon>
                             </ui:Button>
+
+                            <!-- Güncelleme mevcut ise görünür -->
+                            <ui:Button Content="{Binding UpdateVersion, StringFormat='v{0} — İndir ve Güncelle'}"
+                                       Appearance="Primary"
+                                       Cursor="Hand"
+                                       Margin="0,0,0,12"
+                                       Command="{Binding DownloadAndApplyUpdateCommand}">
+                                <ui:Button.Icon>
+                                    <ui:SymbolIcon Symbol="ArrowDownload24"/>
+                                </ui:Button.Icon>
+                                <ui:Button.Style>
+                                    <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:Button.Style>
+                            </ui:Button>
                         </WrapPanel>
+
+                        <!-- İndirme ilerleme çubuğu — sadece indirme sırasında görünür -->
+                        <Grid Margin="0,12,0,0">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsUpdateDownloading}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0"
+                                       Text="{Binding UpdateDownloadProgress, StringFormat='İndiriliyor… %{0}'}"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Margin="0,0,0,6"/>
+                            <ProgressBar Grid.Row="1"
+                                         Value="{Binding UpdateDownloadProgress}"
+                                         Minimum="0" Maximum="100"
+                                         Height="4"/>
+                        </Grid>
                     </StackPanel>
                 </Border>
 

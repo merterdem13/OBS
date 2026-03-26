@@ -46,6 +46,15 @@ namespace OBS.ViewModels
         [ObservableProperty]
         private int _updateDownloadProgress = 0;
 
+        [ObservableProperty]
+        private bool _isForceUpdateRequired = false;
+
+        [ObservableProperty]
+        private string _forceUpdateMessage = string.Empty;
+
+        [ObservableProperty]
+        private int _forceUpdateProgress = 0;
+
         public Func<string, string, string, string, Task<bool>>? ConfirmAsync { get; set; }
 
         public void ShowLoading(string message = "Yükleniyor...", double progress = 0)

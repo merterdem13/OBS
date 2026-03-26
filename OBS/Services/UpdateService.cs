@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading.Tasks;
+using OBS.Models;
 using Velopack;
 using Velopack.Sources;
 
@@ -57,6 +59,23 @@ namespace OBS.Services
         public string? GetPendingVersion()
         {
             return _pendingUpdate?.TargetFullRelease?.Version?.ToString();
+        }
+
+        public async Task<UpdateConfig?> FetchRemoteConfigAsync()
+        {
+            try
+            {
+                const string configUrl = "https://raw.githubusercontent.com/merterdem13/OBS/main/update-config.json";
+                var json = await _httpClient.GetStringAsync(configUrl);
+                return JsonSerializer.Deserialize<UpdateConfig>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            catch
+            {
+                return null; // Ağ hatası — sessiz geç
+            }
         }
 
         public async Task DownloadUpdateAsync(Action<int>? progressCallback = null)
