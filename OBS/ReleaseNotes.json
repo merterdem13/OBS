@@ -1,9 +1,11 @@
 {
-  "Version": "2.4.2",
-  "Date": "24-03-2026",
-  "CriticalWarning": "DİKKAT: Veritabanı iyileştirmeleri sebebiyle ilk açılışta öğrencilerin fotoğrafları yükl-enmeyebilir. Sistemi sıfırlayıp tekrar PDF Yükleme işlemini yapınız.",
+  "Version": "2.4.3",
+  "Date": "26-03-2026",
+  "CriticalWarning": "",
   "Features": [
-    "Takım Düzenleme hataları düzenlendi",
-    "Ayarlar menüsü iyileştirildi."
+    "Güncellemeler bildirimi güncellendi.",
+    "Tema ayarları güncellendi.",
+    "Kurtarma kodu eklendi.",
+    "Öğrencilere not ekleme özelliği eklendi."
   ]
 }

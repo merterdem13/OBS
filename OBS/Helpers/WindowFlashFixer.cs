@@ -84,8 +84,8 @@ namespace OBS.Helpers
             {
                 // Dark:  #121212  → R=18 G=18 B=18
                 "Dark"        => (18) | (18 << 8) | (18 << 16),
-                // Alternative (Nord): #2E3440 → R=46 G=52 B=64
-                "Alternative" => (46) | (52 << 8) | (64 << 16),
+                // Alternative (Deep Graphite): #212124 → R=33 G=33 B=36
+                "Alternative" => (33) | (33 << 8) | (36 << 16),
                 // Light: #f1f5f9 → R=241 G=245 B=249
                 _             => (241) | (245 << 8) | (249 << 16),
             };

@@ -8,22 +8,23 @@
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
     </UserControl.Resources>
 
-    <Grid Background="{DynamicResource HeaderBgBrush}"
+    <Grid Background="{DynamicResource LoadingBgBrush}"
           Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <ui:ProgressRing IsIndeterminate="True" Width="48" Height="48"
-                             Foreground="{DynamicResource AccentBrush}"/>
+            <ui:ProgressRing IsIndeterminate="True" Width="54" Height="54"
+                             Foreground="{DynamicResource LoadingAccentBrush}"/>
             <TextBlock Text="İşlem yapılıyor..."
-                       FontSize="14" FontWeight="SemiBold"
-                       HorizontalAlignment="Center" Margin="0,12,0,4"
+                       FontSize="15" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" Margin="0,16,0,6"
                        Foreground="{DynamicResource TextPrimaryBrush}"/>
             <ProgressBar Value="{Binding LoadingProgress}"
-                         Width="220" Height="6" Margin="0,4"
-                         Foreground="{DynamicResource AccentBrush}"/>
+                         Width="240" Height="6" Margin="0,4"
+                         Foreground="{DynamicResource LoadingAccentBrush}"
+                         Background="{DynamicResource BorderColorBrush}"/>
             <TextBlock Text="{Binding LoadingProgressText}"
-                       FontSize="12" FontWeight="Bold"
+                       FontSize="13" FontWeight="Bold"
                        HorizontalAlignment="Center"
-                       Foreground="{DynamicResource AccentBrush}"/>
+                       Foreground="{DynamicResource LoadingProgressTextBrush}"/>
         </StackPanel>
     </Grid>
 </UserControl>

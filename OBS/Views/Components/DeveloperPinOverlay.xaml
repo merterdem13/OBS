@@ -1,0 +1,117 @@
+<UserControl x:Class="OBS.Views.Components.DeveloperPinOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             Visibility="Collapsed">
+    
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        
+        <Storyboard x:Key="FadeInStoryboard">
+            <DoubleAnimation Storyboard.TargetName="Backdrop"
+                              Storyboard.TargetProperty="Opacity"
+                              From="0" To="1" Duration="0:0:0.25"/>
+            <DoubleAnimation Storyboard.TargetName="DialogCard"
+                              Storyboard.TargetProperty="Opacity"
+                              From="0" To="1" Duration="0:0:0.25"/>
+            <DoubleAnimation Storyboard.TargetName="DialogCard"
+                              Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                              From="30" To="0" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="FadeOutStoryboard">
+            <DoubleAnimation Storyboard.TargetName="Backdrop"
+                              Storyboard.TargetProperty="Opacity"
+                              To="0" Duration="0:0:0.2"/>
+            <DoubleAnimation Storyboard.TargetName="DialogCard"
+                              Storyboard.TargetProperty="Opacity"
+                              To="0" Duration="0:0:0.2"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid x:Name="RootGrid">
+        <!-- Yarı saydam arka plan -->
+        <Border x:Name="Backdrop"
+                Background="#99000000"
+                Opacity="0"
+                MouseLeftButtonDown="Backdrop_Click"/>
+
+        <!-- Dialog Kartı -->
+        <Border x:Name="DialogCard"
+                Opacity="0"
+                Width="300"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource BgCardBrush}"
+                CornerRadius="12"
+                Padding="24">
+
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="24"
+                                  ShadowDepth="6"
+                                  Opacity="0.35"
+                                  Color="#000000"/>
+            </Border.Effect>
+
+            <Border.RenderTransform>
+                <TranslateTransform Y="0"/>
+            </Border.RenderTransform>
+
+            <StackPanel>
+                <!-- İkon -->
+                <ui:SymbolIcon Symbol="ShieldKeyhole24" 
+                               FontSize="40" 
+                               Foreground="{StaticResource BtnPurpleBrush}" 
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,12"/>
+
+                <!-- Başlık -->
+                <TextBlock Text="Geliştirici Erişimi" 
+                           FontSize="16" FontWeight="Bold" 
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextPrimaryBrush}" 
+                           Margin="0,0,0,16"/>
+
+                <!-- PIN Girişi -->
+                <ui:PasswordBox x:Name="DevPinBox"
+                               Password="{Binding DeveloperPinInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                               MaxLength="4" 
+                               PlaceholderText="PIN" 
+                               ClearButtonEnabled="False"
+                               Height="36"
+                               Margin="0,0,0,8"
+                               KeyDown="DevPinBox_KeyDown"/>
+
+                <!-- Hata Mesajı -->
+                <TextBlock Text="Hatalı kod" 
+                           Foreground="#ef4444" 
+                           FontSize="12" 
+                           TextAlignment="Center"
+                           Margin="0,0,0,8"
+                           Visibility="{Binding HasDeveloperPinError, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- Butonlar -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                    <Button Content="İptal" 
+                            Style="{StaticResource ActionBtnStyle}"
+                            Background="{DynamicResource BorderColorBrush}"
+                            Foreground="{DynamicResource TextPrimaryBrush}"
+                            Width="100" Height="36"
+                            FontSize="13"
+                            Margin="0,0,8,0"
+                            Command="{Binding CancelDeveloperPinCommand}"/>
+
+                    <Button Content="Doğrula" 
+                            Style="{StaticResource ActionBtnPurple}"
+                            Width="120" Height="36"
+                            FontSize="13"
+                            Command="{Binding VerifyDeveloperPinCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

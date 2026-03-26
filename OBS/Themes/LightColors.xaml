@@ -7,6 +7,12 @@
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="#78716C"/> <!-- Stone 600: Zarif ikincil metin -->
     <SolidColorBrush x:Key="BorderColorBrush" Color="#E7E5E4"/> <!-- Stone 200: Hafif ve doğal kenarlıklar -->
     <SolidColorBrush x:Key="AccentBrush" Color="#D97706"/> <!-- Amber: Güçlü, asil ve modern vurgu rengi -->
+    
+    <!-- Loading Overlay Fırçaları -->
+    <SolidColorBrush x:Key="LoadingAccentBrush" Color="#D97706"/>
+    <SolidColorBrush x:Key="LoadingProgressTextBrush" Color="#B45309"/>
+    <SolidColorBrush x:Key="LoadingBgBrush" Color="#F2FFFFFF"/> <!-- %95 Temiz Beyaz Arkaplan -->
+
     <SolidColorBrush x:Key="HeaderBgBrush" Color="#E7E5E4CC"/> <!-- Stone 200 with Opacity: Saydamlaştırılmış şık başlık -->
     <SolidColorBrush x:Key="ModalBgBrush" Color="#F5F5F4EE"/> <!-- Stone 50 with Opacity: Temiz modal arka planı -->
 

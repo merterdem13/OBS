@@ -4,10 +4,18 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              Background="Transparent">
 
+    <UserControl.Resources>
+        <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
+            <Setter Property="Width" Value="3"/>
+            <Setter Property="Height" Value="3"/>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="16,16,16,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Uygulama Hakkında" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16"/>

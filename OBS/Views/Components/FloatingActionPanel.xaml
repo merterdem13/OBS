@@ -12,12 +12,39 @@
         <!-- Güncelleme Bildirim Çubuğu (Alt) -->
         <Border VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
                 Margin="12,0,12,12"
-                Background="{StaticResource BtnBlueBrush}"
-                CornerRadius="10"
-                Padding="14,10"
+                Background="{DynamicResource BgCardBrush}"
+                BorderBrush="{DynamicResource BorderColorBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="12,8"
                 Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BoolToVisibility}}">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <TranslateTransform Y="0"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="Visibility" Value="Visible">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6" />
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="30" To="0" Duration="0:0:0.6">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase EasingMode="EaseOut" Amplitude="0.4" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <Border.Effect>
-                <DropShadowEffect BlurRadius="12" Opacity="0.2" Direction="270" ShadowDepth="3"/>
+                <DropShadowEffect BlurRadius="15" Opacity="0.15" Direction="270" ShadowDepth="4"/>
             </Border.Effect>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -26,17 +53,20 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding UpdateVersion, StringFormat='v{0} mevcut'}"
-                               Foreground="White" FontWeight="SemiBold" FontSize="13"/>
+                    <TextBlock Text="{Binding UpdateVersion, StringFormat='🚀 Yeni Bir Güncelleme Mevcut: v{0}'}"
+                               Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="13"/>
                     <ProgressBar Value="{Binding UpdateDownloadProgress}" Maximum="100"
-                                 Height="3" Margin="0,4,8,0"
+                                 Height="4" Margin="0,6,16,0"
                                  Visibility="{Binding IsUpdateDownloading, Converter={StaticResource BoolToVisibility}}"
-                                 Foreground="White" Background="#4DFFFFFF"/>
+                                 Foreground="{DynamicResource AccentBrush}" Background="{DynamicResource BorderColorBrush}"/>
                 </StackPanel>
 
-                <ui:Button Grid.Column="1" Content="Güncelle"
-                           Appearance="Light" Padding="12,6"
-                           FontSize="12"
+                <ui:Button Grid.Column="1" Content="Şimdi Güncelle"
+                           Appearance="Primary" Padding="12,6"
+                           FontSize="11" FontWeight="Medium"
+                           Background="{DynamicResource AccentBrush}"
+                           Foreground="White"
+                           BorderThickness="0"
                            Command="{Binding DownloadAndApplyUpdateCommand}"/>
             </Grid>
         </Border>

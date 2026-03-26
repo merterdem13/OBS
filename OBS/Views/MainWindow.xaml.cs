@@ -58,9 +58,86 @@ namespace OBS.Views
             _ = new OBS.Services.GarbageCollectorService().RunAsync();
         }
 
-        public async void CheckAndShowReleaseNotes()
+        public async void CheckAndShowRecoveryModal()
         {
-            await Task.Delay(500); // Giriş animasyonundan biraz sonra çıkması için
+            // Standalone çağrı (geliştirici erişimi vb.) için
+            await ShowRecoveryModalInternal();
+        }
+
+        public async void ShowPostLoginModals()
+        {
+            await Task.Delay(1000); // Açılış animasyonunun bitmesini bekleyelim
+
+            // 1. Öncelik: Recovery Modal
+            bool recoveryShown = await ShowRecoveryModalInternal();
+
+            // Recovery modal gösterildiyse, kapanmasını bekle
+            if (recoveryShown)
+            {
+                await WaitForRecoveryModalClose();
+                await Task.Delay(300); // Kapanış animasyonu için kısa bekleme
+            }
+
+            // 2. Sonra: Release Notes
+            await ShowReleaseNotesInternal();
+        }
+
+        private async Task<bool> ShowRecoveryModalInternal()
+        {
+            try
+            {
+                var settingsRepo = new OBS.DataAccess.SettingsRepository();
+                var hasSeenModal = settingsRepo.GetSetting("HasSeenRecoveryModal");
+                
+                if (string.IsNullOrWhiteSpace(hasSeenModal) || hasSeenModal != "true")
+                {
+                    GlobalState.Instance.ChangeRecoveryPinTitle = "İlk Kurulum - Kurtarma Kodu";
+                    GlobalState.Instance.ChangeRecoveryPinMessage = "Uygulamaya hoş geldiniz! \nVarsayılan şifre sıfırlama (kurtarma) kodunuz '0000' olarak belirlenmiştir.\n\nGüvenliğiniz için bu kodu şimdi kişiselleştirebilirsiniz veya 'Vazgeç' diyerek daha sonra ayarlardan değiştirebilirsiniz.";
+                    
+                    GlobalState.Instance.IsCurrentRecoveryPinRequired = false;
+                    GlobalState.Instance.CurrentRecoveryPinInput = string.Empty;
+                    GlobalState.Instance.NewRecoveryPinInput = string.Empty;
+                    GlobalState.Instance.HasRecoveryPinError = false;
+                    
+                    GlobalState.Instance.IsChangeRecoveryPinOverlayVisible = true;
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Recovery modal gösterilirken hata oluştu: {ex.Message}");
+            }
+            return false;
+        }
+
+        private async Task WaitForRecoveryModalClose()
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            
+            void OnPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+            {
+                if (e.PropertyName == nameof(GlobalState.IsChangeRecoveryPinOverlayVisible) 
+                    && !GlobalState.Instance.IsChangeRecoveryPinOverlayVisible)
+                {
+                    tcs.TrySetResult(true);
+                }
+            }
+
+            GlobalState.Instance.PropertyChanged += OnPropertyChanged;
+            
+            // Eğer zaten kapandıysa
+            if (!GlobalState.Instance.IsChangeRecoveryPinOverlayVisible)
+            {
+                GlobalState.Instance.PropertyChanged -= OnPropertyChanged;
+                return;
+            }
+
+            await tcs.Task;
+            GlobalState.Instance.PropertyChanged -= OnPropertyChanged;
+        }
+
+        private async Task ShowReleaseNotesInternal()
+        {
             try
             {
                 var releaseNotesPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ReleaseNotes.json");

@@ -3,6 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              Background="Transparent">
+
+    <UserControl.Resources>
+        <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
+            <Setter Property="Width" Value="3"/>
+            <Setter Property="Height" Value="3"/>
+        </Style>
+    </UserControl.Resources>
     <Grid Margin="16">
         <StackPanel>
             <TextBlock Text="Öğrenci Bilgileri Düzenleme" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16"/>

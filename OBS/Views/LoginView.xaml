@@ -36,6 +36,7 @@
         <KeyBinding Key="NumPad7"  Command="{Binding NumpadCommand}" CommandParameter="7"/>
         <KeyBinding Key="NumPad8"  Command="{Binding NumpadCommand}" CommandParameter="8"/>
         <KeyBinding Key="NumPad9"  Command="{Binding NumpadCommand}" CommandParameter="9"/>
+        <KeyBinding Key="F12" Modifiers="Ctrl+Shift" Command="{Binding DeveloperResetCommand}"/>
     </UserControl.InputBindings>
 
     <Grid>

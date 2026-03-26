@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Collections.ObjectModel;
 using OBS.Models;
 
 namespace OBS.ViewModels
@@ -61,6 +62,52 @@ namespace OBS.ViewModels
         /// İSTEM METNİ GEREĞİ: StudentCardComponent'te gösterilmek için.
         /// </summary>
         public string BirthDateString => BirthDate?.ToString("dd.MM.yyyy") ?? "-";
+
+        private ObservableCollection<StudentNote>? _notes;
+        /// <summary>
+        /// Öğrencinin geçmiş notları. UI genişletildiğinde yüklenir.
+        /// </summary>
+        public ObservableCollection<StudentNote> Notes
+        {
+            get
+            {
+                if (_notes == null)
+                {
+                    _notes = new ObservableCollection<StudentNote>();
+                    LoadNotes();
+                }
+                return _notes;
+            }
+        }
+
+        private string _newNoteText = string.Empty;
+        /// <summary>
+        /// Yeni not ekleme alanının bağlandığı metin.
+        /// </summary>
+        public string NewNoteText
+        {
+            get => _newNoteText;
+            set
+            {
+                if (_newNoteText != value)
+                {
+                    _newNoteText = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public void LoadNotes()
+        {
+            if (_notes == null) return;
+            var repo = new DataAccess.StudentNoteRepository();
+            var list = repo.GetNotesByStudent(_student.StudentNumber);
+            _notes.Clear();
+            foreach(var note in list)
+            {
+                _notes.Add(note);
+            }
+        }
 
         /// <summary>
         /// Veli telefon numarası (Guardian tablosundan çekilecek).

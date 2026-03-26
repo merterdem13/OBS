@@ -20,6 +20,10 @@
     FontFamily="{StaticResource MainFont}"
     TextElement.FontFamily="{StaticResource MainFont}">
 
+    <ui:FluentWindow.InputBindings>
+        <KeyBinding Key="F12" Modifiers="Ctrl+Shift" Command="{Binding OpenDeveloperPinOverlayCommand, Source={x:Static local:GlobalState.Instance}}" CommandParameter="Settings"/>
+    </ui:FluentWindow.InputBindings>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -58,8 +62,17 @@
         <!-- Onay Diyaloğu Katmanı -->
         <components:ConfirmDialogOverlay x:Name="ConfirmDialog" Grid.RowSpan="3" Panel.ZIndex="300" DataContext="{x:Static local:GlobalState.Instance}"/>
 
+        <!-- Kurtarma Kodu Değiştirme Katmanı -->
+        <components:ChangeRecoveryPinOverlay Grid.RowSpan="3" Panel.ZIndex="310" DataContext="{x:Static local:GlobalState.Instance}"/>
+
+        <!-- Öğrenci Notları Katmanı -->
+        <components:StudentNotesOverlay x:Name="StudentNotesOverlay" Grid.RowSpan="3" Panel.ZIndex="320" DataContext="{x:Static local:GlobalState.Instance}"/>
+
         <!-- Güncelleme Notları Katmanı -->
         <components:ReleaseNotesOverlay x:Name="ReleaseNotesOverlay" Grid.RowSpan="3" Panel.ZIndex="350" DataContext="{x:Static local:GlobalState.Instance}"/>
+
+        <!-- Geliştirici PIN Katmanı -->
+        <components:DeveloperPinOverlay Grid.RowSpan="3" Panel.ZIndex="400" DataContext="{x:Static local:GlobalState.Instance}"/>
 
     </Grid>
 </ui:FluentWindow>

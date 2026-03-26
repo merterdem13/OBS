@@ -10,6 +10,12 @@
     <!-- Tasarım Elemanları -->
     <SolidColorBrush x:Key="BorderColorBrush" Color="#2d2d2d"/> <!-- İnce gri kenarlık -->
     <SolidColorBrush x:Key="AccentBrush" Color="#555555"/> <!-- Nötr Vurgu (Mavi yerine orta gri) -->
+
+    <!-- Loading Overlay Fırçaları -->
+    <SolidColorBrush x:Key="LoadingAccentBrush" Color="#3B82F6"/> <!-- Canlı Mavi -->
+    <SolidColorBrush x:Key="LoadingProgressTextBrush" Color="#93C5FD"/> <!-- Açık Mavi Yüzde Yazısı -->
+    <SolidColorBrush x:Key="LoadingBgBrush" Color="#e6121212"/> <!-- %90 Opaklıkta Koyu Gri -->
+
     <SolidColorBrush x:Key="HeaderBgBrush" Color="#e6121212"/> 
     <SolidColorBrush x:Key="ModalBgBrush" Color="#1e1e1e"/> <!-- Kartlarla aynı gri -->
     

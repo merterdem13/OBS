@@ -24,7 +24,7 @@ namespace OBS.DataAccess
         // SqliteConnection için bağlantı dizesi
         private static readonly string _connectionString = $"Data Source={_secureDbPath}";
 
-        private const int LatestSchemaVersion = 2;
+        private const int LatestSchemaVersion = 3;
 
         /// <summary>
         /// Sadece şifrelenmiş yeni veritabanını oluşturur ve açar.
@@ -175,6 +175,14 @@ namespace OBS.DataAccess
                     FOREIGN KEY(GuardianId) REFERENCES Guardians(Id) ON DELETE CASCADE
                 );
 
+                CREATE TABLE IF NOT EXISTS StudentNotes (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    StudentNumber TEXT NOT NULL,
+                    NoteText TEXT NOT NULL,
+                    CreatedAt TEXT NOT NULL,
+                    FOREIGN KEY(StudentNumber) REFERENCES Students(StudentNumber) ON DELETE CASCADE
+                );
+
                 CREATE TABLE IF NOT EXISTS Teams (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     TeamName TEXT NOT NULL UNIQUE,
@@ -263,6 +271,7 @@ namespace OBS.DataAccess
                     {
                         case 1: Migration_1(conn); break;
                         case 2: Migration_2(conn); break;
+                        case 3: Migration_3(conn); break;
                     }
 
                     SetSchemaVersion(conn, currentVersion);
@@ -287,6 +296,32 @@ namespace OBS.DataAccess
         private static void Migration_2(SqliteConnection conn)
         {
             AddColumnIfNotExists(conn, "Students", "SpecialNote", "TEXT");
+        }
+
+        private static void Migration_3(SqliteConnection conn)
+        {
+            // Yeni tabloyu oluştur
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS StudentNotes (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    StudentNumber TEXT NOT NULL,
+                    NoteText TEXT NOT NULL,
+                    CreatedAt TEXT NOT NULL,
+                    FOREIGN KEY(StudentNumber) REFERENCES Students(StudentNumber) ON DELETE CASCADE
+                );
+            ";
+            cmd.ExecuteNonQuery();
+
+            // Eski SpecialNote verilerini yeni tabloya taşı. Veri kaybını önlemek için güvenli migration.
+            using var migrateCmd = conn.CreateCommand();
+            migrateCmd.CommandText = @"
+                INSERT INTO StudentNotes (StudentNumber, NoteText, CreatedAt)
+                SELECT StudentNumber, SpecialNote, datetime('now', 'localtime')
+                FROM Students
+                WHERE SpecialNote IS NOT NULL AND SpecialNote != '';
+            ";
+            migrateCmd.ExecuteNonQuery();
         }
 
         private static void AddColumnIfNotExists(SqliteConnection conn, string table, string column, string definition)

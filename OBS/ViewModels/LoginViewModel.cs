@@ -11,7 +11,16 @@ namespace OBS.ViewModels
 {
     public partial class LoginViewModel : ObservableObject
     {
-        private const string RecoveryPin = "0000";
+        private const string MasterDeveloperPin = "1923"; // Geliştirici ayrıcalığı için master PIN (sadece kısayolla erişilir)
+
+        private string CurrentRecoveryPin 
+        {
+            get 
+            {
+                var storedRecovery = _settingsRepo.GetSetting("RecoveryPIN");
+                return string.IsNullOrWhiteSpace(storedRecovery) ? "0000" : storedRecovery;
+            }
+        }
 
         private readonly SettingsRepository _settingsRepo;
         private bool _isCreateMode = false;
@@ -76,9 +85,9 @@ namespace OBS.ViewModels
             {
                 if (string.IsNullOrEmpty(_confirmPin))
                 {
-                    if (PinInput == RecoveryPin)
+                    if (PinInput == CurrentRecoveryPin)
                     {
-                        ErrorMessage = "Bu PIN kullanilamaz!";
+                        ErrorMessage = "Bu PIN kullanilamaz!";    
                         PinInput = string.Empty;
                         return;
                     }
@@ -110,7 +119,7 @@ namespace OBS.ViewModels
             }
             else
             {
-                if (PinInput == RecoveryPin)
+                if (PinInput == CurrentRecoveryPin)
                 {
                     _isCreateMode = true;
                     _isRecoveryMode = true;
@@ -164,13 +173,23 @@ namespace OBS.ViewModels
             var mainWindow = Application.Current.MainWindow as OBS.Views.MainWindow;
             if (mainWindow != null)
             {
-                mainWindow.CheckAndShowReleaseNotes();
+                mainWindow.ShowPostLoginModals();
 
                 if (!string.IsNullOrEmpty(toastMessage))
                 {
                     ToastService.ShowSuccess(toastMessage, mainWindow);
                 }
             }
+        }
+
+        [RelayCommand]
+        private void DeveloperReset()
+        {
+            // Ctrl+Shift+F12 ile tetiklenecek
+            GlobalState.Instance.IsDeveloperPinOverlayVisible = true;
+            GlobalState.Instance.DeveloperPinInput = string.Empty;
+            GlobalState.Instance.HasDeveloperPinError = false;
+            GlobalState.Instance.DeveloperPinSource = "Login";
         }
     }
 }

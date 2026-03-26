@@ -4,10 +4,18 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              Background="Transparent">
 
+    <UserControl.Resources>
+        <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
+            <Setter Property="Width" Value="3"/>
+            <Setter Property="Height" Value="3"/>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Sistem Ayarları" FontSize="20" FontWeight="Bold" Margin="0,0,0,24" Foreground="{DynamicResource TextPrimaryBrush}"/>
@@ -40,6 +48,37 @@
                                        Command="{Binding ResetSystemCommand}">
                                 <ui:Button.Icon>
                                     <ui:SymbolIcon Symbol="Delete24"/>
+                                </ui:Button.Icon>
+                            </ui:Button>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Kurtarma Kodu Kartı -->
+                <Border Background="{DynamicResource BgBodyBrush}" 
+                        CornerRadius="12"
+                        Padding="20"
+                        BorderThickness="1"
+                        BorderBrush="{DynamicResource BorderColorBrush}"
+                        Margin="0,0,0,24">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <ui:SymbolIcon Symbol="Key24" FontSize="20" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,8,0"/>
+                            <TextBlock Text="Kurtarma Kodunu Ayarla" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Uygulama şifrenizi unuttuğunuzda sıfırlayabilmek için kullandığınız 4 haneli kurtarma kodunu güvenliğiniz için güncelleyin." 
+                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                   FontSize="13" TextWrapping="Wrap" Margin="0,0,0,20"/>
+
+                        <WrapPanel Orientation="Horizontal">
+                            <ui:Button Content="Kodu Değiştir" 
+                                       Appearance="Primary"
+                                       Cursor="Hand"
+                                       Margin="0,0,16,12"
+                                       Command="{Binding OpenChangeRecoveryPinOverlayCommand}">
+                                <ui:Button.Icon>
+                                    <ui:SymbolIcon Symbol="Edit24"/>
                                 </ui:Button.Icon>
                             </ui:Button>
                         </WrapPanel>

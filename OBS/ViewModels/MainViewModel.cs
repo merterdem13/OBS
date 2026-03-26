@@ -97,29 +97,56 @@ namespace OBS.ViewModels
 
         [ObservableProperty]
         private bool _hasMoreStudents = false;
-
         public bool IsUpdateAvailable
         {
             get => GlobalState.Instance.IsUpdateAvailable;
-            set => GlobalState.Instance.IsUpdateAvailable = value;
+            set
+            {
+                if (GlobalState.Instance.IsUpdateAvailable != value)
+                {
+                    GlobalState.Instance.IsUpdateAvailable = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public string UpdateVersion
         {
             get => GlobalState.Instance.UpdateVersion;
-            set => GlobalState.Instance.UpdateVersion = value;
+            set
+            {
+                if (GlobalState.Instance.UpdateVersion != value)
+                {
+                    GlobalState.Instance.UpdateVersion = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public bool IsUpdateDownloading
         {
             get => GlobalState.Instance.IsUpdateDownloading;
-            set => GlobalState.Instance.IsUpdateDownloading = value;
+            set
+            {
+                if (GlobalState.Instance.IsUpdateDownloading != value)
+                {
+                    GlobalState.Instance.IsUpdateDownloading = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public int UpdateDownloadProgress
         {
             get => GlobalState.Instance.UpdateDownloadProgress;
-            set => GlobalState.Instance.UpdateDownloadProgress = value;
+            set
+            {
+                if (GlobalState.Instance.UpdateDownloadProgress != value)
+                {
+                    GlobalState.Instance.UpdateDownloadProgress = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         // ── Sayfalama (Infinite Scroll)

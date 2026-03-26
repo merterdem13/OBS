@@ -7,6 +7,10 @@
     
     <UserControl.Resources>
         <converters:StringMatchToBooleanConverter x:Key="StringMatchToBool"/>
+        <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
+            <Setter Property="Width" Value="3"/>
+            <Setter Property="Height" Value="3"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="24">
@@ -42,6 +46,15 @@
                                      IsChecked="{Binding CurrentTheme, Converter={StaticResource StringMatchToBool}, ConverterParameter=Dark, Mode=OneWay}"
                                      Command="{Binding ChangeThemeCommand}" 
                                      CommandParameter="Dark"/>
+
+                        <RadioButton Content="Alternatif" 
+                                     GroupName="ThemeGroup" 
+                                     Margin="0,0,16,12"
+                                     Cursor="Hand"
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                     IsChecked="{Binding CurrentTheme, Converter={StaticResource StringMatchToBool}, ConverterParameter=Alternative, Mode=OneWay}"
+                                     Command="{Binding ChangeThemeCommand}" 
+                                     CommandParameter="Alternative"/>
                     </WrapPanel>
                 </StackPanel>
             </Border>

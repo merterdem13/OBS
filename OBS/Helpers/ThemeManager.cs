@@ -17,7 +17,7 @@ namespace OBS.Helpers
                 themeString = "Alternative";
 
             // 1. Wpf.Ui temasını güncelle (Light veya Dark)
-            var uiTheme = themeString == "Dark" ? ApplicationTheme.Dark : ApplicationTheme.Light;
+            var uiTheme = (themeString == "Dark" || themeString == "Alternative") ? ApplicationTheme.Dark : ApplicationTheme.Light;
             ApplicationThemeManager.Apply(uiTheme);
 
             // 2. Özel renk sözlüğümüzü (Custom ResourceDictionary) bul ve değiştir

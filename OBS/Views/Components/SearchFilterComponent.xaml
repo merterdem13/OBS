@@ -35,13 +35,13 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Arama Modu (IsClassFilterMode = false iken görünür) -->
-                    <ui:TextBox Grid.Column="0"
+                    <ui:TextBox Grid.Column="0" Grid.ColumnSpan="2"
                                 PlaceholderText="Öğrenci Ara (Ad, No)..."
                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                 Background="Transparent"
                                 BorderThickness="0"
-                                Padding="0"
-                                Margin="0,0,8,0"
+                                Padding="0,0,40,0"
+                                Margin="0"
                                 VerticalContentAlignment="Center"
                                 Visibility="{Binding IsClassFilterMode, Converter={StaticResource InverseBoolToVisibility}}">
                         <ui:TextBox.Resources>

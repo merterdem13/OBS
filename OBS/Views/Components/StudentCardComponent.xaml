@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:converters="clr-namespace:OBS.Converters"
-             xmlns:helpers="clr-namespace:OBS.Helpers">
+             xmlns:helpers="clr-namespace:OBS.Helpers"
+             xmlns:local="clr-namespace:OBS.ViewModels">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -98,19 +99,21 @@
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <!-- Not Butonu -->
-                        <ToggleButton x:Name="btnNote"
-                                      Padding="2" Width="24" Height="24" Margin="0,0,4,0"
-                                      ToolTip="Öğrenci Notu"
-                                      Cursor="Hand"
-                                      Background="Transparent"
-                                      BorderThickness="0">
-                            <ToggleButton.Template>
-                                <ControlTemplate TargetType="ToggleButton">
+                        <Button x:Name="btnNote"
+                                Padding="2" Width="24" Height="24" Margin="0,0,4,0"
+                                ToolTip="Öğrenci Notu"
+                                Cursor="Hand"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Command="{Binding OpenStudentNotesCommand, Source={x:Static local:GlobalState.Instance}}"
+                                CommandParameter="{Binding}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
                                     <Border Background="Transparent">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
-                            </ToggleButton.Template>
+                            </Button.Template>
                             <ui:SymbolIcon FontSize="15" RenderTransformOrigin="0.5,0.5">
                                 <ui:SymbolIcon.Style>
                                     <Style TargetType="ui:SymbolIcon">
@@ -126,7 +129,7 @@
                                     </Style>
                                 </ui:SymbolIcon.Style>
                             </ui:SymbolIcon>
-                        </ToggleButton>
+                        </Button>
 
                         <!-- Yıldız Butonu -->
                         <Button Padding="2" Width="24" Height="24"
@@ -253,36 +256,6 @@
             </Grid>
         </Grid>
 
-        <!-- Expanded Note Section -->
-            <Border Visibility="{Binding IsChecked, ElementName=btnNote, Converter={StaticResource BoolToVis}}"
-                    Background="{DynamicResource BgCardBrush}"
-                    BorderBrush="{DynamicResource BorderColorBrush}"
-                    BorderThickness="0,1,0,0"
-                    CornerRadius="0,0,9,9"
-                    Padding="8"
-                    Margin="0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <ui:TextBox Grid.Column="0" Text="{Binding SpecialNote, UpdateSourceTrigger=PropertyChanged}" 
-                                TextWrapping="Wrap" AcceptsReturn="True" MinHeight="38" Padding="10,8"
-                                VerticalContentAlignment="Top" VerticalAlignment="Stretch"
-                                Background="Transparent" BorderThickness="0"
-                                PlaceholderText="Öğrenciye özel ek bir not..."/>
-                    
-                    <ui:Button Grid.Column="1" Click="BtnSaveNote_Click" 
-                               MouseOverBackground="{DynamicResource SpecialButtonHoverBrush}"
-                               Background="{DynamicResource SpecialButtonBgBrush}" 
-                               Foreground="{DynamicResource SpecialButtonTextBrush}" 
-                               Margin="6,0,0,0" Width="38" Height="38" Padding="0" 
-                               VerticalAlignment="Top" BorderThickness="0" ToolTip="Notu Kaydet">
-                        <ui:SymbolIcon Symbol="Save24" Foreground="{DynamicResource SpecialButtonTextBrush}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </ui:Button>
-                </Grid>
-            </Border>
         </StackPanel>
     </Border>
 </UserControl>

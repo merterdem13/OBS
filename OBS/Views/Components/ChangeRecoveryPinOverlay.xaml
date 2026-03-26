@@ -1,0 +1,143 @@
+<UserControl x:Class="OBS.Views.Components.ChangeRecoveryPinOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             Visibility="Collapsed">
+    
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        
+        <Storyboard x:Key="FadeInStoryboard">
+            <DoubleAnimation Storyboard.TargetName="Backdrop"
+                              Storyboard.TargetProperty="Opacity"
+                              From="0" To="1" Duration="0:0:0.25"/>
+            <DoubleAnimation Storyboard.TargetName="DialogCard"
+                              Storyboard.TargetProperty="Opacity"
+                              From="0" To="1" Duration="0:0:0.25"/>
+            <DoubleAnimation Storyboard.TargetName="DialogCard"
+                              Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                              From="30" To="0" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="FadeOutStoryboard">
+            <DoubleAnimation Storyboard.TargetName="Backdrop"
+                              Storyboard.TargetProperty="Opacity"
+                              To="0" Duration="0:0:0.2"/>
+            <DoubleAnimation Storyboard.TargetName="DialogCard"
+                              Storyboard.TargetProperty="Opacity"
+                              To="0" Duration="0:0:0.2"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid x:Name="RootGrid">
+        <!-- Yarı saydam arka plan -->
+        <Border x:Name="Backdrop"
+                Background="#99000000"
+                Opacity="0"
+                MouseLeftButtonDown="Backdrop_Click"/>
+
+        <!-- Dialog Kartı -->
+        <Border x:Name="DialogCard"
+                Opacity="0"
+                Width="340"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource BgCardBrush}"
+                CornerRadius="12"
+                Padding="24">
+
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="24"
+                                  ShadowDepth="6"
+                                  Opacity="0.35"
+                                  Color="#000000"/>
+            </Border.Effect>
+
+            <Border.RenderTransform>
+                <TranslateTransform Y="0"/>
+            </Border.RenderTransform>
+
+            <StackPanel>
+                <!-- İkon -->
+                 <ui:SymbolIcon Symbol="Key24" 
+                                FontSize="40" 
+                                Foreground="{StaticResource BtnOrangeBrush}" 
+                                HorizontalAlignment="Center"
+                                Margin="0,0,0,12"/>
+
+                <!-- Başlık -->
+                <TextBlock Text="{Binding ChangeRecoveryPinTitle}" 
+                           FontSize="18" FontWeight="Bold" 
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextPrimaryBrush}" 
+                           Margin="0,0,0,8"/>
+
+                <TextBlock Text="{Binding ChangeRecoveryPinMessage}" 
+                           Foreground="{DynamicResource TextSecondaryBrush}" 
+                           FontSize="13" TextWrapping="Wrap" 
+                           TextAlignment="Center"
+                           LineHeight="20"
+                           Margin="0,0,0,20"/>
+
+                <!-- Inputs -->
+                <StackPanel Margin="0,0,0,4">
+                    <!-- Mevcut Şifre -->
+                    <StackPanel Visibility="{Binding IsCurrentRecoveryPinRequired, Converter={StaticResource BoolToVis}}" Margin="0,0,0,12">
+                        <TextBlock Text="Mevcut Kurtarma Kodu" 
+                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                   FontSize="11" FontWeight="SemiBold"
+                                   Margin="4,0,0,4"/>
+                        <ui:PasswordBox Password="{Binding CurrentRecoveryPinInput, Mode=TwoWay}" 
+                                       MaxLength="4" 
+                                       PlaceholderText="****" 
+                                       ClearButtonEnabled="False"
+                                       Height="36"/>
+                    </StackPanel>
+
+                    <!-- Yeni Şifre -->
+                    <StackPanel Margin="0,0,0,8">
+                        <TextBlock Text="Yeni Kurtarma Kodu" 
+                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                   FontSize="11" FontWeight="SemiBold"
+                                   Margin="4,0,0,4"/>
+                        <ui:PasswordBox Password="{Binding NewRecoveryPinInput, Mode=TwoWay}" 
+                                       MaxLength="4" 
+                                       PlaceholderText="****"
+                                       ClearButtonEnabled="False"
+                                       Height="36"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Hata Mesajı -->
+                <TextBlock Text="{Binding RecoveryPinErrorMessage}" 
+                           Foreground="#ef4444" 
+                           FontSize="12" 
+                           TextAlignment="Center"
+                           Margin="0,4,0,16" 
+                           Visibility="{Binding HasRecoveryPinError, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- Butonlar -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                    <Button Content="Vazgeç" 
+                            Style="{StaticResource ActionBtnStyle}"
+                            Background="{DynamicResource BorderColorBrush}"
+                            Foreground="{DynamicResource TextPrimaryBrush}"
+                            Width="120" Height="38"
+                            FontSize="13"
+                            Margin="0,0,8,0"
+                            Command="{Binding CancelChangeRecoveryPinCommand}"/>
+
+                    <Button Content="Kaydet" 
+                            Style="{StaticResource ActionBtnBlue}"
+                            Width="140" Height="38"
+                            FontSize="13"
+                            Command="{Binding SaveRecoveryPinCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
