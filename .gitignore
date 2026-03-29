@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Agents and Custom Bat Files
+.agents/rules/
+git-hizli.bat
