@@ -10,6 +10,7 @@
     <RootNamespace>OBS</RootNamespace>
     <AssemblyName>OBS</AssemblyName>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <Version>1.0.0</Version>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
   </PropertyGroup>

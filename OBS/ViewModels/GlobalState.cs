@@ -342,5 +342,26 @@ namespace OBS.ViewModels
                 timer.Start();
             }
         }
+
+        // --- Öğrenci Düzenleme Modu ---
+        [ObservableProperty]
+        private bool _isStudentEditModeActive = false;
+
+        [RelayCommand]
+        private void EnterStudentEditMode()
+        {
+            // Devre dışı bırakıldı
+            // IsSettingsOverlayVisible = false;
+            // IsStudentEditModeActive = true;
+        }
+
+        [RelayCommand]
+        private void ExitStudentEditMode()
+        {
+            // Devre dışı bırakıldı
+            IsStudentEditModeActive = false;
+            IsSettingsOverlayVisible = true;
+            SelectedSettingsIndex = 1; // Öğrenci Bilgileri sekmesi
+        }
     }
 }
