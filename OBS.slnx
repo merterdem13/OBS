@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="OBS/OBS.csproj" />
+  <Project Path="OBS.Tests/OBS.Tests.csproj" />
 </Solution>
