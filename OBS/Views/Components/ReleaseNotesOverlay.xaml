@@ -36,7 +36,7 @@
     <Grid>
         <!-- Yarı saydam arka plan -->
         <Border x:Name="Backdrop"
-                Background="#99000000"
+                Background="{DynamicResource SemanticModalBackdropBrush}"
                 Opacity="0"
                 MouseLeftButtonDown="Backdrop_Click"/>
 
@@ -54,7 +54,7 @@
                 <DropShadowEffect BlurRadius="24"
                                   ShadowDepth="6"
                                   Opacity="0.35"
-                                  Color="#000000"/>
+                                  Color="{DynamicResource SemanticShadowColor}"/>
             </Border.Effect>
 
             <Border.RenderTransform>
@@ -76,11 +76,11 @@
                 </StackPanel>
 
                 <!-- Critical Warning Section (Optional) -->
-                <Border Background="#15EF4444" BorderBrush="#EF4444" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16"
+                <Border Background="{DynamicResource SemanticDangerSurfaceBrush}" BorderBrush="{DynamicResource SemanticDangerTextBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16"
                         Visibility="{Binding HasCriticalWarning, Converter={StaticResource BoolToVis}}">
                     <StackPanel Orientation="Horizontal">
-                        <ui:SymbolIcon Symbol="Warning24" FontSize="20" Foreground="#EF4444" Margin="0,0,12,0" VerticalAlignment="Top"/>
-                        <TextBlock Text="{Binding CriticalWarning}" TextWrapping="Wrap" FontSize="13" Foreground="#EF4444" FontWeight="SemiBold" LineHeight="18" Width="270" VerticalAlignment="Center"/>
+                        <ui:SymbolIcon Symbol="Warning24" FontSize="20" Foreground="{DynamicResource SemanticDangerTextBrush}" Margin="0,0,12,0" VerticalAlignment="Top"/>
+                        <TextBlock Text="{Binding CriticalWarning}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource SemanticDangerTextBrush}" FontWeight="SemiBold" LineHeight="18" Width="270" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
@@ -108,7 +108,7 @@
                 <Button Content="Harika, Anladım!" 
                         Style="{StaticResource ActionBtnStyle}"
                         Background="{StaticResource BtnBlueBrush}"
-                        Foreground="#FFFFFF"
+                        Foreground="{DynamicResource SemanticOnColorBrush}"
                         HorizontalAlignment="Stretch" 
                         Height="40" 
                         FontSize="14" FontWeight="Medium" 

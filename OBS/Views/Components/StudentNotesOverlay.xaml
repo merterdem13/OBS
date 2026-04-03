@@ -34,7 +34,7 @@
     <Grid>
         <!-- Yarı saydam arka plan -->
         <Border x:Name="Backdrop"
-                Background="#AA000000"
+                Background="{DynamicResource SemanticModalBackdropAltBrush}"
                 Opacity="0"
                 MouseLeftButtonDown="Backdrop_Click"/>
 
@@ -52,7 +52,7 @@
                 <DropShadowEffect BlurRadius="24"
                                   ShadowDepth="6"
                                   Opacity="0.35"
-                                  Color="#000000"/>
+                                  Color="{DynamicResource SemanticShadowColor}"/>
             </Border.Effect>
 
             <Border.RenderTransform>
@@ -144,7 +144,7 @@
                                         </StackPanel>
                                         <ui:Button Grid.Column="1" Click="BtnDeleteNote_Click" 
                                                    Background="Transparent" BorderThickness="0" Padding="4" VerticalAlignment="Top" ToolTip="Notu Sil">
-                                            <ui:SymbolIcon Symbol="Delete24" Foreground="#E53E3E" FontSize="14"/>
+                                            <ui:SymbolIcon Symbol="Delete24" Foreground="{DynamicResource SemanticDangerTextBrush}" FontSize="14"/>
                                         </ui:Button>
                                     </Grid>
                                 </Border>
@@ -180,10 +180,10 @@
                         <ui:Button Grid.Column="1" Click="BtnSaveNote_Click" 
                                    MouseOverBackground="{DynamicResource LoadingAccentBrush}"
                                    Background="{DynamicResource NoteIndicatorBrush}" 
-                                   Foreground="White" 
+                                   Foreground="{DynamicResource SemanticOnColorBrush}" 
                                    Width="34" Height="34" Padding="0"
                                    VerticalAlignment="Bottom" BorderThickness="0" ToolTip="Notu Kaydet">
-                             <ui:SymbolIcon Symbol="Send24" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                             <ui:SymbolIcon Symbol="Send24" Foreground="{DynamicResource SemanticOnColorBrush}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0,0,0"/>
                         </ui:Button>
                     </Grid>
                 </Border>

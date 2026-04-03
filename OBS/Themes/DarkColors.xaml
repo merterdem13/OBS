@@ -25,4 +25,27 @@
     <SolidColorBrush x:Key="SpecialButtonHoverBrush" Color="#5A5A5A"/> <!-- Hover için biraz daha açık gri -->
     <SolidColorBrush x:Key="SpecialButtonTextBrush" Color="#EDEDED"/>
     <SolidColorBrush x:Key="TeamLogoBrush" Color="#ffffffff"/>
+
+    <!-- Shared semantic resources -->
+    <Color x:Key="SemanticOnColor">#F8FAFC</Color>
+    <Color x:Key="SemanticDangerColor">#F43F5E</Color>
+    <Color x:Key="SemanticDangerHoverColor">#E11D48</Color>
+    <Color x:Key="SemanticDangerTextColor">#FB7185</Color>
+    <Color x:Key="SemanticDangerActionColor">#EF4444</Color>
+    <Color x:Key="SemanticDangerSurfaceColor">#1AFB7185</Color>
+    <Color x:Key="SemanticWarningColor">#3B82F6</Color>
+    <Color x:Key="SemanticModalBackdropColor">#B3000000</Color>
+    <Color x:Key="SemanticModalBackdropAltColor">#C2000000</Color>
+    <Color x:Key="SemanticModalBackdropBlockingColor">#D9000000</Color>
+    <SolidColorBrush x:Key="SemanticOnColorBrush" Color="{StaticResource SemanticOnColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerBrush" Color="{StaticResource SemanticDangerColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerHoverBrush" Color="{StaticResource SemanticDangerHoverColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerTextBrush" Color="{StaticResource SemanticDangerTextColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerActionBrush" Color="{StaticResource SemanticDangerActionColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerSurfaceBrush" Color="{StaticResource SemanticDangerSurfaceColor}"/>
+    <SolidColorBrush x:Key="SemanticWarningBrush" Color="{StaticResource SemanticWarningColor}"/>
+    <SolidColorBrush x:Key="SemanticModalBackdropBrush" Color="{StaticResource SemanticModalBackdropColor}"/>
+    <SolidColorBrush x:Key="SemanticModalBackdropAltBrush" Color="{StaticResource SemanticModalBackdropAltColor}"/>
+    <SolidColorBrush x:Key="SemanticModalBackdropBlockingBrush" Color="{StaticResource SemanticModalBackdropBlockingColor}"/>
+    <Color x:Key="SemanticShadowColor">#000000</Color>
 </ResourceDictionary>

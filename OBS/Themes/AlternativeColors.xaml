@@ -25,4 +25,27 @@
     <SolidColorBrush x:Key="SpecialButtonBgBrush" Color="#3e3e46"/> <!-- Slate-Graphite Button -->
     <SolidColorBrush x:Key="SpecialButtonHoverBrush" Color="#52525b"/>
     <SolidColorBrush x:Key="SpecialButtonTextBrush" Color="#f8fafc"/>
+
+    <!-- Shared semantic resources -->
+    <Color x:Key="SemanticOnColor">#F8FAFC</Color>
+    <Color x:Key="SemanticDangerColor">#FB7185</Color>
+    <Color x:Key="SemanticDangerHoverColor">#F43F5E</Color>
+    <Color x:Key="SemanticDangerTextColor">#FDA4AF</Color>
+    <Color x:Key="SemanticDangerActionColor">#F43F5E</Color>
+    <Color x:Key="SemanticDangerSurfaceColor">#1AFB7185</Color>
+    <Color x:Key="SemanticWarningColor">#C084FC</Color>
+    <Color x:Key="SemanticModalBackdropColor">#A6000000</Color>
+    <Color x:Key="SemanticModalBackdropAltColor">#B8000000</Color>
+    <Color x:Key="SemanticModalBackdropBlockingColor">#CF000000</Color>
+    <SolidColorBrush x:Key="SemanticOnColorBrush" Color="{StaticResource SemanticOnColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerBrush" Color="{StaticResource SemanticDangerColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerHoverBrush" Color="{StaticResource SemanticDangerHoverColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerTextBrush" Color="{StaticResource SemanticDangerTextColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerActionBrush" Color="{StaticResource SemanticDangerActionColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerSurfaceBrush" Color="{StaticResource SemanticDangerSurfaceColor}"/>
+    <SolidColorBrush x:Key="SemanticWarningBrush" Color="{StaticResource SemanticWarningColor}"/>
+    <SolidColorBrush x:Key="SemanticModalBackdropBrush" Color="{StaticResource SemanticModalBackdropColor}"/>
+    <SolidColorBrush x:Key="SemanticModalBackdropAltBrush" Color="{StaticResource SemanticModalBackdropAltColor}"/>
+    <SolidColorBrush x:Key="SemanticModalBackdropBlockingBrush" Color="{StaticResource SemanticModalBackdropBlockingColor}"/>
+    <Color x:Key="SemanticShadowColor">#000000</Color>
 </ResourceDictionary>

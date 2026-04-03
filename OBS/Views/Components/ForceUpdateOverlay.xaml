@@ -25,7 +25,7 @@
     <Grid>
         <!-- Tam ekran, kapatılamaz arka plan -->
         <Border x:Name="Backdrop"
-                Background="#CC000000"
+                Background="{DynamicResource SemanticModalBackdropBlockingBrush}"
                 Opacity="0"/>
 
         <!-- Dialog Kartı -->
@@ -42,7 +42,7 @@
                 <DropShadowEffect BlurRadius="32"
                                   ShadowDepth="8"
                                   Opacity="0.45"
-                                  Color="#000000"/>
+                                  Color="{DynamicResource SemanticShadowColor}"/>
             </Border.Effect>
 
             <Border.RenderTransform>
@@ -53,12 +53,12 @@
                 <!-- İkon -->
                 <Border Width="56" Height="56"
                         CornerRadius="28"
-                        Background="#15EF4444"
+                        Background="{DynamicResource SemanticDangerSurfaceBrush}"
                         HorizontalAlignment="Center"
                         Margin="0,0,0,20">
                     <ui:SymbolIcon Symbol="ArrowSync24"
                                    FontSize="28"
-                                   Foreground="#EF4444"
+                                   Foreground="{DynamicResource SemanticDangerTextBrush}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
                 </Border>

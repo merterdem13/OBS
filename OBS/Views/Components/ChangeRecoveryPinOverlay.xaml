@@ -36,7 +36,7 @@
     <Grid x:Name="RootGrid">
         <!-- Yarı saydam arka plan -->
         <Border x:Name="Backdrop"
-                Background="#99000000"
+                Background="{DynamicResource SemanticModalBackdropBrush}"
                 Opacity="0"
                 MouseLeftButtonDown="Backdrop_Click"/>
 
@@ -54,7 +54,7 @@
                 <DropShadowEffect BlurRadius="24"
                                   ShadowDepth="6"
                                   Opacity="0.35"
-                                  Color="#000000"/>
+                                  Color="{DynamicResource SemanticShadowColor}"/>
             </Border.Effect>
 
             <Border.RenderTransform>
@@ -114,7 +114,7 @@
                 
                 <!-- Hata Mesajı -->
                 <TextBlock Text="{Binding RecoveryPinErrorMessage}" 
-                           Foreground="#ef4444" 
+                           Foreground="{DynamicResource SemanticDangerTextBrush}" 
                            FontSize="12" 
                            TextAlignment="Center"
                            Margin="0,4,0,16" 

@@ -73,11 +73,11 @@
 
         <!-- SATIR 0 — "DÜZENLEME MODU" Badge + Boşluk (TitleBar'ın altında) -->
         <Border Grid.Row="0" Margin="12,40,12,0">
-            <Border Background="#E11D48" CornerRadius="6" Padding="10,5"
+            <Border Background="{DynamicResource SemanticDangerBrush}" CornerRadius="6" Padding="10,5"
                     HorizontalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon Symbol="Edit24" FontSize="14" Foreground="White" Margin="0,0,6,0"/>
-                    <TextBlock Text="DÜZENLEME MODU" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                    <ui:SymbolIcon Symbol="Edit24" FontSize="14" Foreground="{DynamicResource SemanticOnColorBrush}" Margin="0,0,6,0"/>
+                    <TextBlock Text="DÜZENLEME MODU" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SemanticOnColorBrush}"/>
                 </StackPanel>
             </Border>
         </Border>
@@ -160,7 +160,7 @@
                                 Width="32" Height="32"
                                 BorderThickness="0"
                                 Background="{DynamicResource SpecialButtonBgBrush}"
-                                Foreground="White"
+                                Foreground="{DynamicResource SemanticOnColorBrush}"
                                 Cursor="Hand"
                                 Command="{Binding ToggleEditFilterModeCommand}"
                                 ToolTip="Arama / Sınıf Filtresi"
@@ -269,7 +269,7 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsEditFavoriteMode}" Value="True">
                                                     <Setter Property="Filled" Value="True"/>
-                                                    <Setter Property="Foreground" Value="#F59E0B"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource SemanticWarningBrush}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -340,7 +340,7 @@
             </Button.RenderTransform>
             <Button.Style>
                 <Style TargetType="Button">
-                    <Setter Property="Background" Value="#E11D48"/>
+                    <Setter Property="Background" Value="{DynamicResource SemanticDangerBrush}"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="Button">
@@ -348,7 +348,7 @@
                                         CornerRadius="24"
                                         Effect="{TemplateBinding Effect}">
                                     <ui:SymbolIcon Symbol="Dismiss24" FontSize="22" 
-                                                   Foreground="#FFFFFF"
+                                                   Foreground="{DynamicResource SemanticOnColorBrush}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                             </ControlTemplate>
@@ -356,12 +356,12 @@
                     </Setter>
                     <Setter Property="Effect">
                         <Setter.Value>
-                            <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="8" ShadowDepth="2"/>
+                            <DropShadowEffect Color="{DynamicResource SemanticShadowColor}" Opacity="0.3" BlurRadius="8" ShadowDepth="2"/>
                         </Setter.Value>
                     </Setter>
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#BE123C"/>
+                            <Setter Property="Background" Value="{DynamicResource SemanticDangerHoverBrush}"/>
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
