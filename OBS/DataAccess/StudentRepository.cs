@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Data.Sqlite;
 using OBS.Models;
+using OBS.Services;
 
 namespace OBS.DataAccess
 {
@@ -471,7 +472,7 @@ namespace OBS.DataAccess
         }
 
         /// <summary>
-        /// Sadece öğrencinin KunyePdfPath bilgisini günceller (Klasör taşıma işlemleri için)
+        /// Öğrencinin KunyePdfPath bilgisini günceller (Klasör taşıma işlemleri için)
         /// </summary>
         public void UpdateKunyePdfPath(string studentNumber, string newPath)
         {
@@ -484,6 +485,154 @@ namespace OBS.DataAccess
             cmd.Parameters.AddWithValue("@path", newPath ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("@sn", studentNumber);
             cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Öğrenci düzenleme: Ad, soyad, numara, TC, doğum tarihi, sınıf güncelleme.
+        /// StudentNumber değişirse: TeamMembers, Favorites, StudentNotes referansları güncellenir.
+        /// KunyePdfPath ASLA değiştirilmez.
+        /// </summary>
+        public void UpdateStudent(Student original, Student updated)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var tx = conn.BeginTransaction();
+            try
+            {
+                bool numberChanged = original.StudentNumber != updated.StudentNumber;
+
+                if (numberChanged)
+                {
+                    using var checkCmd = conn.CreateCommand();
+                    checkCmd.Transaction = tx;
+                    checkCmd.CommandText = "SELECT COUNT(*) FROM Students WHERE StudentNumber = @sn;";
+                    checkCmd.Parameters.AddWithValue("@sn", updated.StudentNumber);
+                    int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+                    if (count > 0)
+                    {
+                        throw new InvalidOperationException($"'{updated.StudentNumber}' numarası başka bir öğrenciye ait.");
+                    }
+
+                    using var cmd1 = conn.CreateCommand();
+                    cmd1.Transaction = tx;
+                    cmd1.CommandText = "UPDATE TeamMembers SET StudentNumber = @newSn WHERE StudentNumber = @oldSn;";
+                    cmd1.Parameters.AddWithValue("@newSn", updated.StudentNumber);
+                    cmd1.Parameters.AddWithValue("@oldSn", original.StudentNumber);
+                    cmd1.ExecuteNonQuery();
+
+                    using var cmd2 = conn.CreateCommand();
+                    cmd2.Transaction = tx;
+                    cmd2.CommandText = "UPDATE Favorites SET StudentNumber = @newSn WHERE StudentNumber = @oldSn;";
+                    cmd2.Parameters.AddWithValue("@newSn", updated.StudentNumber);
+                    cmd2.Parameters.AddWithValue("@oldSn", original.StudentNumber);
+                    cmd2.ExecuteNonQuery();
+
+                    using var cmd3 = conn.CreateCommand();
+                    cmd3.Transaction = tx;
+                    cmd3.CommandText = "UPDATE StudentNotes SET StudentNumber = @newSn WHERE StudentNumber = @oldSn;";
+                    cmd3.Parameters.AddWithValue("@newSn", updated.StudentNumber);
+                    cmd3.Parameters.AddWithValue("@oldSn", original.StudentNumber);
+                    cmd3.ExecuteNonQuery();
+
+                    if (!string.IsNullOrEmpty(original.PhotoPath) && File.Exists(original.PhotoPath))
+                    {
+                        var newFileName = FileNameHelper.BuildStudentFileName(updated.StudentNumber, updated.FirstName, updated.LastName);
+                        var ext = Path.GetExtension(original.PhotoPath);
+                        var newPhotoPath = Path.Combine(Path.GetDirectoryName(original.PhotoPath)!, newFileName + ext);
+
+                        if (original.PhotoPath != newPhotoPath)
+                        {
+                            if (File.Exists(newPhotoPath))
+                                File.Delete(newPhotoPath);
+                            File.Move(original.PhotoPath, newPhotoPath);
+                            updated.PhotoPath = newPhotoPath;
+                        }
+                    }
+                }
+
+                using var cmd = conn.CreateCommand();
+                cmd.Transaction = tx;
+                cmd.CommandText = @"
+                    UPDATE Students SET
+                        FirstName = @FirstName,
+                        LastName = @LastName,
+                        Class = @Class,
+                        ClassNo = @ClassNo,
+                        TcNo = @TcNo,
+                        BirthDate = @BirthDate,
+                        PhotoPath = @PhotoPath,
+                        Gender = @Gender,
+                        KunyePdfPath = @KunyePdfPath,
+                        SpecialNote = @SpecialNote,
+                        StudentNumber = @NewStudentNumber
+                    WHERE StudentNumber = @OldStudentNumber;
+                ";
+                cmd.Parameters.AddWithValue("@FirstName", updated.FirstName ?? string.Empty);
+                cmd.Parameters.AddWithValue("@LastName", updated.LastName ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Class", updated.Class ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ClassNo", updated.ClassNo);
+                cmd.Parameters.AddWithValue("@TcNo", updated.TcNo ?? string.Empty);
+                cmd.Parameters.AddWithValue("@BirthDate", updated.BirthDate.HasValue ? updated.BirthDate.Value.ToString("o") : (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@PhotoPath", updated.PhotoPath ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Gender", updated.Gender ?? string.Empty);
+                cmd.Parameters.AddWithValue("@KunyePdfPath", original.KunyePdfPath ?? string.Empty);
+                cmd.Parameters.AddWithValue("@SpecialNote", updated.SpecialNote ?? string.Empty);
+                cmd.Parameters.AddWithValue("@NewStudentNumber", updated.StudentNumber);
+                cmd.Parameters.AddWithValue("@OldStudentNumber", original.StudentNumber);
+
+                cmd.ExecuteNonQuery();
+
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Başka bir öğrencinin aynı numarayı kullanıp kullanmadığını kontrol eder.
+        /// </summary>
+        public bool IsStudentNumberTaken(string studentNumber, string? excludeStudentNumber = null)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+
+            if (!string.IsNullOrEmpty(excludeStudentNumber))
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM Students WHERE StudentNumber = @sn AND StudentNumber != @exclude;";
+                cmd.Parameters.AddWithValue("@exclude", excludeStudentNumber);
+            }
+            else
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM Students WHERE StudentNumber = @sn;";
+            }
+            cmd.Parameters.AddWithValue("@sn", studentNumber);
+            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+        }
+
+        /// <summary>
+        /// Başka bir öğrencinin aynı TC'yi kullanıp kullanmadığını kontrol eder.
+        /// </summary>
+        public bool IsTcNoTaken(string tcNo, string? excludeStudentNumber = null)
+        {
+            using var conn = DatabaseConnection.GetConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+
+            if (!string.IsNullOrEmpty(excludeStudentNumber))
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM Students WHERE TcNo = @tc AND StudentNumber != @exclude;";
+                cmd.Parameters.AddWithValue("@exclude", excludeStudentNumber);
+            }
+            else
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM Students WHERE TcNo = @tc;";
+            }
+            cmd.Parameters.AddWithValue("@tc", tcNo);
+            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
         }
 
         /// <summary>

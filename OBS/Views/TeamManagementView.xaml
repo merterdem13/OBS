@@ -139,7 +139,6 @@
         <components:EditTeamComponent x:Name="InlineEditComponent"
                                       Grid.Row="0" Grid.RowSpan="2"
                                       Visibility="{Binding IsEditingTeam, Converter={StaticResource BoolToVis}}"
-                                      DataContext="{Binding}"
                                       EditClosed="InlineEditComponent_EditClosed"
                                       IsVisibleChanged="OnElementIsVisibleChanged" />
 

@@ -343,6 +343,207 @@ namespace OBS.ViewModels
             }
         }
 
+        // --- Öğrenci Düzenleme Modal ---
+        [ObservableProperty]
+        private bool _isStudentEditModalVisible = false;
+
+        [ObservableProperty]
+        private StudentViewModel? _selectedStudentForEdit = null;
+
+        [ObservableProperty]
+        private System.Collections.ObjectModel.ObservableCollection<string> _editClassList = new();
+
+        // Edit modal form alanları
+        [ObservableProperty]
+        private string _editFirstName = string.Empty;
+
+        [ObservableProperty]
+        private string _editLastName = string.Empty;
+
+        [ObservableProperty]
+        private string _editStudentNumber = string.Empty;
+
+        [ObservableProperty]
+        private string _editTcNo = string.Empty;
+
+        [ObservableProperty]
+        private string _editClassName = string.Empty;
+
+        [ObservableProperty]
+        private DateTime? _editBirthDate;
+
+        public string EditBirthDateString => EditBirthDate?.ToString("dd.MM.yyyy") ?? "";
+
+        [ObservableProperty]
+        private string _editPhotoPath = string.Empty;
+
+        // Per-field validation errors
+        [ObservableProperty]
+        private bool _hasEditFirstNameError = false;
+        [ObservableProperty]
+        private string _editFirstNameError = string.Empty;
+
+        [ObservableProperty]
+        private bool _hasEditLastNameError = false;
+        [ObservableProperty]
+        private string _editLastNameError = string.Empty;
+
+        [ObservableProperty]
+        private bool _hasEditStudentNumberError = false;
+        [ObservableProperty]
+        private string _editStudentNumberError = string.Empty;
+
+        [ObservableProperty]
+        private bool _hasEditTcNoError = false;
+        [ObservableProperty]
+        private string _editTcNoError = string.Empty;
+
+        [ObservableProperty]
+        private bool _hasEditClassError = false;
+        [ObservableProperty]
+        private string _editClassError = string.Empty;
+
+        [RelayCommand]
+        private void OpenStudentEditModal(StudentViewModel student)
+        {
+            if (student == null) return;
+            ClearFieldErrors();
+            SelectedStudentForEdit = student;
+            EditFirstName = student.FirstName;
+            EditLastName = student.LastName;
+            EditStudentNumber = student.StudentNumber;
+            EditTcNo = student.TcNo;
+            EditClassName = student.Class;
+            EditBirthDate = student.BirthDate;
+            EditPhotoPath = student.PhotoPath;
+            LoadEditClassList();
+            OnPropertyChanged(nameof(EditBirthDateString));
+            IsStudentEditModalVisible = true;
+        }
+
+        private void LoadEditClassList()
+        {
+            var repo = new DataAccess.StudentRepository();
+            var classes = repo.GetDistinctClasses();
+            EditClassList = new System.Collections.ObjectModel.ObservableCollection<string>(classes);
+        }
+
+        private void ClearFieldErrors()
+        {
+            HasEditFirstNameError = false; EditFirstNameError = string.Empty;
+            HasEditLastNameError = false; EditLastNameError = string.Empty;
+            HasEditStudentNumberError = false; EditStudentNumberError = string.Empty;
+            HasEditTcNoError = false; EditTcNoError = string.Empty;
+            HasEditClassError = false; EditClassError = string.Empty;
+        }
+
+        [RelayCommand]
+        private void CloseStudentEditModal()
+        {
+            IsStudentEditModalVisible = false;
+            SelectedStudentForEdit = null;
+        }
+
+        [RelayCommand]
+        private async Task SaveStudentEditAsync()
+        {
+            ClearFieldErrors();
+            bool hasError = false;
+
+            if (string.IsNullOrWhiteSpace(EditFirstName))
+            {
+                HasEditFirstNameError = true;
+                EditFirstNameError = "Ad alanı boş olamaz!";
+                hasError = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(EditLastName))
+            {
+                HasEditLastNameError = true;
+                EditLastNameError = "Soyad alanı boş olamaz!";
+                hasError = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(EditStudentNumber))
+            {
+                HasEditStudentNumberError = true;
+                EditStudentNumberError = "Numara alanı boş olamaz!";
+                hasError = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(EditTcNo))
+            {
+                HasEditTcNoError = true;
+                EditTcNoError = "TC alanı boş olamaz!";
+                hasError = true;
+            }
+            else if (EditTcNo.Length != 11 || !EditTcNo.All(char.IsDigit))
+            {
+                HasEditTcNoError = true;
+                EditTcNoError = "TC 11 haneli bir sayı olmalıdır!";
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            if (SelectedStudentForEdit == null) return;
+
+            var repo = new DataAccess.StudentRepository();
+
+            if (repo.IsStudentNumberTaken(EditStudentNumber, SelectedStudentForEdit.StudentNumber))
+            {
+                HasEditStudentNumberError = true;
+                EditStudentNumberError = "Bu numara başka bir öğrenciye ait!";
+                hasError = true;
+            }
+
+            if (repo.IsTcNoTaken(EditTcNo, SelectedStudentForEdit.StudentNumber))
+            {
+                HasEditTcNoError = true;
+                EditTcNoError = "Bu TC başka bir öğrenciye ait!";
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            try
+            {
+                var original = SelectedStudentForEdit.GetModel();
+                var updated = new Models.Student
+                {
+                    StudentNumber = EditStudentNumber,
+                    FirstName = EditFirstName,
+                    LastName = EditLastName,
+                    Class = EditClassName,
+                    ClassNo = original.ClassNo,
+                    TcNo = EditTcNo,
+                    BirthDate = EditBirthDate,
+                    PhotoPath = EditPhotoPath,
+                    Gender = original.Gender,
+                    GuardianId = original.GuardianId,
+                    KunyePdfPath = original.KunyePdfPath,
+                    SpecialNote = original.SpecialNote
+                };
+
+                repo.UpdateStudent(original, updated);
+
+                Services.ToastService.ShowSuccess("Öğrenci bilgileri güncellendi.");
+                IsStudentEditModalVisible = false;
+                SelectedStudentForEdit = null;
+
+                var mainWindow = System.Windows.Application.Current.MainWindow as Views.MainWindow;
+                if (mainWindow?.DataContext is ShellViewModel shell && shell.CurrentView is MainViewModel mainVm)
+                {
+                    mainVm.RefreshDashboard();
+                }
+            }
+            catch (Exception ex)
+            {
+                HasEditStudentNumberError = true;
+                EditStudentNumberError = $"Kayıt hatası: {ex.Message}";
+            }
+        }
+
         // --- Öğrenci Düzenleme Modu ---
         [ObservableProperty]
         private bool _isStudentEditModeActive = false;
@@ -350,18 +551,15 @@ namespace OBS.ViewModels
         [RelayCommand]
         private void EnterStudentEditMode()
         {
-            // Devre dışı bırakıldı
-            // IsSettingsOverlayVisible = false;
-            // IsStudentEditModeActive = true;
+            IsStudentEditModeActive = true;
+            IsSettingsOverlayVisible = false;
+            OBS.App.NavigationService.NavigateTo<MainViewModel>();
         }
 
         [RelayCommand]
         private void ExitStudentEditMode()
         {
-            // Devre dışı bırakıldı
             IsStudentEditModeActive = false;
-            IsSettingsOverlayVisible = true;
-            SelectedSettingsIndex = 1; // Öğrenci Bilgileri sekmesi
         }
     }
 }
