@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using OBS.Helpers;
 
 namespace OBS.ViewModels
 {
@@ -307,7 +308,7 @@ namespace OBS.ViewModels
                     {
                         OBS.Services.ToastService.ShowSuccess("Geliştirici erişimi: Şifre ve kurtarma kodu sıfırlandı.", mainWindow);
                         // Recovery modal'ı göster (yeni kurtarma kodu belirlensin)
-                        mainWindow.CheckAndShowRecoveryModal();
+                        mainWindow.CheckAndShowRecoveryModalAsync().Forget(nameof(OBS.Views.MainWindow.CheckAndShowRecoveryModalAsync));
                     }
                 }
                 else if (DeveloperPinSource == "Settings")

@@ -1,8 +1,10 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
+using OBS.Helpers;
 using OBS.ViewModels;
 using Wpf.Ui.Controls;
 
@@ -58,31 +60,61 @@ namespace OBS.Views
             sb.Begin();
 
             // Çöp Toplayıcı ve Klasör Düzenleyicisini Uygulama Açılışında Çalıştır
-            _ = new OBS.Services.GarbageCollectorService().RunAsync();
+            StartGarbageCollectorRun();
         }
 
-        public async void CheckAndShowRecoveryModal()
+        public async Task CheckAndShowRecoveryModalAsync()
         {
-            // Standalone çağrı (geliştirici erişimi vb.) için
-            await ShowRecoveryModalInternal();
-        }
-
-        public async void ShowPostLoginModals()
-        {
-            await Task.Delay(1000); // Açılış animasyonunun bitmesini bekleyelim
-
-            // 1. Öncelik: Recovery Modal
-            bool recoveryShown = await ShowRecoveryModalInternal();
-
-            // Recovery modal gösterildiyse, kapanmasını bekle
-            if (recoveryShown)
+            try
             {
-                await WaitForRecoveryModalClose();
-                await Task.Delay(300); // Kapanış animasyonu için kısa bekleme
+                await ShowRecoveryModalInternal();
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"CheckAndShowRecoveryModalAsync failed: {ex}");
+            }
+        }
 
-            // 2. Sonra: Release Notes
-            await ShowReleaseNotesInternal();
+        public async Task ShowPostLoginModalsAsync()
+        {
+            try
+            {
+                await Task.Delay(1000); // Açılış animasyonunun bitmesini bekleyelim
+
+                // 1. Öncelik: Recovery Modal
+                bool recoveryShown = await ShowRecoveryModalInternal();
+
+                // Recovery modal gösterildiyse, kapanmasını bekle
+                if (recoveryShown)
+                {
+                    await WaitForRecoveryModalClose();
+                    await Task.Delay(300); // Kapanış animasyonu için kısa bekleme
+                }
+
+                // 2. Sonra: Release Notes
+                await ShowReleaseNotesInternal();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ShowPostLoginModalsAsync failed: {ex}");
+            }
+        }
+
+        private void StartGarbageCollectorRun()
+        {
+            RunGarbageCollectorSafelyAsync().Forget(nameof(RunGarbageCollectorSafelyAsync));
+        }
+
+        private async Task RunGarbageCollectorSafelyAsync()
+        {
+            try
+            {
+                await new OBS.Services.GarbageCollectorService().RunAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"GarbageCollectorService.RunAsync failed: {ex}");
+            }
         }
 
         private Task<bool> ShowRecoveryModalInternal()

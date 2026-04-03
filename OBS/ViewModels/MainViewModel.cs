@@ -10,6 +10,7 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OBS.DataAccess;
+using OBS.Helpers;
 using OBS.Services;
 using Microsoft.Win32;
 
@@ -25,6 +26,7 @@ namespace OBS.ViewModels
         private readonly ResetSystemService _resetService;
         private readonly PdfExportService _pdfExportService;
         private readonly UpdateService _updateService;
+        private readonly StudentListFlowService _studentListFlowService;
 
         // ── Pencere Durumu ──────────────────────────────────────────────────
         [ObservableProperty]
@@ -207,15 +209,15 @@ namespace OBS.ViewModels
             _resetService = new ResetSystemService();
             _pdfExportService = new PdfExportService();
             _updateService = new UpdateService();
+            _studentListFlowService = new StudentListFlowService();
 
             LoadClassList();
             UpdateFavoriteState();
-            _ = CheckForUpdateSilentlyAsync();
+            StartSilentUpdateCheck();
 
             GlobalState.Instance.OnCheckForUpdateAction = CheckForUpdateAsync;
             GlobalState.Instance.OnResetSystemAction = ResetSystemAsync;
             GlobalState.Instance.OnImportKunyePdfAction = ImportKunyePdfAsync;
-            _ = CheckForUpdateSilentlyAsync();
         }
 
         // ── Partial Callbacks ───────────────────────────────────────────────
@@ -252,7 +254,7 @@ namespace OBS.ViewModels
                 }
 
                 Debug.WriteLine($"[FILTER] About to call RefreshStudents from OnSelectedClassChanged");
-                RefreshStudents();
+                StartRefreshStudents();
             }
             finally
             {
@@ -294,7 +296,7 @@ namespace OBS.ViewModels
                     if (_selectedClass != null)
                         return;
 
-                    RefreshStudents();
+                    StartRefreshStudents();
                     return;
                 }
 
@@ -312,7 +314,7 @@ namespace OBS.ViewModels
 
                 // Debounce: Her tuşa basmada DB sorgusu yerine 300ms bekle.
                 // Kullanıcı yazmayı bitirince tek sorgu gider.
-                DebouncedRefreshStudents();
+                StartDebouncedRefreshStudents();
             }
             finally
             {
@@ -320,16 +322,20 @@ namespace OBS.ViewModels
             }
         }
 
-        private async void DebouncedRefreshStudents()
+        private async Task DebouncedRefreshStudentsAsync()
         {
-            _searchDebounceCts?.Cancel();
-            _searchDebounceCts = new CancellationTokenSource();
             try
             {
+                _searchDebounceCts?.Cancel();
+                _searchDebounceCts = new CancellationTokenSource();
                 await Task.Delay(300, _searchDebounceCts.Token);
-                RefreshStudents();
+                await RefreshStudentsAsync();
             }
             catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[REFRESH] DebouncedRefreshStudentsAsync failed: {ex}");
+            }
         }
 
         partial void OnIsFavoriteModeChanged(bool value)
@@ -354,7 +360,7 @@ namespace OBS.ViewModels
                     }
                 }
 
-                RefreshStudents();
+                StartRefreshStudents();
             }
             finally
             {
@@ -470,8 +476,7 @@ namespace OBS.ViewModels
                 // 3. Normal (isteğe bağlı) güncelleme
                 if (hasUpdate)
                 {
-                    IsUpdateAvailable = true;
-                    UpdateVersion = _updateService.GetPendingVersion() ?? "?";
+                    ApplyAvailableUpdateState();
                 }
             }
             catch
@@ -491,8 +496,7 @@ namespace OBS.ViewModels
 
                 if (hasUpdate)
                 {
-                    IsUpdateAvailable = true;
-                    UpdateVersion = _updateService.GetPendingVersion() ?? "?";
+                    ApplyAvailableUpdateState();
                     ToastService.ShowInfo($"Yeni sürüm mevcut: v{UpdateVersion}");
                 }
                 else
@@ -706,7 +710,7 @@ namespace OBS.ViewModels
                 }
 
                 LoadClassList();
-                RefreshStudents();
+                await RefreshStudentsAsync();
 
                 if (failCount == 0)
                     ToastService.ShowSuccess($"{successCount} PDF başarıyla işlendi.");
@@ -714,7 +718,7 @@ namespace OBS.ViewModels
                     ToastService.ShowInfo($"{successCount} başarılı, {failCount} tanınamadı/hatalı.");
 
                 // Arka planda silinen/taşınan dosyalar için çöp toplayıcıyı çalıştır
-                _ = new GarbageCollectorService().RunAsync();
+                StartGarbageCollectorRun();
             }
             catch (Exception ex)
             {
@@ -761,7 +765,7 @@ namespace OBS.ViewModels
             if (!silent)
             {
                 LoadClassList();
-                RefreshStudents();
+                await RefreshStudentsAsync();
                 ToastService.ShowSuccess($"{students.Count} öğrenci başarıyla aktarıldı.");
             }
         }
@@ -788,7 +792,7 @@ namespace OBS.ViewModels
             if (!silent)
             {
                 LoadClassList();
-                RefreshStudents();
+                await RefreshStudentsAsync();
                 ToastService.ShowSuccess($"{classList.Count} öğrencinin sınıf bilgisi güncellendi.");
             }
         }
@@ -1013,66 +1017,74 @@ namespace OBS.ViewModels
 
         private CancellationTokenSource? _staggerCts;
 
-        public async void RefreshStudents()
+        public async Task RefreshStudentsAsync()
         {
-            Debug.WriteLine($"[REFRESH] RefreshStudents called. SearchText='{SearchText}', SelectedClass='{SelectedClass}', IsFavoriteMode={IsFavoriteMode}, Students.Count={Students.Count}");
-            // Bekleyen debounce aramasını da iptal et — yarış durumunu önler.
-            _searchDebounceCts?.Cancel();
-
-            _staggerCts?.Cancel();
-            _staggerCts = new CancellationTokenSource();
-            var token = _staggerCts.Token;
-
-            var favoriteNumbersList = _favoriteRepo.GetAllFavoriteStudentNumbers();
-            var favoriteNumbers = new HashSet<string>(favoriteNumbersList);
-            IEnumerable<Models.Student> rawStudents;
-
-            if (IsFavoriteMode)
-            {
-                Debug.WriteLine($"[REFRESH] Branch: FavoriteMode");
-                rawStudents = favoriteNumbersList
-                    .Select(sn => _studentRepo.GetByStudentNumber(sn))
-                    .Where(s => s != null)!;
-            }
-            else if (!string.IsNullOrWhiteSpace(SearchText))
-            {
-                Debug.WriteLine($"[REFRESH] Branch: Search '{SearchText}'");
-                rawStudents = _studentRepo.Search(SearchText);
-            }
-            else if (!string.IsNullOrEmpty(SelectedClass))
-            {
-                Debug.WriteLine($"[REFRESH] Branch: Class '{SelectedClass}'");
-                rawStudents = _studentRepo.GetByClass(SelectedClass);
-            }
-            else
-            {
-                Debug.WriteLine($"[REFRESH] Branch: CLEAR ALL");
-                _allViewModels.Clear();
-                _loadedCount = 0;
-                HasMoreStudents = false;
-
-                if (Students.Count > 0)
-                {
-                    try
-                    {
-                        foreach (var s in Students) s.IsRemoving = true;
-                        // Öğrencilerin aşağı doğru kaybolma animasyonu (0.5 sn) = 500 ms
-                        await Task.Delay(500, token);
-                        Students.Clear();
-                    }
-                    catch (OperationCanceledException) { Debug.WriteLine($"[REFRESH] CLEAR ALL cancelled"); }
-                }
-                return;
-            }
-
-            _allViewModels = rawStudents
-                .Select(s => new StudentViewModel(s, favoriteNumbers.Contains(s.StudentNumber)))
-                .ToList();
-            _loadedCount = 0;
-            Debug.WriteLine($"[REFRESH] _allViewModels.Count={_allViewModels.Count}, Students.Count={Students.Count}");
-
             try
             {
+                Debug.WriteLine($"[REFRESH] RefreshStudentsAsync called. SearchText='{SearchText}', SelectedClass='{SelectedClass}', IsFavoriteMode={IsFavoriteMode}, Students.Count={Students.Count}");
+                // Bekleyen debounce aramasını da iptal et — yarış durumunu önler.
+                _searchDebounceCts?.Cancel();
+
+                _staggerCts?.Cancel();
+                _staggerCts = new CancellationTokenSource();
+                var token = _staggerCts.Token;
+
+                var favoriteNumbersList = _favoriteRepo.GetAllFavoriteStudentNumbers();
+                var favoriteNumbers = new HashSet<string>(favoriteNumbersList);
+                IEnumerable<Models.Student> rawStudents = [];
+
+                if (IsFavoriteMode)
+                {
+                    Debug.WriteLine($"[REFRESH] Branch: FavoriteMode");
+                    rawStudents = favoriteNumbersList
+                        .Select(sn => _studentRepo.GetByStudentNumber(sn))
+                        .Where(s => s != null)!;
+                }
+                else if (!string.IsNullOrWhiteSpace(SearchText))
+                {
+                    Debug.WriteLine($"[REFRESH] Branch: Search '{SearchText}'");
+                    rawStudents = _studentRepo.Search(SearchText);
+                }
+                else if (!string.IsNullOrEmpty(SelectedClass))
+                {
+                    Debug.WriteLine($"[REFRESH] Branch: Class '{SelectedClass}'");
+                    rawStudents = _studentRepo.GetByClass(SelectedClass);
+                }
+                var refreshResult = _studentListFlowService.BuildRefreshResult(
+                    SearchText,
+                    SelectedClass,
+                    IsFavoriteMode,
+                    rawStudents,
+                    favoriteNumbers,
+                    PageSize);
+
+                if (refreshResult.ShouldClearCurrentStudents)
+                {
+                    Debug.WriteLine($"[REFRESH] Branch: CLEAR ALL");
+                    _allViewModels.Clear();
+                    _loadedCount = 0;
+                    HasMoreStudents = false;
+
+                    if (Students.Count > 0)
+                    {
+                        try
+                        {
+                            foreach (var s in Students) s.IsRemoving = true;
+                            await Task.Delay(500, token);
+                            Students.Clear();
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            Debug.WriteLine($"[REFRESH] CLEAR ALL cancelled");
+                        }
+                    }
+
+                    return;
+                }
+
+                _allViewModels = refreshResult.AllStudents;
+                Debug.WriteLine($"[REFRESH] _allViewModels.Count={_allViewModels.Count}, Students.Count={Students.Count}");
+
                 if (Students.Count > 0)
                 {
                     foreach (var s in Students) s.IsRemoving = true;
@@ -1086,12 +1098,22 @@ namespace OBS.ViewModels
                 }
 
                 Students.Clear();
-                LoadNextPage();
+                foreach (var student in refreshResult.VisibleStudents)
+                {
+                    Students.Add(student);
+                }
+
+                _loadedCount = refreshResult.LoadedCount;
+                HasMoreStudents = refreshResult.HasMoreStudents;
                 Debug.WriteLine($"[REFRESH] LoadNextPage done, Students.Count={Students.Count}");
             }
             catch (OperationCanceledException)
             {
                 Debug.WriteLine($"[REFRESH] *** CANCELLED during fade! Students NOT loaded. ***");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[REFRESH] RefreshStudentsAsync failed: {ex}");
             }
         }
 
@@ -1108,16 +1130,14 @@ namespace OBS.ViewModels
 
         private void LoadNextPage()
         {
-            var nextBatch = _allViewModels.Skip(_loadedCount).Take(PageSize).ToList();
-            int delay = 0;
-            foreach (var vm in nextBatch)
+            var nextPage = _studentListFlowService.LoadNextPage(_allViewModels, _loadedCount, PageSize);
+            foreach (var student in nextPage.Students)
             {
-                vm.StaggerDelay = delay;
-                delay += 50; // Her kart 50ms sonrasında görünsün (Şelale effekti)
-                Students.Add(vm);
-                _loadedCount++;
+                Students.Add(student);
             }
-            HasMoreStudents = _loadedCount < _allViewModels.Count;
+
+            _loadedCount = nextPage.LoadedCount;
+            HasMoreStudents = nextPage.HasMoreStudents;
         }
 
         public void LoadClassList()
@@ -1131,7 +1151,39 @@ namespace OBS.ViewModels
         public void RefreshDashboard()
         {
             LoadClassList();
-            RefreshStudents();
+            StartRefreshStudents();
+        }
+
+        private void StartSilentUpdateCheck()
+        {
+            CheckForUpdateSilentlyAsync().Forget(nameof(CheckForUpdateSilentlyAsync));
+        }
+
+        private void StartDebouncedRefreshStudents()
+        {
+            DebouncedRefreshStudentsAsync().Forget(nameof(DebouncedRefreshStudentsAsync));
+        }
+
+        private void StartRefreshStudents()
+        {
+            RefreshStudentsAsync().Forget(nameof(RefreshStudentsAsync));
+        }
+
+        private void StartGarbageCollectorRun()
+        {
+            RunGarbageCollectorSafelyAsync().Forget(nameof(RunGarbageCollectorSafelyAsync));
+        }
+
+        private async Task RunGarbageCollectorSafelyAsync()
+        {
+            try
+            {
+                await new GarbageCollectorService().RunAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[GC] GarbageCollectorService.RunAsync failed: {ex}");
+            }
         }
 
         private void UpdateFavoriteState()
@@ -1148,6 +1200,12 @@ namespace OBS.ViewModels
             IsLoading = isLoading;
             LoadingProgressText = isLoading ? text : "%0";
             LoadingProgress = progress;
+        }
+
+        private void ApplyAvailableUpdateState()
+        {
+            IsUpdateAvailable = true;
+            UpdateVersion = _updateService.GetPendingVersion() ?? "?";
         }
 
         private static void OpenFile(string filePath)
