@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:converters="clr-namespace:OBS.Converters">
+             xmlns:converters="clr-namespace:OBS.Converters"
+             xmlns:local="clr-namespace:OBS.ViewModels">
 
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
@@ -218,7 +219,8 @@
                     Background="{DynamicResource BgCardBrush}"
                     Cursor="Hand"
                     Command="{Binding OpenSettingsOverlayCommand}"
-                    RenderTransformOrigin="0.5,0.5">
+                    RenderTransformOrigin="0.5,0.5"
+                    Visibility="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource InverseBoolToVisibility}}">
                 <Button.RenderTransform>
                     <ScaleTransform ScaleX="1" ScaleY="1"/>
                 </Button.RenderTransform>

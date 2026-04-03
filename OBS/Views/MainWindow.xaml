@@ -56,8 +56,8 @@
         <!-- Ayarlar Katmanı -->
         <components:SettingsOverlay Grid.RowSpan="3" Panel.ZIndex="150" DataContext="{x:Static local:GlobalState.Instance}"/>
 
-        <!-- Öğrenci Düzenleme Modu Katmanı (Devre Dışı) -->
-        <!-- <components:StudentEditOverlay Grid.RowSpan="3" Panel.ZIndex="160"/> -->
+        <!-- Öğrenci Düzenleme Modal Katmanı -->
+        <components:StudentEditModalOverlay Grid.RowSpan="3" Panel.ZIndex="250"/>
 
         <!-- Yükleme Katmanı -->
         <components:LoadingOverlay Grid.RowSpan="3" Panel.ZIndex="200" DataContext="{x:Static local:GlobalState.Instance}"/>

@@ -174,5 +174,16 @@ namespace OBS.Views
             await ReleaseNotesOverlay.ShowAsync(viewModel);
             _releaseNotesService.MarkReleaseNotesAsSeen(viewModel.Version);
         }
+
+        public void RefreshDashboard()
+        {
+            if (DataContext is ShellViewModel shell)
+            {
+                if (shell.CurrentView is MainViewModel mainVm)
+                {
+                    mainVm.RefreshDashboard();
+                }
+            }
+        }
     }
 }

@@ -42,6 +42,8 @@ namespace OBS.Views
             {
                 ClearFavButtonTranslate.Y = Helpers.LocalSettings.Current.ClearFavoritesButtonVerticalOffset;
             }
+
+            EditExitButtonTranslate.Y = Helpers.LocalSettings.Current.EditExitButtonVerticalOffset;
         }
 
         private void OnStudentListScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -255,6 +257,78 @@ namespace OBS.Views
 
                 e.Handled = true;
                 _isFavDragging = false;
+            }
+        }
+
+        // ── Sürükleme Mantığı — Edit Exit Floating Buton ──────────────────────
+        private bool _isEditExitDragging = false;
+        private Point _editExitClickPosition;
+        private double _editExitInitialTranslateY;
+
+        private void OnEditExitButtonPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                _isEditExitDragging = false;
+                _editExitClickPosition = e.GetPosition(this);
+                _editExitInitialTranslateY = EditExitButtonTranslate.Y;
+                EditExitFloatingButton.CaptureMouse();
+            }
+        }
+
+        private void OnEditExitButtonPreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (EditExitFloatingButton.IsMouseCaptured)
+            {
+                Point currentPosition = e.GetPosition(this);
+                double deltaY = currentPosition.Y - _editExitClickPosition.Y;
+
+                if (!_isEditExitDragging && Math.Abs(deltaY) > 5)
+                {
+                    _isEditExitDragging = true;
+                }
+
+                if (_isEditExitDragging)
+                {
+                    double newTranslateY = _editExitInitialTranslateY + deltaY;
+
+                    var parentGrid = EditExitFloatingButton.Parent as Grid;
+                    if (parentGrid != null)
+                    {
+                        double buttonHeight = EditExitFloatingButton.ActualHeight > 0 ? EditExitFloatingButton.ActualHeight : 48;
+                        double maxMove = (this.ActualHeight / 2) - (buttonHeight / 2) - 30;
+                        double minMove = -(this.ActualHeight / 2) + (buttonHeight / 2) + 60;
+
+                        if (newTranslateY > maxMove) newTranslateY = maxMove;
+                        if (newTranslateY < minMove) newTranslateY = minMove;
+                    }
+
+                    EditExitButtonTranslate.Y = newTranslateY;
+                }
+            }
+        }
+
+        private void OnEditExitButtonPreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (EditExitFloatingButton.IsMouseCaptured)
+            {
+                EditExitFloatingButton.ReleaseMouseCapture();
+
+                if (!_isEditExitDragging)
+                {
+                    if (EditExitFloatingButton.Command != null && EditExitFloatingButton.Command.CanExecute(null))
+                    {
+                        EditExitFloatingButton.Command.Execute(null);
+                    }
+                }
+                else
+                {
+                    Helpers.LocalSettings.Current.EditExitButtonVerticalOffset = EditExitButtonTranslate.Y;
+                    Helpers.LocalSettings.Save();
+                }
+
+                e.Handled = true;
+                _isEditExitDragging = false;
             }
         }
     }
