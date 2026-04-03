@@ -138,12 +138,14 @@
 
         <components:EditTeamComponent x:Name="InlineEditComponent"
                                       Grid.Row="0" Grid.RowSpan="2"
+                                      ViewModel="{Binding EditTeamViewModel}"
                                       Visibility="{Binding IsEditingTeam, Converter={StaticResource BoolToVis}}"
                                       EditClosed="InlineEditComponent_EditClosed"
                                       IsVisibleChanged="OnElementIsVisibleChanged" />
 
         <components:CreateTeamComponent x:Name="InlineCreateComponent"
                                         Grid.Row="0" Grid.RowSpan="2"
+                                        ViewModel="{Binding CreateTeamViewModel}"
                                         Visibility="{Binding IsCreatingTeam, Converter={StaticResource BoolToVis}}"
                                         CreateClosed="InlineCreateComponent_CreateClosed"
                                         IsVisibleChanged="OnElementIsVisibleChanged" />

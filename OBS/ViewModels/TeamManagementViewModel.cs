@@ -15,6 +15,10 @@ namespace OBS.ViewModels
     {
         private readonly TeamRepository _teamRepo;
 
+        public CreateTeamViewModel CreateTeamViewModel { get; } = new();
+
+        public EditTeamViewModel EditTeamViewModel { get; } = new();
+
         [ObservableProperty]
         private ObservableCollection<TeamCardViewModel> _teams = new();
 
@@ -69,6 +73,7 @@ namespace OBS.ViewModels
             if (team is null) return;
 
             EditingTeam = team;
+            EditTeamViewModel.LoadTeam(team);
             IsEditingTeam = true;
         }
 

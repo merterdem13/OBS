@@ -10,7 +10,8 @@
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
     </UserControl.Resources>
 
-    <Grid Background="Transparent">
+    <Grid Background="Transparent"
+          DataContext="{Binding ViewModel, RelativeSource={RelativeSource AncestorType=UserControl}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Üst Bar (Geri + Başlık) -->
             <RowDefinition Height="Auto"/> <!-- Takım Adı -->

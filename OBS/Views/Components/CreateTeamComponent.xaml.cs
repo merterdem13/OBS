@@ -10,18 +10,29 @@ namespace OBS.Views.Components
 {
     public partial class CreateTeamComponent : UserControl
     {
+        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
+            nameof(ViewModel),
+            typeof(CreateTeamViewModel),
+            typeof(CreateTeamComponent),
+            new PropertyMetadata(null, OnViewModelChanged));
+
         public event EventHandler<bool>? CreateClosed;
+
+        public CreateTeamViewModel? ViewModel
+        {
+            get => (CreateTeamViewModel?)GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
+        }
 
         public CreateTeamComponent()
         {
             InitializeComponent();
-            DataContextChanged += OnDataContextChanged;
-            AttachViewModelHandlers(DataContext as CreateTeamViewModel);
+            ViewModel ??= new CreateTeamViewModel();
         }
 
         private void OnSearchResultDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (DataContext is not CreateTeamViewModel viewModel || SearchResultsList.SelectedItem is not Student student)
+            if (ViewModel is not CreateTeamViewModel viewModel || SearchResultsList.SelectedItem is not Student student)
             {
                 return;
             }
@@ -37,10 +48,15 @@ namespace OBS.Views.Components
             CreateClosed?.Invoke(this, hasChanges);
         }
 
-        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            DetachViewModelHandlers(e.OldValue as CreateTeamViewModel);
-            AttachViewModelHandlers(e.NewValue as CreateTeamViewModel);
+            if (d is not CreateTeamComponent component)
+            {
+                return;
+            }
+
+            component.DetachViewModelHandlers(e.OldValue as CreateTeamViewModel);
+            component.AttachViewModelHandlers(e.NewValue as CreateTeamViewModel);
         }
 
         private void AttachViewModelHandlers(CreateTeamViewModel? viewModel)
