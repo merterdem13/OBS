@@ -365,3 +365,17 @@ FodyWeavers.xsd
 # Agents and Custom Bat Files
 .agents/rules/
 git-hizli.bat
+
+# Root allowlist: only keep solution + app folder + git config files at repo root
+/*
+!/.gitignore
+!/.gitattributes
+!/OBS.slnx
+!/OBS/
+# Still ignore unwanted root leftovers explicitly
+/docs/
+/sdks/
+/opencode.json
+/VELOPACKHIZLI.bat
+/crash*.txt
+/build_err.txt
