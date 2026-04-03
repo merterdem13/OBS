@@ -165,5 +165,16 @@ namespace OBS.Views
                 System.Diagnostics.Debug.WriteLine($"Release notes gösterilirken hata oluştu: {ex.Message}");
             }
         }
+
+        public void RefreshDashboard()
+        {
+            if (DataContext is ShellViewModel shell)
+            {
+                if (shell.CurrentView is MainViewModel mainVm)
+                {
+                    mainVm.RefreshDashboard();
+                }
+            }
+        }
     }
 }

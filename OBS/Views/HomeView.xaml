@@ -5,9 +5,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:components="clr-namespace:OBS.Views.Components"
+             xmlns:converters="clr-namespace:OBS.Converters"
+             xmlns:local="clr-namespace:OBS.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="400"
              Opacity="0">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -64,7 +71,18 @@
         </ListBox>
 
         <!-- Float Buton Panel (HomeView içine taşıdık) -->
-        <components:FloatingActionPanel Grid.RowSpan="2" Panel.ZIndex="101"/>
+        <components:FloatingActionPanel Grid.RowSpan="2" Panel.ZIndex="101">
+            <components:FloatingActionPanel.Style>
+                <Style TargetType="components:FloatingActionPanel">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </components:FloatingActionPanel.Style>
+        </components:FloatingActionPanel>
 
         <Button x:Name="FloatingButton" 
                 Grid.Row="0" Grid.RowSpan="2"
@@ -89,6 +107,7 @@
                 <Style TargetType="Button">
                     <Setter Property="Opacity" Value="0.4"/>
                     <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                    <Setter Property="Visibility" Value="Visible"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="Button">
@@ -105,6 +124,9 @@
                         </Setter.Value>
                     </Setter>
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Opacity" Value="1.0"/>
                             <Trigger.EnterActions>
@@ -153,7 +175,7 @@
                 <Style TargetType="Button">
                     <Setter Property="Opacity" Value="0"/>
                     <Setter Property="Visibility" Value="Collapsed"/>
-                    <Setter Property="Background" Value="#E11D48"/> <!-- Red color -->
+                    <Setter Property="Background" Value="#E11D48"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="Button">
@@ -170,6 +192,9 @@
                         </Setter.Value>
                     </Setter>
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition Binding="{Binding IsFavoriteMode}" Value="True"/>
@@ -197,7 +222,100 @@
                             </MultiDataTrigger.ExitActions>
                         </MultiDataTrigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#BE123C"/> <!-- Darker red on hover -->
+                            <Setter Property="Background" Value="#BE123C"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.1" />
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.1" />
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <!-- Düzenleme Modu Badge — Sol Alt (dinamik opaklık) -->
+        <Border Grid.RowSpan="2"
+                HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                Margin="12,0,0,16"
+                Panel.ZIndex="102"
+                Visibility="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}">
+            <Border Background="#E11D48" CornerRadius="6" Padding="10,5">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Opacity" Value="0.85"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasStudents}" Value="True">
+                            <Setter Property="Opacity" Value="0.2"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding HasStudents}" Value="False">
+                            <Setter Property="Opacity" Value="1"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Symbol="Edit24" FontSize="14" Foreground="White" Margin="0,0,6,0"/>
+                    <TextBlock Text="DÜZENLEME MODU" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Düzenleme Modu Çıkış Butonu — Sağda yüzer (sürüklenebilir) -->
+        <Button x:Name="EditExitFloatingButton"
+                Grid.Row="0" Grid.RowSpan="2"
+                HorizontalAlignment="Right" VerticalAlignment="Center"
+                Margin="0,0,-4,0"
+                Width="38" Height="48"
+                Padding="0"
+                Cursor="Hand"
+                Command="{Binding ExitStudentEditModeCommand, Source={x:Static local:GlobalState.Instance}}"
+                Panel.ZIndex="100"
+                ToolTip="Düzenleme Modundan Çık"
+                RenderTransformOrigin="0.5,0.5"
+                PreviewMouseDown="OnEditExitButtonPreviewMouseDown"
+                PreviewMouseMove="OnEditExitButtonPreviewMouseMove"
+                PreviewMouseUp="OnEditExitButtonPreviewMouseUp"
+                Visibility="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}">
+            <Button.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    <TranslateTransform x:Name="EditExitButtonTranslate"/>
+                </TransformGroup>
+            </Button.RenderTransform>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Opacity" Value="0.4"/>
+                    <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        CornerRadius="12,0,0,12" 
+                                        BorderBrush="{DynamicResource BorderColorBrush}"
+                                        BorderThickness="1,1,0,1">
+                                    <ui:SymbolIcon Symbol="Dismiss24" FontSize="20" 
+                                                   Foreground="#E11D48"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Margin="0,0,4,0"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="1.0"/>
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>

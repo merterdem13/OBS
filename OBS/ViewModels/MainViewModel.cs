@@ -93,6 +93,9 @@ namespace OBS.ViewModels
         private ObservableCollection<StudentViewModel> _students = new();
 
         [ObservableProperty]
+        private bool _hasStudents = false;
+
+        [ObservableProperty]
         private bool _hasFavorites = false;
 
         [ObservableProperty]
@@ -1050,6 +1053,7 @@ namespace OBS.ViewModels
                 _allViewModels.Clear();
                 _loadedCount = 0;
                 HasMoreStudents = false;
+                HasStudents = false;
 
                 if (Students.Count > 0)
                 {
@@ -1118,6 +1122,7 @@ namespace OBS.ViewModels
                 _loadedCount++;
             }
             HasMoreStudents = _loadedCount < _allViewModels.Count;
+            HasStudents = Students.Count > 0;
         }
 
         public void LoadClassList()
@@ -1162,6 +1167,7 @@ namespace OBS.ViewModels
         public void ClearAllStudents()
         {
             Students.Clear();
+            HasStudents = false;
         }
     }
 }

@@ -33,33 +33,20 @@
 
             <!-- Düzenleme Moduna Geç Butonu -->
             <ui:Button Appearance="Primary"
-                       IsEnabled="False"
-                       Opacity="0.5"
                        HorizontalAlignment="Stretch"
                        Padding="16,12"
-                       Cursor="Arrow"
+                       Cursor="Hand"
                        Background="{DynamicResource SpecialButtonBgBrush}"
                        Command="{Binding EnterStudentEditModeCommand, Source={x:Static local:GlobalState.Instance}}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <ui:SymbolIcon Symbol="Edit24" FontSize="18" Margin="0,0,8,0"
                                    Foreground="{DynamicResource SpecialButtonTextBrush}"/>
-                    <TextBlock Text="Düzenleme Modu (Devre Dışı)" 
+                    <TextBlock Text="Düzenleme Modu" 
                                FontSize="14" FontWeight="SemiBold"
                                Foreground="{DynamicResource SpecialButtonTextBrush}"
                                VerticalAlignment="Center"/>
                 </StackPanel>
             </ui:Button>
-
-            <!-- Yakında Eklenecek Notu -->
-            <Border Background="#1aEAB308" CornerRadius="6" Padding="12,8" Margin="0,16,0,0">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <ui:SymbolIcon Symbol="Clock24" FontSize="16" Foreground="#EAB308" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="Yakında Eklenecektir" 
-                               Foreground="#EAB308" 
-                               FontSize="13" FontWeight="Bold" 
-                               VerticalAlignment="Center"/>
-                </StackPanel>
-            </Border>
 
             <!-- Bilgi Notu -->
             <Border Background="{DynamicResource BgBodyBrush}" 
