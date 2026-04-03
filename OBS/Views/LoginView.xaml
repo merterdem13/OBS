@@ -83,7 +83,7 @@
                            Margin="0,0,0,16"/>
 
                 <!-- PIN Input Box -->
-                <Border BorderBrush="Orange" 
+                <Border BorderBrush="{StaticResource BtnOrangeBrush}" 
                         BorderThickness="2" CornerRadius="8" 
                         Padding="12,6" Margin="0,0,0,10" MinWidth="280">
                     <Grid>
@@ -91,7 +91,7 @@
                         <TextBlock Text="{Binding PinDisplay}"
                                    FontSize="36" FontWeight="Bold"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Foreground="Orange" />
+                                   Foreground="{StaticResource BtnOrangeBrush}" />
 
                         <!-- Numpad Toggle Button -->
                         <ToggleButton x:Name="NumpadToggle" 
@@ -106,7 +106,7 @@
 
                 <!-- Error Message -->
                 <TextBlock Text="{Binding ErrorMessage}"
-                           Foreground="#ef4444"
+                           Foreground="{DynamicResource SemanticDangerTextBrush}"
                            FontSize="13"
                            HorizontalAlignment="Center"
                            TextAlignment="Center"

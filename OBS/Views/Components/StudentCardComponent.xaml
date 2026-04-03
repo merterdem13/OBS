@@ -159,7 +159,7 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                                                 <Setter Property="Filled" Value="True"/>
-                                                <Setter Property="Foreground" Value="#F59E0B"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource SemanticWarningBrush}"/>
                                                 <DataTrigger.EnterActions>
                                                     <BeginStoryboard>
                                                         <Storyboard>
@@ -238,8 +238,8 @@
                     <!-- PDF Butonu (Künye) -->
                     <ui:Button Grid.Column="1"
                                Appearance="Danger"
-                               Background="#E53E3E"
-                               Foreground="White"
+                               Background="{DynamicResource SemanticDangerActionBrush}"
+                               Foreground="{DynamicResource SemanticOnColorBrush}"
                                HorizontalAlignment="Right"
                                VerticalAlignment="Bottom"
                                Padding="8,4" FontSize="11"
@@ -248,8 +248,8 @@
                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                CommandParameter="{Binding}">
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="DocumentPdf24" Foreground="White" FontSize="13" Margin="0,0,4,0"/>
-                            <TextBlock Text="Künye" Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+                            <ui:SymbolIcon Symbol="DocumentPdf24" Foreground="{DynamicResource SemanticOnColorBrush}" FontSize="13" Margin="0,0,4,0"/>
+                            <TextBlock Text="Künye" Foreground="{DynamicResource SemanticOnColorBrush}" FontSize="12" FontWeight="SemiBold"/>
                         </StackPanel>
                     </ui:Button>
                 </Grid>

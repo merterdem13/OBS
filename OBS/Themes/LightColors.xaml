@@ -22,4 +22,27 @@
     <SolidColorBrush x:Key="SpecialButtonHoverBrush" Color="#B45309"/>
     <SolidColorBrush x:Key="SpecialButtonTextBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="TeamLogoBrush" Color="#44403C"/>
+
+    <!-- Shared semantic resources -->
+    <Color x:Key="SemanticOnColor">#FFFFFF</Color>
+    <Color x:Key="SemanticDangerColor">#E11D48</Color>
+    <Color x:Key="SemanticDangerHoverColor">#BE123C</Color>
+    <Color x:Key="SemanticDangerTextColor">#EF4444</Color>
+    <Color x:Key="SemanticDangerActionColor">#E53E3E</Color>
+    <Color x:Key="SemanticDangerSurfaceColor">#15EF4444</Color>
+    <Color x:Key="SemanticWarningColor">#D97706</Color>
+    <Color x:Key="SemanticModalBackdropColor">#99000000</Color>
+    <Color x:Key="SemanticModalBackdropAltColor">#AA000000</Color>
+    <Color x:Key="SemanticModalBackdropBlockingColor">#CC000000</Color>
+    <SolidColorBrush x:Key="SemanticOnColorBrush" Color="{StaticResource SemanticOnColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerBrush" Color="{StaticResource SemanticDangerColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerHoverBrush" Color="{StaticResource SemanticDangerHoverColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerTextBrush" Color="{StaticResource SemanticDangerTextColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerActionBrush" Color="{StaticResource SemanticDangerActionColor}"/>
+    <SolidColorBrush x:Key="SemanticDangerSurfaceBrush" Color="{StaticResource SemanticDangerSurfaceColor}"/>
+    <SolidColorBrush x:Key="SemanticWarningBrush" Color="{StaticResource SemanticWarningColor}"/>
+    <SolidColorBrush x:Key="SemanticModalBackdropBrush" Color="{StaticResource SemanticModalBackdropColor}"/>
+    <SolidColorBrush x:Key="SemanticModalBackdropAltBrush" Color="{StaticResource SemanticModalBackdropAltColor}"/>
+    <SolidColorBrush x:Key="SemanticModalBackdropBlockingBrush" Color="{StaticResource SemanticModalBackdropBlockingColor}"/>
+    <Color x:Key="SemanticShadowColor">#000000</Color>
 </ResourceDictionary>

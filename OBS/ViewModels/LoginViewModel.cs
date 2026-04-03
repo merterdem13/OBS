@@ -55,8 +55,7 @@ namespace OBS.ViewModels
 
                 if (PinInput.Length == 4)
                 {
-                    Task.Delay(200).ContinueWith(_ =>
-                        Application.Current.Dispatcher.Invoke(Confirm));
+                    ConfirmAfterNumpadDelayAsync().Forget(nameof(ConfirmAfterNumpadDelayAsync));
                 }
             }
         }
@@ -173,13 +172,19 @@ namespace OBS.ViewModels
             var mainWindow = Application.Current.MainWindow as OBS.Views.MainWindow;
             if (mainWindow != null)
             {
-                mainWindow.ShowPostLoginModals();
+                mainWindow.ShowPostLoginModalsAsync().Forget(nameof(OBS.Views.MainWindow.ShowPostLoginModalsAsync));
 
                 if (!string.IsNullOrEmpty(toastMessage))
                 {
                     ToastService.ShowSuccess(toastMessage, mainWindow);
                 }
             }
+        }
+
+        private async Task ConfirmAfterNumpadDelayAsync()
+        {
+            await Task.Delay(200);
+            Application.Current.Dispatcher.Invoke(Confirm);
         }
 
         [RelayCommand]

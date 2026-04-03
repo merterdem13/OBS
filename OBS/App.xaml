@@ -35,6 +35,14 @@
         <SolidColorBrush x:Key="BtnRedBrush" Color="#ef4444"/>
         <SolidColorBrush x:Key="BtnGreenBrush" Color="#10b981"/>
 
+        <!-- Plan-compatible theme-aware semantic aliases -->
+        <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource SemanticDangerColor}"/>
+        <SolidColorBrush x:Key="DangerHoverBrush" Color="{DynamicResource SemanticDangerHoverColor}"/>
+        <SolidColorBrush x:Key="DangerForegroundBrush" Color="{DynamicResource SemanticOnColor}"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="{DynamicResource SemanticWarningColor}"/>
+        <SolidColorBrush x:Key="OverlayScrimBrush" Color="{DynamicResource SemanticModalBackdropColor}"/>
+        <SolidColorBrush x:Key="HeavyOverlayScrimBrush" Color="{DynamicResource SemanticModalBackdropBlockingColor}"/>
+
         <!-- Generic Fonts -->
         <FontFamily x:Key="MainFont">Inter, sans-serif</FontFamily>
 
@@ -44,7 +52,7 @@
     
             <Setter Property="Padding" Value="15"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource SemanticOnColorBrush}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Cursor" Value="Hand"/>

@@ -1,8 +1,10 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
+using OBS.Helpers;
 using OBS.ViewModels;
 using Wpf.Ui.Controls;
 
@@ -10,6 +12,9 @@ namespace OBS.Views
 {
     public partial class MainWindow
     {
+        private readonly Services.RecoverySetupService _recoverySetupService = new();
+        private readonly Services.ReleaseNotesService _releaseNotesService = new();
+
         public MainWindow()
         {
             Opacity = 0;
@@ -55,59 +60,81 @@ namespace OBS.Views
             sb.Begin();
 
             // Çöp Toplayıcı ve Klasör Düzenleyicisini Uygulama Açılışında Çalıştır
-            _ = new OBS.Services.GarbageCollectorService().RunAsync();
+            StartGarbageCollectorRun();
         }
 
-        public async void CheckAndShowRecoveryModal()
-        {
-            // Standalone çağrı (geliştirici erişimi vb.) için
-            await ShowRecoveryModalInternal();
-        }
-
-        public async void ShowPostLoginModals()
-        {
-            await Task.Delay(1000); // Açılış animasyonunun bitmesini bekleyelim
-
-            // 1. Öncelik: Recovery Modal
-            bool recoveryShown = await ShowRecoveryModalInternal();
-
-            // Recovery modal gösterildiyse, kapanmasını bekle
-            if (recoveryShown)
-            {
-                await WaitForRecoveryModalClose();
-                await Task.Delay(300); // Kapanış animasyonu için kısa bekleme
-            }
-
-            // 2. Sonra: Release Notes
-            await ShowReleaseNotesInternal();
-        }
-
-        private async Task<bool> ShowRecoveryModalInternal()
+        public async Task CheckAndShowRecoveryModalAsync()
         {
             try
             {
-                var settingsRepo = new OBS.DataAccess.SettingsRepository();
-                var hasSeenModal = settingsRepo.GetSetting("HasSeenRecoveryModal");
-                
-                if (string.IsNullOrWhiteSpace(hasSeenModal) || hasSeenModal != "true")
-                {
-                    GlobalState.Instance.ChangeRecoveryPinTitle = "İlk Kurulum - Kurtarma Kodu";
-                    GlobalState.Instance.ChangeRecoveryPinMessage = "Uygulamaya hoş geldiniz! \nVarsayılan şifre sıfırlama (kurtarma) kodunuz '0000' olarak belirlenmiştir.\n\nGüvenliğiniz için bu kodu şimdi kişiselleştirebilirsiniz veya 'Vazgeç' diyerek daha sonra ayarlardan değiştirebilirsiniz.";
-                    
-                    GlobalState.Instance.IsCurrentRecoveryPinRequired = false;
-                    GlobalState.Instance.CurrentRecoveryPinInput = string.Empty;
-                    GlobalState.Instance.NewRecoveryPinInput = string.Empty;
-                    GlobalState.Instance.HasRecoveryPinError = false;
-                    
-                    GlobalState.Instance.IsChangeRecoveryPinOverlayVisible = true;
-                    return true;
-                }
+                await ShowRecoveryModalInternal();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Recovery modal gösterilirken hata oluştu: {ex.Message}");
+                Debug.WriteLine($"CheckAndShowRecoveryModalAsync failed: {ex}");
             }
-            return false;
+        }
+
+        public async Task ShowPostLoginModalsAsync()
+        {
+            try
+            {
+                await Task.Delay(1000); // Açılış animasyonunun bitmesini bekleyelim
+
+                // 1. Öncelik: Recovery Modal
+                bool recoveryShown = await ShowRecoveryModalInternal();
+
+                // Recovery modal gösterildiyse, kapanmasını bekle
+                if (recoveryShown)
+                {
+                    await WaitForRecoveryModalClose();
+                    await Task.Delay(300); // Kapanış animasyonu için kısa bekleme
+                }
+
+                // 2. Sonra: Release Notes
+                await ShowReleaseNotesInternal();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ShowPostLoginModalsAsync failed: {ex}");
+            }
+        }
+
+        private void StartGarbageCollectorRun()
+        {
+            RunGarbageCollectorSafelyAsync().Forget(nameof(RunGarbageCollectorSafelyAsync));
+        }
+
+        private async Task RunGarbageCollectorSafelyAsync()
+        {
+            try
+            {
+                await new OBS.Services.GarbageCollectorService().RunAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"GarbageCollectorService.RunAsync failed: {ex}");
+            }
+        }
+
+        private Task<bool> ShowRecoveryModalInternal()
+        {
+            var startupState = _recoverySetupService.BuildStartupState();
+            if (!startupState.ShouldShowModal || startupState.Payload == null)
+            {
+                return Task.FromResult(false);
+            }
+
+            var state = GlobalState.Instance;
+            state.ChangeRecoveryPinTitle = startupState.Payload.Title;
+            state.ChangeRecoveryPinMessage = startupState.Payload.Message;
+            state.IsCurrentRecoveryPinRequired = startupState.Payload.IsCurrentRecoveryPinRequired;
+            state.CurrentRecoveryPinInput = startupState.Payload.CurrentRecoveryPinInput;
+            state.NewRecoveryPinInput = startupState.Payload.NewRecoveryPinInput;
+            state.HasRecoveryPinError = startupState.Payload.HasRecoveryPinError;
+            state.IsChangeRecoveryPinOverlayVisible = true;
+
+            return Task.FromResult(true);
         }
 
         private async Task WaitForRecoveryModalClose()
@@ -138,32 +165,14 @@ namespace OBS.Views
 
         private async Task ShowReleaseNotesInternal()
         {
-            try
+            var viewModel = _releaseNotesService.GetReleaseNotesToShow();
+            if (viewModel == null)
             {
-                var releaseNotesPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ReleaseNotes.json");
-                if (System.IO.File.Exists(releaseNotesPath))
-                {
-                    var json = System.IO.File.ReadAllText(releaseNotesPath);
-                    var viewModel = Newtonsoft.Json.JsonConvert.DeserializeObject<ViewModels.ReleaseNotesViewModel>(json);
-
-                    if (viewModel != null && !string.IsNullOrEmpty(viewModel.Version))
-                    {
-                        var lastSeenVersion = Helpers.LocalSettings.Current.LastSeenReleaseNotesVersion;
-
-                        if (string.IsNullOrEmpty(lastSeenVersion) || lastSeenVersion != viewModel.Version)
-                        {
-                            await ReleaseNotesOverlay.ShowAsync(viewModel);
-
-                            Helpers.LocalSettings.Current.LastSeenReleaseNotesVersion = viewModel.Version;
-                            Helpers.LocalSettings.Save();
-                        }
-                    }
-                }
+                return;
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Release notes gösterilirken hata oluştu: {ex.Message}");
-            }
+
+            await ReleaseNotesOverlay.ShowAsync(viewModel);
+            _releaseNotesService.MarkReleaseNotesAsSeen(viewModel.Version);
         }
     }
 }

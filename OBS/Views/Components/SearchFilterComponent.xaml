@@ -88,7 +88,7 @@
                             Width="32" Height="32"
                             BorderThickness="0"
                             Background="{DynamicResource SpecialButtonBgBrush}"
-                            Foreground="White"
+                            Foreground="{DynamicResource SemanticOnColorBrush}"
                             Cursor="Hand"
                             Command="{Binding ToggleFilterModeCommand}"
                             ToolTip="Arama / Sınıf Filtresi"
@@ -197,7 +197,7 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsFavoriteMode}" Value="True">
                                                 <Setter Property="Filled" Value="True"/>
-                                                <Setter Property="Foreground" Value="#F59E0B"/> <!-- Amber/Yellow -->
+                                                <Setter Property="Foreground" Value="{DynamicResource SemanticWarningBrush}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
