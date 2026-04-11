@@ -363,6 +363,29 @@ namespace OBS.DataAccess
             return new SqliteConnection(_connectionString + $";Password={dbKey}");
         }
 
+        public static string GetAppFolder() => _appFolder;
+
+        public static void PrepareForFileOperation()
+        {
+            try
+            {
+                using var conn = GetConnection();
+                conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
+                cmd.ExecuteNonQuery();
+            }
+            catch
+            {
+                // Dosya işlemleri öncesinde bağlantı serbest bırakma denemesi best-effort çalışır.
+            }
+
+            SqliteConnection.ClearAllPools();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+        }
+
         public static string GetDatabasePath() => _secureDbPath;
 
         public static string GetPhotosFolder() => Path.Combine(_appFolder, "Photos");

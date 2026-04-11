@@ -22,7 +22,48 @@
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
-                
+
+                <!-- Yedekleme Kartı -->
+                <Border Background="{DynamicResource BgBodyBrush}" 
+                        CornerRadius="12"
+                        Padding="20"
+                        BorderThickness="1"
+                        BorderBrush="{DynamicResource BorderColorBrush}"
+                        Margin="0,0,0,24">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <ui:SymbolIcon Symbol="ArrowSync24" FontSize="20" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,8,0"/>
+                            <TextBlock Text="Yedekle / Geri Yükle" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <TextBlock Text="OBS_System altındaki veritabanı, fotoğraflar, öğrenci dosyaları, loglar, uygulama anahtarı ve yerel ayarlar tek bir yedek dosyasında saklanır."
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="13" TextWrapping="Wrap" Margin="0,0,0,20"/>
+
+                        <WrapPanel Orientation="Horizontal">
+                            <ui:Button Content="Yedek Oluştur"
+                                       Appearance="Primary"
+                                       Cursor="Hand"
+                                       Margin="0,0,16,12"
+                                       Command="{Binding CreateBackupCommand}">
+                                <ui:Button.Icon>
+                                    <ui:SymbolIcon Symbol="ArrowDownload24"/>
+                                </ui:Button.Icon>
+                            </ui:Button>
+
+                            <ui:Button Content="Yedekten Geri Yükle"
+                                       Appearance="Secondary"
+                                       Cursor="Hand"
+                                       Margin="0,0,0,12"
+                                       Command="{Binding RestoreBackupCommand}">
+                                <ui:Button.Icon>
+                                    <ui:SymbolIcon Symbol="ArrowSync24"/>
+                                </ui:Button.Icon>
+                            </ui:Button>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
                 <!-- Sistemi Sıfırla Kartı -->
                 <Border Background="{DynamicResource BgBodyBrush}" 
                         CornerRadius="12"

@@ -11,6 +11,14 @@ namespace OBS.ViewModels
         private static readonly Lazy<GlobalState> _instance = new(() => new GlobalState());
         public static GlobalState Instance => _instance.Value;
 
+        private const string DeveloperPinValue = "1923";
+        private const string DeveloperPinSourceLogin = "Login";
+        private const string DeveloperPinSourceSettings = "Settings";
+        private const string DeveloperPinSourceEnableDeveloperMode = "EnableDeveloperMode";
+
+        private int _debugShortcutPressCount;
+        private DateTime _lastDebugShortcutPressedAt = DateTime.MinValue;
+
         [ObservableProperty]
         private string _currentTheme;
 
@@ -18,6 +26,10 @@ namespace OBS.ViewModels
         {
             var settingsRepo = new OBS.DataAccess.SettingsRepository();
             _currentTheme = settingsRepo.GetSetting("Theme") ?? "Light";
+            _isDebugSettingsPageVisible = LocalSettings.Current.IsDebugSettingsPageVisible;
+            _isDeveloperModeEnabled = LocalSettings.Current.IsDeveloperModeEnabled;
+            _isLoginBypassEnabled = LocalSettings.Current.IsLoginBypassEnabled;
+            _isAdvancedStudentEditModeEnabled = LocalSettings.Current.IsAdvancedStudentEditModeEnabled;
         }
 
         [ObservableProperty]
@@ -25,6 +37,18 @@ namespace OBS.ViewModels
 
         [ObservableProperty]
         private int _selectedSettingsIndex = 0;
+
+        [ObservableProperty]
+        private bool _isDebugSettingsPageVisible = false;
+
+        [ObservableProperty]
+        private bool _isDeveloperModeEnabled = false;
+
+        [ObservableProperty]
+        private bool _isLoginBypassEnabled = false;
+
+        [ObservableProperty]
+        private bool _isAdvancedStudentEditModeEnabled = false;
 
         [ObservableProperty]
         private bool _isLoading = false;
@@ -56,6 +80,18 @@ namespace OBS.ViewModels
         [ObservableProperty]
         private int _forceUpdateProgress = 0;
 
+        [ObservableProperty]
+        private int _totalStudentCount = 0;
+
+        [ObservableProperty]
+        private int _totalClassCount = 0;
+
+        [ObservableProperty]
+        private int _totalTeamCount = 0;
+
+        [ObservableProperty]
+        private int _totalAssignedStudentCount = 0;
+
         public Func<string, string, string, string, Task<bool>>? ConfirmAsync { get; set; }
 
         public void ShowLoading(string message = "Yükleniyor...", double progress = 0)
@@ -74,6 +110,90 @@ namespace OBS.ViewModels
         private void CloseSettingsOverlay()
         {
             IsSettingsOverlayVisible = false;
+        }
+
+        [RelayCommand]
+        private void RegisterDebugShortcutKey()
+        {
+            if (!IsSettingsOverlayVisible)
+            {
+                return;
+            }
+
+            var now = DateTime.UtcNow;
+            _debugShortcutPressCount = now - _lastDebugShortcutPressedAt <= TimeSpan.FromSeconds(1.5)
+                ? _debugShortcutPressCount + 1
+                : 1;
+
+            _lastDebugShortcutPressedAt = now;
+
+            if (_debugShortcutPressCount < 3)
+            {
+                return;
+            }
+
+            _debugShortcutPressCount = 0;
+
+            if (!IsDebugSettingsPageVisible)
+            {
+                IsDebugSettingsPageVisible = true;
+                SaveDeveloperSettings();
+
+                var mainWindow = System.Windows.Application.Current.MainWindow as OBS.Views.MainWindow;
+                if (mainWindow != null)
+                {
+                    OBS.Services.ToastService.ShowInfo("Debug sayfasi acildi.", mainWindow);
+                }
+            }
+
+            IsDebugSettingsPageVisible = true;
+            SelectedSettingsIndex = 6;
+        }
+
+        [RelayCommand]
+        private void DisableDeveloperMode()
+        {
+            IsDeveloperModeEnabled = false;
+            IsLoginBypassEnabled = false;
+            IsAdvancedStudentEditModeEnabled = false;
+            SaveDeveloperSettings();
+        }
+
+        [RelayCommand]
+        private void ToggleLoginBypass()
+        {
+            if (!IsDeveloperModeEnabled)
+            {
+                IsLoginBypassEnabled = false;
+                SaveDeveloperSettings();
+                return;
+            }
+
+            IsLoginBypassEnabled = !IsLoginBypassEnabled;
+            SaveDeveloperSettings();
+        }
+
+        [RelayCommand]
+        private void ToggleAdvancedStudentEditMode()
+        {
+            if (!IsDeveloperModeEnabled)
+            {
+                IsAdvancedStudentEditModeEnabled = false;
+                SaveDeveloperSettings();
+                return;
+            }
+
+            IsAdvancedStudentEditModeEnabled = !IsAdvancedStudentEditModeEnabled;
+            SaveDeveloperSettings();
+        }
+
+        private void SaveDeveloperSettings()
+        {
+            LocalSettings.Current.IsDebugSettingsPageVisible = IsDebugSettingsPageVisible;
+            LocalSettings.Current.IsDeveloperModeEnabled = IsDeveloperModeEnabled;
+            LocalSettings.Current.IsLoginBypassEnabled = IsLoginBypassEnabled;
+            LocalSettings.Current.IsAdvancedStudentEditModeEnabled = IsAdvancedStudentEditModeEnabled;
+            LocalSettings.Save();
         }
 
         [ObservableProperty]
@@ -130,6 +250,9 @@ namespace OBS.ViewModels
         public Func<Task>? OnCheckForUpdateAction { get; set; }
         public Func<Task>? OnResetSystemAction { get; set; }
         public Func<Task>? OnImportKunyePdfAction { get; set; }
+        public Func<Task>? OnDownloadAndApplyUpdateAction { get; set; }
+        public Func<Task>? OnCreateBackupAction { get; set; }
+        public Func<Task>? OnRestoreBackupAction { get; set; }
 
         [RelayCommand]
         private async Task CheckForUpdate()
@@ -150,6 +273,27 @@ namespace OBS.ViewModels
         {
             if (OnImportKunyePdfAction != null)
                 await OnImportKunyePdfAction.Invoke();
+        }
+
+        [RelayCommand]
+        private async Task DownloadAndApplyUpdate()
+        {
+            if (OnDownloadAndApplyUpdateAction != null)
+                await OnDownloadAndApplyUpdateAction.Invoke();
+        }
+
+        [RelayCommand]
+        private async Task CreateBackup()
+        {
+            if (OnCreateBackupAction != null)
+                await OnCreateBackupAction.Invoke();
+        }
+
+        [RelayCommand]
+        private async Task RestoreBackup()
+        {
+            if (OnRestoreBackupAction != null)
+                await OnRestoreBackupAction.Invoke();
         }
 
         // --- Kurtarma Kodu Ayarlari ---
@@ -286,11 +430,11 @@ namespace OBS.ViewModels
         [RelayCommand]
         private void VerifyDeveloperPin()
         {
-            if (DeveloperPinInput == "1923")
+            if (DeveloperPinInput == DeveloperPinValue)
             {
                 IsDeveloperPinOverlayVisible = false;
 
-                if (DeveloperPinSource == "Login")
+                if (DeveloperPinSource == DeveloperPinSourceLogin)
                 {
                     // Geliştirici bypass: Login'i atlayıp HomeView'e geç
                     var settingsRepo = new OBS.DataAccess.SettingsRepository();
@@ -311,7 +455,7 @@ namespace OBS.ViewModels
                         mainWindow.CheckAndShowRecoveryModalAsync().Forget(nameof(OBS.Views.MainWindow.CheckAndShowRecoveryModalAsync));
                     }
                 }
-                else if (DeveloperPinSource == "Settings")
+                else if (DeveloperPinSource == DeveloperPinSourceSettings)
                 {
                     // Ayarlar: PIN ve kurtarma kodunu sıfırla
                     var settingsRepo = new OBS.DataAccess.SettingsRepository();
@@ -323,6 +467,17 @@ namespace OBS.ViewModels
                     if (mainWindow != null)
                     {
                         OBS.Services.ToastService.ShowSuccess("Geliştirici erişimi: Şifre ve kurtarma kodu sıfırlandı. Yeniden giriş gerekecek.", mainWindow);
+                    }
+                }
+                else if (DeveloperPinSource == DeveloperPinSourceEnableDeveloperMode)
+                {
+                    IsDeveloperModeEnabled = true;
+                    SaveDeveloperSettings();
+
+                    var mainWindow = System.Windows.Application.Current.MainWindow as OBS.Views.MainWindow;
+                    if (mainWindow != null)
+                    {
+                        OBS.Services.ToastService.ShowSuccess("Geliştirici modu etkinleştirildi.", mainWindow);
                     }
                 }
             }
@@ -450,6 +605,7 @@ namespace OBS.ViewModels
         {
             ClearFieldErrors();
             bool hasError = false;
+            bool isAdvancedEditMode = IsAdvancedStudentEditModeEnabled;
 
             if (string.IsNullOrWhiteSpace(EditFirstName))
             {
@@ -465,20 +621,20 @@ namespace OBS.ViewModels
                 hasError = true;
             }
 
-            if (string.IsNullOrWhiteSpace(EditStudentNumber))
+            if (isAdvancedEditMode && string.IsNullOrWhiteSpace(EditStudentNumber))
             {
                 HasEditStudentNumberError = true;
                 EditStudentNumberError = "Numara alanı boş olamaz!";
                 hasError = true;
             }
 
-            if (string.IsNullOrWhiteSpace(EditTcNo))
+            if (isAdvancedEditMode && string.IsNullOrWhiteSpace(EditTcNo))
             {
                 HasEditTcNoError = true;
                 EditTcNoError = "TC alanı boş olamaz!";
                 hasError = true;
             }
-            else if (EditTcNo.Length != 11 || !EditTcNo.All(char.IsDigit))
+            else if (isAdvancedEditMode && (EditTcNo.Length != 11 || !EditTcNo.All(char.IsDigit)))
             {
                 HasEditTcNoError = true;
                 EditTcNoError = "TC 11 haneli bir sayı olmalıdır!";
@@ -491,14 +647,14 @@ namespace OBS.ViewModels
 
             var repo = new DataAccess.StudentRepository();
 
-            if (repo.IsStudentNumberTaken(EditStudentNumber, SelectedStudentForEdit.StudentNumber))
+            if (isAdvancedEditMode && repo.IsStudentNumberTaken(EditStudentNumber, SelectedStudentForEdit.StudentNumber))
             {
                 HasEditStudentNumberError = true;
                 EditStudentNumberError = "Bu numara başka bir öğrenciye ait!";
                 hasError = true;
             }
 
-            if (repo.IsTcNoTaken(EditTcNo, SelectedStudentForEdit.StudentNumber))
+            if (isAdvancedEditMode && repo.IsTcNoTaken(EditTcNo, SelectedStudentForEdit.StudentNumber))
             {
                 HasEditTcNoError = true;
                 EditTcNoError = "Bu TC başka bir öğrenciye ait!";
@@ -512,13 +668,13 @@ namespace OBS.ViewModels
                 var original = SelectedStudentForEdit.GetModel();
                 var updated = new Models.Student
                 {
-                    StudentNumber = EditStudentNumber,
+                    StudentNumber = isAdvancedEditMode ? EditStudentNumber : original.StudentNumber,
                     FirstName = EditFirstName,
                     LastName = EditLastName,
-                    Class = EditClassName,
+                    Class = isAdvancedEditMode ? EditClassName : original.Class,
                     ClassNo = original.ClassNo,
-                    TcNo = EditTcNo,
-                    BirthDate = EditBirthDate,
+                    TcNo = isAdvancedEditMode ? EditTcNo : original.TcNo,
+                    BirthDate = isAdvancedEditMode ? EditBirthDate : original.BirthDate,
                     PhotoPath = EditPhotoPath,
                     Gender = original.Gender,
                     GuardianId = original.GuardianId,

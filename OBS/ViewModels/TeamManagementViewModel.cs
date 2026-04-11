@@ -34,6 +34,12 @@ namespace OBS.ViewModels
         [ObservableProperty]
         private TeamCardViewModel? _editingTeam;
 
+        [ObservableProperty]
+        private int _totalTeamCount;
+
+        [ObservableProperty]
+        private int _totalAssignedStudentCount;
+
         public TeamManagementViewModel()
         {
             _teamRepo = new TeamRepository();
@@ -167,6 +173,11 @@ namespace OBS.ViewModels
             Teams = new ObservableCollection<TeamCardViewModel>(
                 allTeams.Select(t => new TeamCardViewModel(t))
             );
+
+            TotalTeamCount = allTeams.Count;
+            TotalAssignedStudentCount = allTeams.Sum(team => team.MemberCount);
+            GlobalState.Instance.TotalTeamCount = TotalTeamCount;
+            GlobalState.Instance.TotalAssignedStudentCount = TotalAssignedStudentCount;
         }
     }
 }

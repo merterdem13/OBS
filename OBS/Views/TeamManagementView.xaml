@@ -17,6 +17,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- SATIR 0 — Üst Bar: Takım Oluştur -->
@@ -81,7 +82,7 @@
         </TextBlock>
 
         <ListBox x:Name="TeamsListBox"
-                 Grid.Row="1"
+                  Grid.Row="1"
                  ItemsSource="{Binding Teams}"
                  VirtualizingPanel.IsVirtualizing="True"
                  VirtualizingPanel.VirtualizationMode="Recycling"
@@ -93,8 +94,9 @@
                  BorderThickness="0"
                  Padding="12,4,12,4"
                  SelectionMode="Single"
-                 IsTabStop="False"
-                 IsVisibleChanged="OnElementIsVisibleChanged">
+                  IsTabStop="False"
+                  Margin="0,0,0,8"
+                  IsVisibleChanged="OnElementIsVisibleChanged">
             <ListBox.Style>
                 <Style TargetType="ListBox">
                     <Setter Property="Visibility" Value="Visible"/>
@@ -136,22 +138,56 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
+        <StackPanel Grid.Row="2"
+                    Margin="12,0,12,12"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEditingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsCreatingTeam}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+            <TextBlock Text="{Binding TotalTeamCount, StringFormat=Toplam Takım: {0}}"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="  •  "
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       FontSize="14"
+                       FontWeight="SemiBold"/>
+            <TextBlock
+                       Text="{Binding TotalAssignedStudentCount, StringFormat=Takımlardaki Öğrenci: {0}}"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"/>
+        </StackPanel>
+
         <components:EditTeamComponent x:Name="InlineEditComponent"
-                                      Grid.Row="0" Grid.RowSpan="2"
+                                      Grid.Row="0" Grid.RowSpan="3"
                                       ViewModel="{Binding EditTeamViewModel}"
                                       Visibility="{Binding IsEditingTeam, Converter={StaticResource BoolToVis}}"
                                       EditClosed="InlineEditComponent_EditClosed"
                                       IsVisibleChanged="OnElementIsVisibleChanged" />
 
         <components:CreateTeamComponent x:Name="InlineCreateComponent"
-                                        Grid.Row="0" Grid.RowSpan="2"
-                                        ViewModel="{Binding CreateTeamViewModel}"
-                                        Visibility="{Binding IsCreatingTeam, Converter={StaticResource BoolToVis}}"
-                                        CreateClosed="InlineCreateComponent_CreateClosed"
-                                        IsVisibleChanged="OnElementIsVisibleChanged" />
+                                         Grid.Row="0" Grid.RowSpan="3"
+                                         ViewModel="{Binding CreateTeamViewModel}"
+                                         Visibility="{Binding IsCreatingTeam, Converter={StaticResource BoolToVis}}"
+                                         CreateClosed="InlineCreateComponent_CreateClosed"
+                                         IsVisibleChanged="OnElementIsVisibleChanged" />
 
         <Button x:Name="HomeButton" 
-                Grid.Row="0" Grid.RowSpan="2"
+                Grid.Row="0" Grid.RowSpan="3"
                 HorizontalAlignment="Left" VerticalAlignment="Center"
                 Margin="-4,0,0,0"
                 Width="38" Height="48"

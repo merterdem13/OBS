@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:converters="clr-namespace:OBS.Converters"
-             xmlns:local="clr-namespace:OBS.ViewModels">
+             xmlns:local="clr-namespace:OBS.ViewModels"
+             xmlns:viewmodels="clr-namespace:OBS.ViewModels">
 
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
@@ -177,76 +178,89 @@
                     <TextBlock Text="{Binding EditLastNameError, Source={x:Static local:GlobalState.Instance}}" Style="{StaticResource FieldErrorText}"
                                Visibility="{Binding HasEditLastNameError, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}"/>
 
-                    <!-- Sınıf -->
-                    <TextBlock Text="Sınıf" Style="{StaticResource EditFieldLabel}" Margin="0,8,0,4"/>
-                    <ComboBox ItemsSource="{Binding EditClassList, Source={x:Static local:GlobalState.Instance}}"
-                              SelectedItem="{Binding EditClassName, Source={x:Static local:GlobalState.Instance}, UpdateSourceTrigger=PropertyChanged}"
-                              IsEditable="False"
-                              Padding="10,7"
-                              Margin="0,0,0,2"
-                              Background="{DynamicResource BgBodyBrush}"
-                              Foreground="{DynamicResource TextPrimaryBrush}"/>
-                    <TextBlock Text="{Binding EditClassError, Source={x:Static local:GlobalState.Instance}}" Style="{StaticResource FieldErrorText}"
-                               Visibility="{Binding HasEditClassError, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}"/>
+                    <StackPanel>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAdvancedStudentEditModeEnabled, Source={x:Static viewmodels:GlobalState.Instance}}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
 
-                    <!-- Numara -->
-                    <TextBlock Text="Numara" Style="{StaticResource EditFieldLabel}" Margin="0,8,0,4"/>
-                    <Border BorderBrush="{DynamicResource BorderColorBrush}" BorderThickness="1" CornerRadius="8">
-                        <ui:TextBox Text="{Binding EditStudentNumber, Source={x:Static local:GlobalState.Instance}, UpdateSourceTrigger=PropertyChanged}"
-                                    Style="{StaticResource EditTextBox}" Margin="0"/>
-                    </Border>
-                    <TextBlock Text="{Binding EditStudentNumberError, Source={x:Static local:GlobalState.Instance}}" Style="{StaticResource FieldErrorText}"
-                               Visibility="{Binding HasEditStudentNumberError, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}"/>
+                        <!-- Sınıf -->
+                        <TextBlock Text="Sınıf" Style="{StaticResource EditFieldLabel}" Margin="0,8,0,4"/>
+                        <ComboBox ItemsSource="{Binding EditClassList, Source={x:Static local:GlobalState.Instance}}"
+                                  SelectedItem="{Binding EditClassName, Source={x:Static local:GlobalState.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                                  IsEditable="False"
+                                  Padding="10,7"
+                                  Margin="0,0,0,2"
+                                  Background="{DynamicResource BgBodyBrush}"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Text="{Binding EditClassError, Source={x:Static local:GlobalState.Instance}}" Style="{StaticResource FieldErrorText}"
+                                   Visibility="{Binding HasEditClassError, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}"/>
 
-                    <!-- TC -->
-                    <TextBlock Text="TC Kimlik No" Style="{StaticResource EditFieldLabel}" Margin="0,8,0,4"/>
-                    <Border BorderBrush="{DynamicResource BorderColorBrush}" BorderThickness="1" CornerRadius="8">
-                        <ui:TextBox Text="{Binding EditTcNo, Source={x:Static local:GlobalState.Instance}, UpdateSourceTrigger=PropertyChanged}"
-                                    Style="{StaticResource EditTextBox}" Margin="0" MaxLength="11"/>
-                    </Border>
-                    <TextBlock Text="{Binding EditTcNoError, Source={x:Static local:GlobalState.Instance}}" Style="{StaticResource FieldErrorText}"
-                               Visibility="{Binding HasEditTcNoError, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}"/>
-
-                    <!-- Doğum Tarihi -->
-                    <TextBlock Text="Doğum Tarihi" Style="{StaticResource EditFieldLabel}" Margin="0,8,0,4"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <ui:TextBox Grid.Column="0"
-                                    Text="{Binding EditBirthDateString, Source={x:Static local:GlobalState.Instance}, Mode=OneWay}"
-                                    IsReadOnly="True"
-                                    Padding="10,7"
-                                    Margin="0,0,4,0"
-                                    Cursor="Hand"
-                                    MouseDown="OnBirthDateClick"/>
-                        <Button Grid.Column="1" Width="36" Height="36" Cursor="Hand"
-                                Click="OnCalendarButtonClick"
-                                Background="Transparent" BorderThickness="0">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{DynamicResource BgBodyBrush}" CornerRadius="8">
-                                        <ui:SymbolIcon Symbol="Calendar24" FontSize="16"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </Grid>
-                    <Popup x:Name="BirthDatePickerPopup" StaysOpen="False" AllowsTransparency="True" Placement="Mouse">
-                        <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderColorBrush}" BorderThickness="1" CornerRadius="8" Padding="8">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="10" Opacity="0.2" Direction="270" ShadowDepth="4"/>
-                            </Border.Effect>
-                            <Calendar x:Name="EditCalendar"
-                                      SelectedDate="{Binding EditBirthDate, Source={x:Static local:GlobalState.Instance}}"
-                                      DisplayDateStart="1950-01-01"
-                                      DisplayDateEnd="2030-12-31"
-                                      SelectedDatesChanged="OnCalendarSelected"/>
+                        <!-- Numara -->
+                        <TextBlock Text="Numara" Style="{StaticResource EditFieldLabel}" Margin="0,8,0,4"/>
+                        <Border BorderBrush="{DynamicResource BorderColorBrush}" BorderThickness="1" CornerRadius="8">
+                            <ui:TextBox Text="{Binding EditStudentNumber, Source={x:Static local:GlobalState.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource EditTextBox}" Margin="0"/>
                         </Border>
-                    </Popup>
+                        <TextBlock Text="{Binding EditStudentNumberError, Source={x:Static local:GlobalState.Instance}}" Style="{StaticResource FieldErrorText}"
+                                   Visibility="{Binding HasEditStudentNumberError, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}"/>
+
+                        <!-- TC -->
+                        <TextBlock Text="TC Kimlik No" Style="{StaticResource EditFieldLabel}" Margin="0,8,0,4"/>
+                        <Border BorderBrush="{DynamicResource BorderColorBrush}" BorderThickness="1" CornerRadius="8">
+                            <ui:TextBox Text="{Binding EditTcNo, Source={x:Static local:GlobalState.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource EditTextBox}" Margin="0" MaxLength="11"/>
+                        </Border>
+                        <TextBlock Text="{Binding EditTcNoError, Source={x:Static local:GlobalState.Instance}}" Style="{StaticResource FieldErrorText}"
+                                   Visibility="{Binding HasEditTcNoError, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}"/>
+
+                        <!-- Doğum Tarihi -->
+                        <TextBlock Text="Doğum Tarihi" Style="{StaticResource EditFieldLabel}" Margin="0,8,0,4"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:TextBox Grid.Column="0"
+                                        Text="{Binding EditBirthDateString, Source={x:Static local:GlobalState.Instance}, Mode=OneWay}"
+                                        IsReadOnly="True"
+                                        Padding="10,7"
+                                        Margin="0,0,4,0"
+                                        Cursor="Hand"
+                                        MouseDown="OnBirthDateClick"/>
+                            <Button Grid.Column="1" Width="36" Height="36" Cursor="Hand"
+                                    Click="OnCalendarButtonClick"
+                                    Background="Transparent" BorderThickness="0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{DynamicResource BgBodyBrush}" CornerRadius="8">
+                                            <ui:SymbolIcon Symbol="Calendar24" FontSize="16"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                        <Popup x:Name="BirthDatePickerPopup" StaysOpen="False" AllowsTransparency="True" Placement="Mouse">
+                            <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderColorBrush}" BorderThickness="1" CornerRadius="8" Padding="8">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" Opacity="0.2" Direction="270" ShadowDepth="4"/>
+                                </Border.Effect>
+                                <Calendar x:Name="EditCalendar"
+                                          SelectedDate="{Binding EditBirthDate, Source={x:Static local:GlobalState.Instance}}"
+                                          DisplayDateStart="1950-01-01"
+                                          DisplayDateEnd="2030-12-31"
+                                          SelectedDatesChanged="OnCalendarSelected"/>
+                            </Border>
+                        </Popup>
+                    </StackPanel>
 
                     <!-- Butonlar -->
                     <Grid Margin="0,14,0,0">

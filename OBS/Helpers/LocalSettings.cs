@@ -10,13 +10,17 @@ namespace OBS.Helpers
         public double FloatingButtonVerticalOffset { get; set; } = 0;
         public double ClearFavoritesButtonVerticalOffset { get; set; } = -9999;
         public double EditExitButtonVerticalOffset { get; set; } = 0;
+        public bool IsDebugSettingsPageVisible { get; set; } = false;
+        public bool IsDeveloperModeEnabled { get; set; } = false;
+        public bool IsLoginBypassEnabled { get; set; } = false;
+        public bool IsAdvancedStudentEditModeEnabled { get; set; } = false;
     }
 
     public static class LocalSettings
     {
         private static readonly string SettingsFolderPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "AlparslanOBS");
+            "OBS_System");
 
         private static readonly string SettingsFilePath = Path.Combine(SettingsFolderPath, "settings.json");
 

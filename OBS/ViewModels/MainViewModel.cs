@@ -21,12 +21,14 @@ namespace OBS.ViewModels
         // ── Servisler ────────────────────────────────────────────────────────
         private readonly StudentRepository _studentRepo;
         private readonly FavoriteRepository _favoriteRepo;
+        private readonly TeamRepository _teamRepo;
         private readonly IPdfExtractionService _pdfService;
         private readonly IMergeService _mergeService;
         private readonly ResetSystemService _resetService;
         private readonly PdfExportService _pdfExportService;
         private readonly UpdateService _updateService;
         private readonly StudentListFlowService _studentListFlowService;
+        private readonly BackupRestoreService _backupRestoreService;
 
         // ── Pencere Durumu ──────────────────────────────────────────────────
         [ObservableProperty]
@@ -40,6 +42,18 @@ namespace OBS.ViewModels
         private bool _isClassSelected = false;
         [ObservableProperty]
         private bool _isClassFilterMode = false;
+
+        [ObservableProperty]
+        private bool _isBulkSelectionMode = false;
+
+        [ObservableProperty]
+        private bool _isBulkTeamPickerVisible = false;
+
+        [ObservableProperty]
+        private ObservableCollection<TeamCardViewModel> _bulkTeams = new();
+
+        [ObservableProperty]
+        private TeamCardViewModel? _selectedBulkTeam;
 
         public bool IsSettingsOverlayVisible
         {
@@ -89,6 +103,12 @@ namespace OBS.ViewModels
 
         [ObservableProperty]
         private int _totalClassCount = 0;
+
+        public int SelectedStudentCount => _allViewModels.Count(student => student.IsSelected);
+
+        public bool HasSelectedStudents => SelectedStudentCount > 0;
+
+        public string SelectedStudentSummary => $"{SelectedStudentCount} öğrenci seçildi";
 
         // ── Öğrenci Listesi ─────────────────────────────────────────────────
         [ObservableProperty]
@@ -207,12 +227,14 @@ namespace OBS.ViewModels
         {
             _studentRepo = new StudentRepository();
             _favoriteRepo = new FavoriteRepository();
+            _teamRepo = new TeamRepository();
             _pdfService = new PdfExtractionService();
             _mergeService = new MergeService();
             _resetService = new ResetSystemService();
             _pdfExportService = new PdfExportService();
             _updateService = new UpdateService();
             _studentListFlowService = new StudentListFlowService();
+            _backupRestoreService = new BackupRestoreService();
 
             LoadClassList();
             UpdateFavoriteState();
@@ -221,6 +243,9 @@ namespace OBS.ViewModels
             GlobalState.Instance.OnCheckForUpdateAction = CheckForUpdateAsync;
             GlobalState.Instance.OnResetSystemAction = ResetSystemAsync;
             GlobalState.Instance.OnImportKunyePdfAction = ImportKunyePdfAsync;
+            GlobalState.Instance.OnDownloadAndApplyUpdateAction = DownloadAndApplyUpdateAsync;
+            GlobalState.Instance.OnCreateBackupAction = CreateBackupAsync;
+            GlobalState.Instance.OnRestoreBackupAction = RestoreBackupAsync;
         }
 
         // ── Partial Callbacks ───────────────────────────────────────────────
@@ -371,6 +396,18 @@ namespace OBS.ViewModels
             }
         }
 
+        partial void OnIsBulkSelectionModeChanged(bool value)
+        {
+            if (value)
+            {
+                return;
+            }
+
+            IsBulkTeamPickerVisible = false;
+            SelectedBulkTeam = null;
+            ClearSelectedStudentsInternal();
+        }
+
         // ── Komutlar — Toggle / Panel ───────────────────────────────────────
 
         [RelayCommand]
@@ -425,6 +462,149 @@ namespace OBS.ViewModels
             {
                 SearchText = string.Empty;
             }
+        }
+
+        [RelayCommand]
+        private void ToggleBulkSelectionMode()
+        {
+            IsBulkSelectionMode = !IsBulkSelectionMode;
+        }
+
+        [RelayCommand]
+        private void ToggleStudentSelection(StudentViewModel? student)
+        {
+            if (!IsBulkSelectionMode || student is null)
+            {
+                return;
+            }
+
+            student.IsSelected = !student.IsSelected;
+            NotifyBulkSelectionChanged();
+        }
+
+        [RelayCommand]
+        private void ClearSelectedStudents()
+        {
+            ClearSelectedStudentsInternal();
+        }
+
+        [RelayCommand]
+        private void OpenBulkTeamPicker()
+        {
+            if (!HasSelectedStudents)
+            {
+                ToastService.ShowInfo("Önce en az bir öğrenci seçin.");
+                return;
+            }
+
+            var teams = _teamRepo.GetAll()
+                .Select(team => new TeamCardViewModel(team))
+                .ToList();
+
+            if (teams.Count == 0)
+            {
+                ToastService.ShowError("Önce bir takım oluşturmalısınız.");
+                return;
+            }
+
+            BulkTeams = new ObservableCollection<TeamCardViewModel>(teams);
+            SelectedBulkTeam = BulkTeams.FirstOrDefault();
+            IsBulkTeamPickerVisible = true;
+        }
+
+        [RelayCommand]
+        private void CancelBulkTeamPicker()
+        {
+            IsBulkTeamPickerVisible = false;
+            SelectedBulkTeam = null;
+        }
+
+        [RelayCommand]
+        private void BulkAddSelectedToFavorites()
+        {
+            var selectedStudents = GetSelectedStudents();
+            if (selectedStudents.Count == 0)
+            {
+                ToastService.ShowInfo("Favorilere eklemek için öğrenci seçin.");
+                return;
+            }
+
+            int addedCount = 0;
+            foreach (var student in selectedStudents)
+            {
+                if (student.IsFavorite)
+                {
+                    continue;
+                }
+
+                _favoriteRepo.AddFavorite(student.StudentNumber);
+                student.IsFavorite = true;
+                addedCount++;
+            }
+
+            UpdateFavoriteState();
+            ClearSelectedStudentsInternal();
+
+            if (addedCount == 0)
+            {
+                ToastService.ShowInfo("Seçilen öğrenciler zaten favorilerde.");
+                return;
+            }
+
+            ToastService.ShowSuccess($"{addedCount} öğrenci favorilere eklendi.");
+        }
+
+        [RelayCommand]
+        private async Task ConfirmBulkAddToTeamAsync()
+        {
+            if (SelectedBulkTeam is null)
+            {
+                ToastService.ShowInfo("Bir takım seçin.");
+                return;
+            }
+
+            var selectedStudents = GetSelectedStudents();
+            if (selectedStudents.Count == 0)
+            {
+                ToastService.ShowInfo("Takıma eklemek için öğrenci seçin.");
+                return;
+            }
+
+            var selectedTeam = SelectedBulkTeam;
+            int addedCount = 0;
+            int skippedCount = 0;
+
+            await Task.Run(() =>
+            {
+                foreach (var student in selectedStudents)
+                {
+                    var existingTeamName = _teamRepo.GetTeamNameForStudent(student.StudentNumber);
+                    if (!string.IsNullOrWhiteSpace(existingTeamName))
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    _teamRepo.AddMember(selectedTeam.Id, student.StudentNumber);
+                    addedCount++;
+                }
+            });
+
+            LoadClassList();
+            ClearSelectedStudentsInternal();
+            CancelBulkTeamPicker();
+
+            if (addedCount == 0)
+            {
+                ToastService.ShowInfo($"Seçilen öğrenciler başka takımlarda olduğu için eklenemedi. Atlanan: {skippedCount}.");
+                return;
+            }
+
+            var message = skippedCount > 0
+                ? $"{addedCount} öğrenci \"{selectedTeam.TeamName}\" takımına eklendi. Atlanan: {skippedCount}."
+                : $"{addedCount} öğrenci \"{selectedTeam.TeamName}\" takımına eklendi.";
+
+            ToastService.ShowSuccess(message);
         }
 
 
@@ -514,6 +694,74 @@ namespace OBS.ViewModels
             finally
             {
                 SetLoading(false);
+            }
+        }
+
+        private async Task CreateBackupAsync()
+        {
+            var dialog = new SaveFileDialog
+            {
+                FileName = $"OBS-{DateTime.Now:yyyyMMdd-HHmmss}",
+                DefaultExt = ".obsbackup",
+                Filter = "OBS Yedek Dosyası|*.obsbackup"
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                SetLoading(true, "Yedek hazırlanıyor...");
+                await Task.Run(() => _backupRestoreService.CreateBackup(dialog.FileName));
+                ToastService.ShowSuccess("Yedek dosyası oluşturuldu.");
+            }
+            catch (Exception ex)
+            {
+                ToastService.ShowError($"Yedekleme hatası: {ex.Message}");
+            }
+            finally
+            {
+                SetLoading(false);
+            }
+        }
+
+        private async Task RestoreBackupAsync()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Yedek Dosyasını Seçin",
+                Filter = "OBS Yedek Dosyası|*.obsbackup"
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            var shouldContinue = GlobalState.Instance.ConfirmAsync == null
+                || await GlobalState.Instance.ConfirmAsync(
+                    "Yedeği Geri Yükle",
+                    "Mevcut OBS_System verileri yedekten geri yüklenecek. Uygulama yeniden başlatılacak.",
+                    "Devam Et",
+                    "Vazgeç");
+
+            if (!shouldContinue)
+            {
+                return;
+            }
+
+            try
+            {
+                SetLoading(true, "Yedek doğrulanıyor...");
+                await Task.Run(() => _backupRestoreService.StartRestore(dialog.FileName));
+                Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                SetLoading(false);
+                ToastService.ShowError($"Geri yükleme hatası: {ex.Message}");
             }
         }
 
@@ -1087,6 +1335,7 @@ namespace OBS.ViewModels
                 }
 
                 _allViewModels = refreshResult.AllStudents;
+                ClearSelectedStudentsInternal();
                 Debug.WriteLine($"[REFRESH] _allViewModels.Count={_allViewModels.Count}, Students.Count={Students.Count}");
 
                 if (Students.Count > 0)
@@ -1149,9 +1398,15 @@ namespace OBS.ViewModels
         public void LoadClassList()
         {
             var classes = _studentRepo.GetDistinctClasses();
+            var teams = _teamRepo.GetAll();
             ClassList = new ObservableCollection<string>(classes);
             TotalClassCount = classes.Count;
             TotalStudentCount = _studentRepo.GetCount();
+
+            GlobalState.Instance.TotalClassCount = TotalClassCount;
+            GlobalState.Instance.TotalStudentCount = TotalStudentCount;
+            GlobalState.Instance.TotalTeamCount = teams.Count;
+            GlobalState.Instance.TotalAssignedStudentCount = teams.Sum(team => team.MemberCount);
         }
 
         public void RefreshDashboard()
@@ -1227,6 +1482,31 @@ namespace OBS.ViewModels
         {
             Students.Clear();
             HasStudents = false;
+            ClearSelectedStudentsInternal();
+        }
+
+        private List<StudentViewModel> GetSelectedStudents()
+        {
+            return _allViewModels.Where(student => student.IsSelected).ToList();
+        }
+
+        private void ClearSelectedStudentsInternal()
+        {
+            foreach (var student in _allViewModels)
+            {
+                student.IsSelected = false;
+            }
+
+            IsBulkTeamPickerVisible = false;
+            SelectedBulkTeam = null;
+            NotifyBulkSelectionChanged();
+        }
+
+        private void NotifyBulkSelectionChanged()
+        {
+            OnPropertyChanged(nameof(SelectedStudentCount));
+            OnPropertyChanged(nameof(HasSelectedStudents));
+            OnPropertyChanged(nameof(SelectedStudentSummary));
         }
     }
 }

@@ -23,7 +23,11 @@
             helpers:AnimationHelper.IsRemoving="{Binding IsRemoving}">
         <Border.Style>
             <Style TargetType="Border">
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderColorBrush}"/>
                 <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <Setter Property="BorderBrush" Value="{DynamicResource SpecialButtonBgBrush}"/>
+                    </DataTrigger>
                     <Trigger Property="IsMouseOver" Value="True">
                         <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                     </Trigger>
@@ -99,15 +103,65 @@
                              Style="{StaticResource SelectValue}"/>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Padding="2" Width="24" Height="24" Margin="0,0,4,0"
+                                ToolTip="Seç"
+                                Cursor="Hand"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Command="{Binding DataContext.ToggleStudentSelectionCommand,
+                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsBulkSelectionMode, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <ui:SymbolIcon FontSize="16">
+                                <ui:SymbolIcon.Style>
+                                    <Style TargetType="ui:SymbolIcon">
+                                        <Setter Property="Symbol" Value="Add24"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Symbol" Value="Checkmark24"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource SpecialButtonBgBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:SymbolIcon.Style>
+                            </ui:SymbolIcon>
+                        </Button>
+
                         <!-- Edit Butonu (sadece edit modunda) -->
                         <Button Padding="2" Width="24" Height="24" Margin="0,0,4,0"
                                 ToolTip="Düzenle"
                                 Cursor="Hand"
                                 Background="Transparent"
                                 BorderThickness="0"
-                                Visibility="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVis}}"
                                 Command="{Binding OpenStudentEditModalCommand, Source={x:Static local:GlobalState.Instance}}"
                                 CommandParameter="{Binding}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVis}}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsBulkSelectionMode, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="Transparent">
@@ -125,9 +179,18 @@
                                 Cursor="Hand"
                                 Background="Transparent"
                                 BorderThickness="0"
-                                Visibility="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource InverseBoolToVisibility}}"
                                 Command="{Binding OpenStudentNotesCommand, Source={x:Static local:GlobalState.Instance}}"
                                 CommandParameter="{Binding}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsBulkSelectionMode, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="Transparent">
@@ -160,8 +223,17 @@
                                 CommandParameter="{Binding}"
                                 Cursor="Hand"
                                 Background="Transparent"
-                                BorderThickness="0"
-                                Visibility="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource InverseBoolToVisibility}}">
+                                BorderThickness="0">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsBulkSelectionMode, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="Transparent">

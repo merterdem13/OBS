@@ -79,6 +79,9 @@
                         <DataTrigger Binding="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsBulkSelectionMode}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </components:FloatingActionPanel.Style>
@@ -125,6 +128,9 @@
                     </Setter>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsBulkSelectionMode}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -195,6 +201,9 @@
                         <DataTrigger Binding="{Binding IsStudentEditModeActive, Source={x:Static local:GlobalState.Instance}}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsBulkSelectionMode}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition Binding="{Binding IsFavoriteMode}" Value="True"/>
@@ -244,6 +253,71 @@
                 </Style>
             </Button.Style>
         </Button>
+
+        <Border Grid.RowSpan="2"
+                Background="{DynamicResource BgBodyBrush}"
+                Opacity="0.82"
+                Panel.ZIndex="140">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBulkTeamPickerVisible}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
+
+        <Border Grid.RowSpan="2"
+                Panel.ZIndex="141"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource BgCardBrush}"
+                BorderBrush="{DynamicResource BorderColorBrush}"
+                BorderThickness="1"
+                CornerRadius="16"
+                Padding="20"
+                Width="320"
+                MaxWidth="320">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBulkTeamPickerVisible}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel>
+                <TextBlock Text="Takım Seç"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock Text="Seçili öğrencileri eklemek istediğiniz takımı seçin."
+                           Margin="0,8,0,14"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <ComboBox ItemsSource="{Binding BulkTeams}"
+                          SelectedItem="{Binding SelectedBulkTeam}"
+                          DisplayMemberPath="TeamName"
+                          Margin="0,0,0,14"/>
+                <WrapPanel HorizontalAlignment="Right">
+                    <ui:Button Content="Vazgeç"
+                               Appearance="Secondary"
+                               Margin="0,0,8,0"
+                               Command="{Binding CancelBulkTeamPickerCommand}"/>
+                    <ui:Button Content="Ekle"
+                               Command="{Binding ConfirmBulkAddToTeamCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="PeopleAdd24"/>
+                        </ui:Button.Icon>
+                    </ui:Button>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
 
         <!-- Düzenleme Modu Badge — Sol Alt (dinamik opaklık) -->
         <Border Grid.RowSpan="2"

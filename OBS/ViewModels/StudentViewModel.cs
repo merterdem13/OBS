@@ -15,6 +15,7 @@ namespace OBS.ViewModels
     {
         private readonly Student _student;
         private bool _isFavorite;
+        private bool _isSelected;
 
         public StudentViewModel(Student student, bool isFavorite = false)
         {
@@ -137,6 +138,19 @@ namespace OBS.ViewModels
         /// Favori butonu tooltip metni.
         /// </summary>
         public string FavoriteTooltip => IsFavorite ? "Favorilerden çıkar" : "Favorilere ekle";
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         private bool _isRemoving;
         public bool IsRemoving

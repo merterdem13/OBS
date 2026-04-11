@@ -24,12 +24,41 @@
                        HorizontalAlignment="Center"
                        Margin="0,0,0,8"/>
 
-            <TextBlock Text="Öğrencilerin ad, soyad, numara, TC, doğum tarihi ve sınıf bilgilerini buradan düzenleyebilirsiniz."
-                       Foreground="{DynamicResource TextSecondaryBrush}" 
-                       FontSize="13"
-                       TextWrapping="Wrap"
-                       TextAlignment="Center"
-                       Margin="0,0,0,24"/>
+            <Grid Margin="0,0,0,24">
+                <TextBlock Text="Öğrencilerin fotoğraf, ad ve soyad bilgilerini buradan düzenleyebilirsiniz."
+                           Foreground="{DynamicResource TextSecondaryBrush}" 
+                           FontSize="13"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsAdvancedStudentEditModeEnabled, Source={x:Static local:GlobalState.Instance}}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock Text="Öğrencilerin ad, soyad, numara, TC, doğum tarihi ve sınıf bilgilerini buradan düzenleyebilirsiniz."
+                           Foreground="{DynamicResource TextSecondaryBrush}" 
+                           FontSize="13"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsAdvancedStudentEditModeEnabled, Source={x:Static local:GlobalState.Instance}}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
 
             <!-- Düzenleme Moduna Geç Butonu -->
             <ui:Button Appearance="Primary"
@@ -57,11 +86,39 @@
                     <ui:SymbolIcon Symbol="Info24" FontSize="16" 
                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                    Margin="0,0,8,0" VerticalAlignment="Top"/>
-                    <TextBlock Text="Düzenleme modunda öğrencileri arayabilir, sınıfa göre filtreleyebilir ve bilgilerini değiştirebilirsiniz."
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               FontSize="11"
-                               TextWrapping="Wrap"
-                               MaxWidth="220"/>
+                     <Grid MaxWidth="220">
+                         <TextBlock Text="Düzenleme modunda öğrencileri arayabilir, sınıfa göre filtreleyebilir ve fotoğraf, ad, soyad bilgilerini değiştirebilirsiniz."
+                                    Foreground="{DynamicResource TextSecondaryBrush}"
+                                    FontSize="11"
+                                    TextWrapping="Wrap">
+                             <TextBlock.Style>
+                                 <Style TargetType="TextBlock">
+                                     <Setter Property="Visibility" Value="Visible"/>
+                                     <Style.Triggers>
+                                         <DataTrigger Binding="{Binding IsAdvancedStudentEditModeEnabled, Source={x:Static local:GlobalState.Instance}}" Value="True">
+                                             <Setter Property="Visibility" Value="Collapsed"/>
+                                         </DataTrigger>
+                                     </Style.Triggers>
+                                 </Style>
+                             </TextBlock.Style>
+                         </TextBlock>
+
+                         <TextBlock Text="Düzenleme modunda öğrencileri arayabilir, sınıfa göre filtreleyebilir ve bilgilerini değiştirebilirsiniz."
+                                    Foreground="{DynamicResource TextSecondaryBrush}"
+                                    FontSize="11"
+                                    TextWrapping="Wrap">
+                             <TextBlock.Style>
+                                 <Style TargetType="TextBlock">
+                                     <Setter Property="Visibility" Value="Collapsed"/>
+                                     <Style.Triggers>
+                                         <DataTrigger Binding="{Binding IsAdvancedStudentEditModeEnabled, Source={x:Static local:GlobalState.Instance}}" Value="True">
+                                             <Setter Property="Visibility" Value="Visible"/>
+                                         </DataTrigger>
+                                     </Style.Triggers>
+                                 </Style>
+                             </TextBlock.Style>
+                         </TextBlock>
+                     </Grid>
                 </StackPanel>
             </Border>
         </StackPanel>

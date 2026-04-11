@@ -20,10 +20,6 @@
     FontFamily="{StaticResource MainFont}"
     TextElement.FontFamily="{StaticResource MainFont}">
 
-    <ui:FluentWindow.InputBindings>
-        <KeyBinding Key="F12" Modifiers="Ctrl+Shift" Command="{Binding OpenDeveloperPinOverlayCommand, Source={x:Static local:GlobalState.Instance}}" CommandParameter="Settings"/>
-    </ui:FluentWindow.InputBindings>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:pages="clr-namespace:OBS.Views.Pages.Settings"
-             xmlns:converters="clr-namespace:OBS.Converters">
+             xmlns:converters="clr-namespace:OBS.Converters"
+             xmlns:viewmodels="clr-namespace:OBS.ViewModels"
+             PreviewKeyDown="OnPreviewKeyDown">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -250,6 +252,12 @@
                         <TextBlock Text="Ekran Ayarları" VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                 </ListBoxItem>
+                <ListBoxItem ToolTip="Dashboard">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="DocumentTable24" FontSize="20" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                        <TextBlock Text="Dashboard" VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </ListBoxItem>
                 <ListBoxItem ToolTip="Sistem Ayarları">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Settings24" FontSize="20" VerticalAlignment="Center" Margin="0,0,16,0"/>
@@ -260,6 +268,13 @@
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Info24" FontSize="20" VerticalAlignment="Center" Margin="0,0,16,0"/>
                         <TextBlock Text="Uygulama Hakkında" VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </ListBoxItem>
+                <ListBoxItem ToolTip="Debug"
+                              Visibility="{Binding Source={x:Static viewmodels:GlobalState.Instance}, Path=IsDebugSettingsPageVisible, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Bug24" FontSize="20" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                        <TextBlock Text="Debug" VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                 </ListBoxItem>
             </ListBox>
@@ -284,13 +299,21 @@
                     <pages:DisplaySettingsPage DataContext="{Binding}"
                         Visibility="{Binding SelectedSettingsIndex, Converter={StaticResource IndexToVis}, ConverterParameter=2}"/>
                     
+                    <!-- Dashboard -->
+                    <pages:DashboardSettingsPage DataContext="{Binding}"
+                        Visibility="{Binding SelectedSettingsIndex, Converter={StaticResource IndexToVis}, ConverterParameter=3}"/>
+                    
                     <!-- Sistem Ayarları -->
                     <pages:SystemSettingsPage DataContext="{Binding}"
-                        Visibility="{Binding SelectedSettingsIndex, Converter={StaticResource IndexToVis}, ConverterParameter=3}"/>
+                        Visibility="{Binding SelectedSettingsIndex, Converter={StaticResource IndexToVis}, ConverterParameter=4}"/>
                     
                     <!-- Uygulama Hakkında -->
                     <pages:AboutAppPage 
-                        Visibility="{Binding SelectedSettingsIndex, Converter={StaticResource IndexToVis}, ConverterParameter=4}"/>
+                        Visibility="{Binding SelectedSettingsIndex, Converter={StaticResource IndexToVis}, ConverterParameter=5}"/>
+
+                    <!-- Debug -->
+                    <pages:DebugSettingsPage DataContext="{x:Static viewmodels:GlobalState.Instance}"
+                        Visibility="{Binding SelectedSettingsIndex, Converter={StaticResource IndexToVis}, ConverterParameter=6}"/>
                 </Grid>
             </Border>
         </Grid>

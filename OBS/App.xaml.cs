@@ -1,5 +1,6 @@
 using System.Windows;
 using OBS.DataAccess;
+using OBS.Helpers;
 using Wpf.Ui.Appearance;
 
 namespace OBS
@@ -33,8 +34,23 @@ namespace OBS
 
             var mainWindow = new Views.MainWindow();
             Application.Current.MainWindow = mainWindow;
-            NavigationService.NavigateTo<ViewModels.LoginViewModel>();
+            bool shouldBypassLogin = LocalSettings.Current.IsDeveloperModeEnabled && LocalSettings.Current.IsLoginBypassEnabled;
+
+            if (shouldBypassLogin)
+            {
+                NavigationService.NavigateTo<ViewModels.MainViewModel>();
+            }
+            else
+            {
+                NavigationService.NavigateTo<ViewModels.LoginViewModel>();
+            }
+
             mainWindow.Show();
+
+            if (shouldBypassLogin)
+            {
+                mainWindow.ShowPostLoginModalsAsync().Forget(nameof(Views.MainWindow.ShowPostLoginModalsAsync));
+            }
         }
     }
 }

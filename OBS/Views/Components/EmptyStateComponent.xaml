@@ -4,12 +4,9 @@
 
     <Grid>
         <!-- Genel Boş Mesaj -->
-        <TextBlock Text="Öğrenci aratınız veya Sınıf seçiniz."
-                   Foreground="{DynamicResource TextSecondaryBrush}"
-                   FontSize="14" FontWeight="SemiBold"
-                   HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock.Style>
-                <Style TargetType="TextBlock">
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
                     <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
                         <MultiDataTrigger>
@@ -21,8 +18,36 @@
                         </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
-            </TextBlock.Style>
-        </TextBlock>
+            </Grid.Style>
+
+            <TextBlock Text="Öğrenci aratınız veya Sınıf seçiniz."
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Margin="0,0,0,48"/>
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="0,0,0,72">
+                <TextBlock Text="{Binding TotalStudentCount, StringFormat=Toplam Öğrenci: {0}}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="  •  "
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="14"
+                           FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding TotalClassCount, StringFormat=Toplam Sınıf: {0}}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
 
         <!-- Favoriler Boş Mesaj -->
         <TextBlock Text="Favori Listeniz Boş!"
