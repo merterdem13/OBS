@@ -1,5 +1,5 @@
 {
-    "ForceUpdate": false,
+    "ForceUpdate": true,
     "MinRequiredVersion": "2.4.9",
     "ForceUpdateMessage": "Bu güncelleme zorunludur ve uygulamayı kullanmaya devam etmek için yüklenmesi gerekmektedir."
 }
