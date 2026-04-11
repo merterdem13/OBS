@@ -1,11 +1,10 @@
 {
-  "Version": "2.4.5",
-  "Date": "29-03-2026",
+  "Version": "2.4.6",
+  "Date": "12-04-2026",
   "CriticalWarning": "",
   "Features": [
-    "Güncellemeler bildirimi güncellendi.",
-    "Tema ayarları güncellendi.",
-    "Kurtarma kodu eklendi.",
-    "Öğrencilere not ekleme özelliği eklendi."
+    "Ana ekran ve takım sayfalarına istatistikler eklendi.",
+    "Ayarlar menüsüne istatistikler bölümü eklendi."
+    
   ]
 }
