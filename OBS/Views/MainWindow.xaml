@@ -70,6 +70,8 @@
         <!-- Güncelleme Notları Katmanı -->
         <components:ReleaseNotesOverlay x:Name="ReleaseNotesOverlay" Grid.RowSpan="3" Panel.ZIndex="350" DataContext="{x:Static local:GlobalState.Instance}"/>
 
+        <components:UpdateAvailableOverlay Grid.RowSpan="3" Panel.ZIndex="360"/>
+
         <!-- Geliştirici PIN Katmanı -->
         <components:DeveloperPinOverlay Grid.RowSpan="3" Panel.ZIndex="400" DataContext="{x:Static local:GlobalState.Instance}"/>
 

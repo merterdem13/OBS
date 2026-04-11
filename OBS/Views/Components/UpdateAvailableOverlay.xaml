@@ -1,0 +1,158 @@
+<UserControl x:Class="OBS.Views.Components.UpdateAvailableOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             Visibility="Collapsed">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <Storyboard x:Key="FadeInStoryboard">
+            <DoubleAnimation Storyboard.TargetName="Backdrop"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.25"/>
+            <DoubleAnimation Storyboard.TargetName="DialogCard"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.25"/>
+            <DoubleAnimation Storyboard.TargetName="DialogCard"
+                             Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                             From="28" To="0" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="FadeOutStoryboard">
+            <DoubleAnimation Storyboard.TargetName="Backdrop"
+                             Storyboard.TargetProperty="Opacity"
+                             From="1" To="0" Duration="0:0:0.18"/>
+            <DoubleAnimation Storyboard.TargetName="DialogCard"
+                             Storyboard.TargetProperty="Opacity"
+                             From="1" To="0" Duration="0:0:0.18"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid>
+        <Border x:Name="Backdrop"
+                Background="{DynamicResource SemanticModalBackdropBrush}"
+                Opacity="0"/>
+
+        <Border x:Name="DialogCard"
+                Opacity="0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="360"
+                Background="{DynamicResource ModalBgBrush}"
+                CornerRadius="12"
+                Padding="24">
+
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="24"
+                                  ShadowDepth="6"
+                                  Opacity="0.35"
+                                  Color="{DynamicResource SemanticShadowColor}"/>
+            </Border.Effect>
+
+            <Border.RenderTransform>
+                <TranslateTransform Y="0"/>
+            </Border.RenderTransform>
+
+            <StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Margin="0,0,0,18">
+                    <ui:SymbolIcon Symbol="ArrowSyncCircle24"
+                                   FontSize="28"
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   Margin="0,0,10,0"/>
+                    <TextBlock Text="Güncelleme Mevcut"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Border Background="{DynamicResource SemanticDangerSurfaceBrush}"
+                        BorderBrush="{DynamicResource SemanticDangerTextBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="12"
+                        Margin="0,0,0,16"
+                        Visibility="{Binding IsUpdateModalMandatory, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Warning24"
+                                       FontSize="20"
+                                       Foreground="{DynamicResource SemanticDangerTextBrush}"
+                                       Margin="0,0,12,0"
+                                       VerticalAlignment="Top"/>
+                        <TextBlock Text="Bu güncelleme artık ertelenemez."
+                                   TextWrapping="Wrap"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource SemanticDangerTextBrush}"
+                                   FontWeight="SemiBold"
+                                   LineHeight="18"
+                                   Width="270"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Yeni sürüm mevcut. Uygulamayı güncel tutmak için indir tuşuna basınız."
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           FontSize="13"
+                           LineHeight="20"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="0,0,0,24"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ui:Button Grid.Column="0"
+                               Content="Sonra Hatırlat"
+                               Appearance="Secondary"
+                               Height="42"
+                               HorizontalAlignment="Stretch"
+                               Click="DeferButton_Click">
+                        <ui:Button.Style>
+                            <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsUpdateModalMandatory}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ui:Button.Style>
+                    </ui:Button>
+
+                    <ui:Button Grid.Column="2"
+                               Content="İndir"
+                               Appearance="Primary"
+                               Height="42"
+                               HorizontalAlignment="Stretch"
+                               Background="{DynamicResource AccentBrush}"
+                               Foreground="{DynamicResource SemanticOnColorBrush}"
+                               Click="DownloadButton_Click">
+                        <ui:Button.Style>
+                            <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                <Setter Property="Grid.Column" Value="2"/>
+                                <Setter Property="Grid.ColumnSpan" Value="1"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsUpdateModalMandatory}" Value="True">
+                                        <Setter Property="Grid.Column" Value="0"/>
+                                        <Setter Property="Grid.ColumnSpan" Value="3"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ui:Button.Style>
+                    </ui:Button>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

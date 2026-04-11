@@ -1,23 +1,23 @@
 <UserControl x:Class="OBS.Views.Components.FloatingActionPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:converters="clr-namespace:OBS.Converters">
+             xmlns:converters="clr-namespace:OBS.Converters"
+             xmlns:local="clr-namespace:OBS.ViewModels">
 
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
     </UserControl.Resources>
 
     <Grid>
-        <!-- Güncelleme Bildirim Çubuğu (Alt) -->
-        <Border VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
+        <Border VerticalAlignment="Bottom"
+                HorizontalAlignment="Stretch"
                 Margin="12,0,12,12"
                 Background="{DynamicResource BgCardBrush}"
                 BorderBrush="{DynamicResource BorderColorBrush}"
                 BorderThickness="1"
                 CornerRadius="8"
-                Padding="12,8"
-                Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BoolToVisibility}}">
+                Padding="12,10"
+                Visibility="{Binding IsUpdateDownloading, Source={x:Static local:GlobalState.Instance}, Converter={StaticResource BoolToVisibility}}">
             <Border.Style>
                 <Style TargetType="Border">
                     <Setter Property="RenderTransform">
@@ -30,10 +30,10 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6" />
-                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="30" To="0" Duration="0:0:0.6">
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.35"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="24" To="0" Duration="0:0:0.35">
                                             <DoubleAnimation.EasingFunction>
-                                                <BackEase EasingMode="EaseOut" Amplitude="0.4" />
+                                                <CubicEase EasingMode="EaseOut"/>
                                             </DoubleAnimation.EasingFunction>
                                         </DoubleAnimation>
                                     </Storyboard>
@@ -46,29 +46,27 @@
             <Border.Effect>
                 <DropShadowEffect BlurRadius="15" Opacity="0.15" Direction="270" ShadowDepth="4"/>
             </Border.Effect>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding UpdateVersion, StringFormat='🚀 Yeni Bir Güncelleme Mevcut: v{0}'}"
-                               Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="13"/>
-                    <ProgressBar Value="{Binding UpdateDownloadProgress}" Maximum="100"
-                                 Height="4" Margin="0,6,16,0"
-                                 Visibility="{Binding IsUpdateDownloading, Converter={StaticResource BoolToVisibility}}"
-                                 Foreground="{DynamicResource AccentBrush}" Background="{DynamicResource BorderColorBrush}"/>
-                </StackPanel>
+            <StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <TextBlock Text="Güncelleme indiriliyor..."
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               FontWeight="SemiBold"
+                               FontSize="13"
+                               HorizontalAlignment="Left"/>
+                    <TextBlock Text="{Binding UpdateDownloadProgress, Source={x:Static local:GlobalState.Instance}, StringFormat='%{0}'}"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               HorizontalAlignment="Right"/>
+                </Grid>
 
-                <ui:Button Grid.Column="1" Content="Şimdi Güncelle"
-                           Appearance="Primary" Padding="12,6"
-                           FontSize="11" FontWeight="Medium"
-                           Background="{DynamicResource AccentBrush}"
-                           Foreground="White"
-                           BorderThickness="0"
-                           Command="{Binding DownloadAndApplyUpdateCommand}"/>
-            </Grid>
+                <ProgressBar Value="{Binding UpdateDownloadProgress, Source={x:Static local:GlobalState.Instance}}"
+                             Maximum="100"
+                             Height="5"
+                             Foreground="{DynamicResource AccentBrush}"
+                             Background="{DynamicResource BorderColorBrush}"/>
+            </StackPanel>
         </Border>
     </Grid>
 </UserControl>

@@ -59,7 +59,6 @@ namespace OBS.Views
             Storyboard.SetTargetProperty(anim, new PropertyPath("Opacity"));
             sb.Begin();
 
-            // Çöp Toplayıcı ve Klasör Düzenleyicisini Uygulama Açılışında Çalıştır
             StartGarbageCollectorRun();
         }
 
@@ -79,19 +78,16 @@ namespace OBS.Views
         {
             try
             {
-                await Task.Delay(1000); // Açılış animasyonunun bitmesini bekleyelim
+                await Task.Delay(250);
+                await App.UpdateCoordinator.ShowNormalUpdateModalIfNeededAsync();
 
-                // 1. Öncelik: Recovery Modal
                 bool recoveryShown = await ShowRecoveryModalInternal();
-
-                // Recovery modal gösterildiyse, kapanmasını bekle
                 if (recoveryShown)
                 {
                     await WaitForRecoveryModalClose();
-                    await Task.Delay(300); // Kapanış animasyonu için kısa bekleme
+                    await Task.Delay(300);
                 }
 
-                // 2. Sonra: Release Notes
                 await ShowReleaseNotesInternal();
             }
             catch (Exception ex)
@@ -140,10 +136,10 @@ namespace OBS.Views
         private async Task WaitForRecoveryModalClose()
         {
             var tcs = new TaskCompletionSource<bool>();
-            
+
             void OnPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
             {
-                if (e.PropertyName == nameof(GlobalState.IsChangeRecoveryPinOverlayVisible) 
+                if (e.PropertyName == nameof(GlobalState.IsChangeRecoveryPinOverlayVisible)
                     && !GlobalState.Instance.IsChangeRecoveryPinOverlayVisible)
                 {
                     tcs.TrySetResult(true);
@@ -151,8 +147,6 @@ namespace OBS.Views
             }
 
             GlobalState.Instance.PropertyChanged += OnPropertyChanged;
-            
-            // Eğer zaten kapandıysa
             if (!GlobalState.Instance.IsChangeRecoveryPinOverlayVisible)
             {
                 GlobalState.Instance.PropertyChanged -= OnPropertyChanged;

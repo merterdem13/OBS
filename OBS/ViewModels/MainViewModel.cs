@@ -238,12 +238,9 @@ namespace OBS.ViewModels
 
             LoadClassList();
             UpdateFavoriteState();
-            StartSilentUpdateCheck();
 
-            GlobalState.Instance.OnCheckForUpdateAction = CheckForUpdateAsync;
             GlobalState.Instance.OnResetSystemAction = ResetSystemAsync;
             GlobalState.Instance.OnImportKunyePdfAction = ImportKunyePdfAsync;
-            GlobalState.Instance.OnDownloadAndApplyUpdateAction = DownloadAndApplyUpdateAsync;
             GlobalState.Instance.OnCreateBackupAction = CreateBackupAsync;
             GlobalState.Instance.OnRestoreBackupAction = RestoreBackupAsync;
         }

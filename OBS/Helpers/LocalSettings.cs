@@ -14,6 +14,8 @@ namespace OBS.Helpers
         public bool IsDeveloperModeEnabled { get; set; } = false;
         public bool IsLoginBypassEnabled { get; set; } = false;
         public bool IsAdvancedStudentEditModeEnabled { get; set; } = false;
+        public string? DeferredUpdateVersion { get; set; }
+        public int DeferredUpdateCount { get; set; } = 0;
     }
 
     public static class LocalSettings

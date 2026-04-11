@@ -8,6 +8,7 @@ namespace OBS
     public partial class App : Application
     {
         public static Services.INavigationService NavigationService { get; } = new Services.NavigationService();
+        public static Services.UpdateCoordinatorService UpdateCoordinator { get; } = new Services.UpdateCoordinatorService();
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -46,6 +47,7 @@ namespace OBS
             }
 
             mainWindow.Show();
+            UpdateCoordinator.StartStartupUpdateCheck();
 
             if (shouldBypassLogin)
             {

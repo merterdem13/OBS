@@ -154,6 +154,29 @@
                                 </ui:Button.Icon>
                             </ui:Button>
 
+                            <Border Background="{DynamicResource SemanticDangerSurfaceBrush}"
+                                    BorderBrush="{DynamicResource SemanticDangerTextBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="10"
+                                    Margin="0,0,16,12">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="GUNCELLEME MEVCUT"
+                                           FontSize="12"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource SemanticDangerTextBrush}"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+
                             <!-- Güncelleme mevcut ise görünür -->
                             <ui:Button Content="{Binding UpdateVersion, StringFormat='v{0} — İndir ve Güncelle'}"
                                        Appearance="Primary"

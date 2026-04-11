@@ -63,6 +63,9 @@ namespace OBS.ViewModels
         private bool _isUpdateAvailable = false;
 
         [ObservableProperty]
+        private bool _hasPendingUpdate = false;
+
+        [ObservableProperty]
         private string _updateVersion = string.Empty;
 
         [ObservableProperty]
@@ -70,6 +73,12 @@ namespace OBS.ViewModels
 
         [ObservableProperty]
         private int _updateDownloadProgress = 0;
+
+        [ObservableProperty]
+        private bool _isUpdateModalVisible = false;
+
+        [ObservableProperty]
+        private bool _isUpdateModalMandatory = false;
 
         [ObservableProperty]
         private bool _isForceUpdateRequired = false;

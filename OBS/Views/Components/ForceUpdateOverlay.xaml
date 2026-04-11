@@ -23,20 +23,20 @@
     </UserControl.Resources>
 
     <Grid>
-        <!-- Tam ekran, kapatılamaz arka plan -->
         <Border x:Name="Backdrop"
                 Background="{DynamicResource SemanticModalBackdropBlockingBrush}"
                 Opacity="0"/>
 
-        <!-- Dialog Kartı -->
         <Border x:Name="DialogCard"
                 Opacity="0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Width="400"
-                Background="{DynamicResource BgCardBrush}"
-                CornerRadius="16"
-                Padding="32">
+                Width="336"
+                MaxWidth="336"
+                Margin="24,0"
+                Background="{DynamicResource ModalBgBrush}"
+                CornerRadius="12"
+                Padding="28">
 
             <Border.Effect>
                 <DropShadowEffect BlurRadius="32"
@@ -50,20 +50,19 @@
             </Border.RenderTransform>
 
             <StackPanel>
-                <!-- İkon -->
-                <Border Width="56" Height="56"
+                <Border Width="56"
+                        Height="56"
                         CornerRadius="28"
                         Background="{DynamicResource SemanticDangerSurfaceBrush}"
                         HorizontalAlignment="Center"
                         Margin="0,0,0,20">
                     <ui:SymbolIcon Symbol="ArrowSync24"
                                    FontSize="28"
-                                   Foreground="{DynamicResource SemanticDangerTextBrush}"
+                                   Foreground="{DynamicResource AccentBrush}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
                 </Border>
 
-                <!-- Başlık -->
                 <TextBlock Text="Zorunlu Güncelleme"
                            FontSize="20"
                            FontWeight="Bold"
@@ -71,7 +70,6 @@
                            HorizontalAlignment="Center"
                            Margin="0,0,0,12"/>
 
-                <!-- Mesaj -->
                 <TextBlock x:Name="MessageText"
                            TextWrapping="Wrap"
                            TextAlignment="Center"
@@ -80,7 +78,6 @@
                            Foreground="{DynamicResource TextSecondaryBrush}"
                            Margin="0,0,0,28"/>
 
-                <!-- İndirme Durumu -->
                 <StackPanel x:Name="ProgressPanel">
                     <Grid Margin="0,0,0,8">
                         <TextBlock Text="İndiriliyor..."
@@ -98,7 +95,9 @@
                                  Value="0"
                                  Minimum="0"
                                  Maximum="100"
-                                 Height="6"/>
+                                 Height="6"
+                                 Foreground="{DynamicResource AccentBrush}"
+                                 Background="{DynamicResource BorderColorBrush}"/>
                     <TextBlock Text="İndirme tamamlandığında uygulama otomatik olarak yeniden başlayacak."
                                FontSize="11"
                                Foreground="{DynamicResource TextSecondaryBrush}"
